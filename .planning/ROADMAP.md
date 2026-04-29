@@ -81,7 +81,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   7. Partial failure inside ApplyOrchestrator transaction rolls back EVERYTHING (stock writes + line.applied flags + invoice.status); asserted by `PartialFailureRollsBackEverythingTest` and `ActiveFlagInsideSameTransactionAsStockApplyTest`
 
 **Plans**: 8 plans
-  - [ ] 03-01-PLAN.md - SettingsAccessor + DRY grep gate (APPLY-09 + QA-09); hooks SettingsAccessor::flush into TestCase teardown
+  - [x] 03-01-PLAN.md - SettingsAccessor + DRY grep gate (APPLY-09 + QA-09); hooks SettingsAccessor::flush into TestCase teardown *(closed 2026-04-29 — APPLY-09 + QA-09 closed; dual-gate enforcement (Makefile + Pest mirror); flushPluginSingletons() first body line populated)*
   - [ ] 03-02-PLAN.md - ImportAuditService (~50-80 LoC vendor-inlined; APPLY-10 / D-14); 4 log methods (apply/parse/reject/initial_reset)
   - [ ] 03-03-PLAN.md - StockApplyService (saveQuietly + post-commit batched cache flush; APPLY-01 + APPLY-02 + QA-04 200-line cache-flush counter test)
   - [ ] 03-04-PLAN.md - ActiveFlagService (provenance-aware reconcile + reconcileAll chunked; APPLY-03 + APPLY-04 + QA-05 4-cell matrix + SkipsManuallyDeactivated)
@@ -131,6 +131,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Schema, Scaffold, Settings, Permissions | 8/8 | Complete | 2026-04-29 |
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
-| 3. Apply Layer + Orchestrators | 0/8 | Not started | - |
+| 3. Apply Layer + Orchestrators | 1/8 | In progress | - |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
 | 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |

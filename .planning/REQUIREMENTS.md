@@ -53,7 +53,7 @@
 - [ ] **APPLY-06**: `classes/orchestrator/ParseAndPersistOrchestrator` — single public method. Wraps: parse → resolve → duplicate-check → persist Invoice@status=parsed → batch-match → write line `matched_offer_id`/`match_strategy`. `DB::transaction` boundary lives here, NOT in controller.
 - [ ] **APPLY-07**: `classes/orchestrator/ApplyOrchestrator` — single public method. Acquires `Invoice::lockForUpdate()`; throws `ApplyAlreadyDoneException` if `status='applied'`; runs `StockApplyService::apply` → `ActiveFlagService::reconcile($arAffected)` → flips `Invoice.status='applied'` → records audit. ALL inside ONE `DB::transaction`. `flushAffectedCaches` fires AFTER commit.
 - [ ] **APPLY-08**: Override-reimport (D12): when operator ticks "Override and re-import" on a duplicate invoice, ApplyOrchestrator re-applies the new lines additively on top of the prior apply. New `Invoice` row with `override_of_invoice_id` = prior. UX warning displayed before submit; operator confirms by typed string.
-- [ ] **APPLY-09**: `classes/support/SettingsAccessor` — single accessor for all Settings reads. Memoized per-request. CI grep gate enforces `Settings::get(` only appears in `SettingsAccessor.php` (Makefile target `lint:settings-accessor`).
+- [x] **APPLY-09**: `classes/support/SettingsAccessor` — single accessor for all Settings reads. Memoized per-request. CI grep gate enforces `Settings::get(` only appears in `SettingsAccessor.php` (Makefile target `lint:settings-accessor`). *(closed 2026-04-29 in plan 03-01 — SettingsAccessor with 4 boolean getters + flush(); atomic 4-key bulk-fill memoization; flushPluginSingletons() wired)*
 - [ ] **APPLY-10**: `classes/support/ImportAuditService` — vendor-inlined ~50-80 LoC (per D14). Logs to `Log::*` with structured context array (invoice_id, status, units_added, offers_touched, applied_by). NO soft-dep on ExtendShopaholic.
 
 ### Backend UI + Console (Phase 4)
@@ -90,7 +90,7 @@
 - [ ] **QA-06**: InitialReset tests: `RequiresAllowInitialResetSettingTest`, `OneShotEnforcedTest`, `SnapshotsBeforeWriteTest`, `RollbackRestoresExactPriorStateTest`, `ChunkedNotSingleStatementTest`.
 - [ ] **QA-07**: Multi-site Settings: `IsMultisiteAwareTest`, `MultisiteContextSwitchClearsCacheTest`.
 - [ ] **QA-08**: Transaction safety: `PartialFailureRollsBackEverythingTest`, `ActiveFlagInsideSameTransactionAsStockApplyTest`.
-- [ ] **QA-09**: Settings DRY gate: `SettingsAccessorIsSoleConsumerOfSettingsGetTest` (CI grep).
+- [x] **QA-09**: Settings DRY gate: `SettingsAccessorIsSoleConsumerOfSettingsGetTest` (CI grep). *(closed 2026-04-29 in plan 03-01 — dual-gate: Makefile `lint-settings-accessor` target + Pest mirror; both negative-path verified; in `make all` chain)*
 - [ ] **QA-10**: Permissions: `RequiresApplyPermissionTest`, `RequiresUploadPermissionTest`, `RequiresOverridePermissionTest`, `RequiresInitialResetPermissionTest`.
 - [ ] **QA-11**: Test base `GoodsReceivedTestCase::tearDown()` calls `flushModelEventListeners()` AND each plugin singleton's `flush()` method. Cross-test bleed prevention.
 
@@ -174,7 +174,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | APPLY-06 | Phase 3 | Pending |
 | APPLY-07 | Phase 3 | Pending |
 | APPLY-08 | Phase 3 | Pending |
-| APPLY-09 | Phase 3 | Pending |
+| APPLY-09 | Phase 3 | Closed (plan 03-01, 2026-04-29) |
 | APPLY-10 | Phase 3 | Pending |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
@@ -202,7 +202,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | QA-06 | Phase 3 | Pending |
 | QA-07 | Phase 1 | Pending |
 | QA-08 | Phase 3 | Pending |
-| QA-09 | Phase 3 | Pending |
+| QA-09 | Phase 3 | Closed (plan 03-01, 2026-04-29) |
 | QA-10 | Phase 4 | Pending |
 | QA-11 | Phase 1 | Pending |
 
