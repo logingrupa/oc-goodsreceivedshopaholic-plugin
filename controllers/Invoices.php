@@ -81,6 +81,15 @@ class Invoices extends Controller
      */
     private const APPLY_LOCK_TTL_SECONDS = 60;
 
+    /**
+     * Typed-confirmation literal for the override-and-reimport gate (UI-10 /
+     * D-19). Operator must type this string EXACTLY (case-sensitive strict
+     * equality) before runOverride is invoked. Source-grep pinned by
+     * `OverrideConfirmTest::onOverrideConfirm rejects when typed string is
+     * wrong case` (the lowercase 'override' rejection assertion).
+     */
+    private const OVERRIDE_LITERAL = 'OVERRIDE';
+
     /** @var list<string> */
     public $implement = [
         'Backend.Behaviors.ListController',
@@ -332,6 +341,101 @@ class Invoices extends Controller
         } finally {
             $obLock->release();
         }
+    }
+
+    /**
+     * AJAX handler: render the OVERRIDE warning modal (UI-10 / D-18).
+     *
+     * The modal carries the literal warning copy ("ADDITIVELY on top of the
+     * prior apply" / "NOT a delta calculation") plus a typed-input field that
+     * the operator must fill with the literal `OVERRIDE` (case-sensitive).
+     * Permission-gated by `override_invoices` (D-20). The prior_invoice_id is
+     * threaded through so the typed-confirm submit can route to runOverride
+     * with the right linkage.
+     *
+     * Response shape:
+     *   ['#overrideConfirm' => makePartial('_partials/_override_confirm', [...])]
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onOverrideShowConfirm(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.override_invoices');
+
+        $iPriorInvoiceId = $this->scalarToInt(Input::get('prior_invoice_id'));
+        if ($iPriorInvoiceId <= 0) {
+            throw new AjaxException(['message' => 'prior_invoice_id is required.']);
+        }
+
+        return [
+            '#overrideConfirm' => $this->makePartial('_partials/_override_confirm', [
+                'prior_invoice_id' => $iPriorInvoiceId,
+            ]),
+        ];
+    }
+
+    /**
+     * AJAX handler: process the typed-OVERRIDE submission. Validates the
+     * literal then routes through ParseAndPersistOrchestrator::runOverride
+     * (UI-10 / D-19 / D-21).
+     *
+     * The new Invoice's `override_of_invoice_id` points at the prior; the
+     * operator subsequently clicks Apply on the new row to execute the
+     * ADD-ON-TOP write (Phase 3 D-12 — apply orchestrator runs unchanged).
+     * Permission-gated by `override_invoices` (D-20).
+     *
+     * Strict case-sensitive comparison on the OVERRIDE literal: `===` on the
+     * raw input string before any orchestrator wiring runs (T-04-06-01
+     * mitigation — server-side gate is the source of truth, client-side
+     * check is UX only).
+     *
+     * Response shape on happy path:
+     *   ['#invoicePreviewWrap' => makePartial('_partials/_preview_lines', [...]),
+     *    '#invoiceRejectWrap'  => '']
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onOverrideConfirm(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.override_invoices');
+
+        $mTyped = Input::get('confirm_typed');
+        $sTyped = is_scalar($mTyped) ? strval($mTyped) : '';
+        if ($sTyped !== self::OVERRIDE_LITERAL) {
+            throw new AjaxException([
+                'message' => sprintf('Type %s exactly to confirm override.', self::OVERRIDE_LITERAL),
+            ]);
+        }
+
+        $iPriorInvoiceId = $this->scalarToInt(Input::get('prior_invoice_id'));
+        if ($iPriorInvoiceId <= 0) {
+            throw new AjaxException(['message' => 'prior_invoice_id is required.']);
+        }
+
+        $arFiles = $this->getUploadedFiles();
+        if ($arFiles === null || $arFiles === []) {
+            throw new AjaxException(['message' => 'No file provided for override.']);
+        }
+        $obFile = $arFiles[0];
+
+        $this->assertHtmFile($obFile);
+        $iUserId = $this->resolveBackendUserId();
+        $sHtml = $this->readFileContents($obFile);
+        $sFilename = (string) $obFile->getClientOriginalName();
+
+        $obOrchestrator = $this->resolveParseOrchestrator();
+        $obInvoice = $obOrchestrator->runOverride($sHtml, $sFilename, $iPriorInvoiceId, $iUserId);
+
+        return [
+            '#invoicePreviewWrap' => $this->makePartial('_partials/_preview_lines', [
+                'invoices' => [$this->buildPreviewPayload($obInvoice)],
+            ]),
+            '#invoiceRejectWrap' => '',
+        ];
     }
 
     /**

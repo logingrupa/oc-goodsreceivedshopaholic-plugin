@@ -1,0 +1,55 @@
+{# UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal for the
+   override-and-reimport flow.
+
+   The literal English copy on the warning lines (`ADDITIVELY on top of the
+   prior apply.` / `NOT a delta calculation.`) is intentional per UI-10 spec —
+   a translation drift would weaken the legal/operational protection for an
+   operator about to rerun stock writes. Lang keys exist for translation
+   overlays (lang/en/lang.php override.*) but the warning content is verified
+   by `OverrideConfirmTest` substring assertions.
+
+   The operator MUST also re-upload the original .HTM file: the upload-side
+   pre-parse duplicate gate (UI-09 / D-16) discards the bytes BEFORE the
+   parser runs, so the override flow re-ingests them here. The handler reads
+   files via `Input::file('files')` (the same widget contract as onUpload),
+   so the file input keeps the `name="files[]"` shape. #}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <header class="modal-header">
+            <h4>Override and re-import — Confirm</h4>
+        </header>
+        <div class="modal-body">
+            <div class="alert alert-warning">
+                <p><strong>This re-applies the invoice ADDITIVELY on top of the prior apply.</strong></p>
+                <p>Stock will be incremented by new line quantities.</p>
+                <p>This is NOT a delta calculation. Continue?</p>
+            </div>
+            <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
+            <?= Form::open(['files' => true]) ?>
+                <input type="hidden" name="prior_invoice_id" value="{{ prior_invoice_id }}">
+                <div class="form-group">
+                    <input type="text"
+                           name="confirm_typed"
+                           class="form-control"
+                           placeholder="Type OVERRIDE here"
+                           autocomplete="off"
+                           autocapitalize="off"
+                           spellcheck="false">
+                </div>
+                <div class="form-group">
+                    <label>Re-upload the .HTM file</label>
+                    <input type="file" name="files[]" accept=".htm,.HTM">
+                </div>
+                <button type="button"
+                        class="btn btn-warning"
+                        data-request="onOverrideConfirm"
+                        data-request-files
+                        data-request-loading=".override-spinner">
+                    Confirm override
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+                <span class="override-spinner" style="display:none;">Re-importing…</span>
+            <?= Form::close() ?>
+        </div>
+    </div>
+</div>

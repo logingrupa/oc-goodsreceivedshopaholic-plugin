@@ -103,4 +103,13 @@ return [
         'invoice_id_required'  => 'invoice_id is required.',
         'invoice_not_found'    => 'Invoice #:id not found.',
     ],
+    'override' => [
+        'title'      => 'Override and re-import — Confirm',
+        'warn_line1' => 'This re-applies the invoice ADDITIVELY on top of the prior apply.',
+        'warn_line2' => 'Stock will be incremented by new line quantities.',
+        'warn_line3' => 'This is NOT a delta calculation. Continue?',
+        'typed_hint' => 'Type OVERRIDE exactly (uppercase) to confirm.',
+        'button'     => 'Confirm override',
+        'spinner'    => 'Re-importing…',
+    ],
 ];

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 require_once __DIR__.'/../Apply/ApplyTestCase.php';
 require_once __DIR__.'/InvoiceUploadTestHelpers.php';
@@ -158,8 +157,7 @@ it('onOverrideConfirm with literal OVERRIDE proceeds to runOverride (UI-10 happy
     // and returns a synthetic new Invoice with override_of_invoice_id set.
     $iCalls = 0;
     $arRecorded = ['html' => '', 'filename' => '', 'prior_id' => 0, 'user_id' => 0];
-    $obSpy = new class ($iCalls, $arRecorded) extends ParseAndPersistOrchestrator
-    {
+    $obSpy = new class ($iCalls, $arRecorded) extends ParseAndPersistOrchestrator {
         public int $iCallCount = 0;
 
         /** @var array<string, mixed> */
