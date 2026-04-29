@@ -106,7 +106,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   8. Plugin boot logs a warning if PHP `max_file_uploads<20` or `upload_max_filesize<10M`
 
 **Plans**: 8 plans
-  - [ ] 04-01-PLAN.md - Plugin boot self-check + parseIniSize() helper (UI-12)
+  - [x] 04-01-PLAN.md - Plugin boot self-check + parseIniSize() helper (UI-12)
   - [ ] 04-02-PLAN.md - Console command goodsreceived:recompute_active_from_stock (UI-11)
   - [ ] 04-03-PLAN.md - Backend controller foundation + audit history list + Invoice attachOne (UI-01 + UI-05 + UI-06 + UI-07)
   - [ ] 04-04-PLAN.md - onUpload + onUpdateLine + pre-parse duplicate detection (UI-02 + UI-03 + UI-07 + UI-09)
@@ -140,5 +140,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Schema, Scaffold, Settings, Permissions | 8/8 | Complete | 2026-04-29 |
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
-| 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
+| 4. Backend Controller, Upload/Preview/Apply UI, Console | 1/8 | In progress | - |
 | 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |

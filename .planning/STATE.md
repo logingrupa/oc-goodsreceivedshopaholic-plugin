@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: GoodsReceivedShopaholic
 status: in_progress
-stopped_at: "Phase 3 COMPLETE (all 8 plans, all 16 requirements APPLY-01..10 + QA-03/04/05/06/08/09 closed). 03-08 final QA gate verified `make all` green: 145/145 tests passed (708 assertions / 7.65s Pest / 8.91s wall-clock), PHPStan L10 clean, Pint clean, PHPMD clean, lint-settings-accessor clean (Settings::get( appears in EXACTLY 1 file: classes/support/SettingsAccessor.php). phpstan-baseline.neon sha256 UNCHANGED at 4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a (Phase 3 introduced ZERO new baseline-suppressed errors — every L10 finding fixed at source via stubs + is_scalar narrowing helpers + instanceof loops + explicit body-assignment over PHP 8.4 new-in-initializer; no @var / @phpstan-ignore added). Phase 3 cumulative artifacts: 8 production files (1570 LoC), 13 new test files, 53 new Pest cases (92→145), 444 new assertions (264→708), 6 new Decisions logged D-03-01-01..D-03-07-06 (28 entries total Phase 3). 16-row REQ closure table all Y in 03-08-SUMMARY.md cross-referencing each REQ to a concrete test pin or grep gate. QA-04 cache flush concretely measured: 200-line apply = 401 actual queries (≤500 budget) / 4 actual list-store cache flushes (≤5 contract) — anti-pattern guard (per-line ->save() regression would explode to ≥1600 flushes) locked by Mockery shouldHaveReceived spies. Next: Phase 4 plan 04-01 kickoff (Backend Controller, Upload/Preview/Apply UI, Console)."
-last_updated: "2026-04-29T22:00:00.000Z"
+stopped_at: "Phase 4 plan 04-01 COMPLETE (UI-12 closed). Plugin::boot() now backend-gates a runtime self-check: `Log::warning` when PHP `max_file_uploads<20` OR `upload_max_filesize<10M`. Frontend cost = 0 (App::runningInBackend() guard short-circuits before any ini_get / Log call). New private static `parseIniSize(string): int` helper handles K/M/G suffixes (case-insensitive) + bare numerics; safely degrades to 0 on malformed input (NEVER throws — T-04-01-01 mitigation). 7 new Pest cases (PluginBootSelfCheckTest) bring suite to 152/152 (was 145/145; +7). 22 new assertions bring total to 730 (was 708; +22). PHPStan L10 clean, Pint clean, PHPMD clean, QA-09 grep gate green. phpstan-baseline.neon SHA UNCHANGED at 4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a — Plugin.php's new ~50 LoC type-checks at L10 with zero suppressions. One deviation logged: D-04-01-01 (ini_set runtime injection abandoned in favour of live-ini-aware Pest cases — max_file_uploads + upload_max_filesize are PHP_INI_PERDIR; runtime ini_set returns false in CLI/PHPUnit, verified empirically). Two new Decisions: D-04-01-01 (test strategy reshape) + D-04-01-02 (parseIniSize accepts lowercase suffixes). Next: Phase 4 plan 04-02 (Console command goodsreceived:recompute_active_from_stock for UI-11)."
+last_updated: "2026-04-29T22:13:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 23
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -19,16 +19,16 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** Backend operators upload distributor `.HTM` delivery receipts; stock is added to matched offers idempotently with per-site automation and auditable history
-**Current focus:** Phase 3 — Apply Layer + Orchestrators (Phase 2 shipped)
+**Current focus:** Phase 4 — Backend Controller, Upload/Preview/Apply UI, Console (Phase 3 shipped; UI-12 closed via plan 04-01)
 
 ## Current Position
 
-Phase: 3 of 5 (Apply Layer + Orchestrators) — COMPLETE
-Plan: 03-08 complete (8 of 8 Phase 3 plans). Wave 1 (03-01 + 03-02) DONE; Wave 2 (03-03 StockApply + 03-04 ActiveFlag + 03-05 InitialReset) DONE; Wave 3 (03-06 ParseAndPersistOrchestrator + 03-07 ApplyOrchestrator) DONE; Wave 4 (03-08 final QA gate) DONE. ALL 16 Phase 3 requirements CLOSED (APPLY-01..10 + QA-03/04/05/06/08/09).
-Status: Phase 3 final QA gate (03-08) ran the full toolchain on a fresh invocation: `make all` exit 0 in 8.91s wall-clock; 145/145 Pest cases pass (708 assertions / 7.65s); PHPStan L10 clean (31/31 files, [OK] No errors); Pint clean ({"result":"pass"}); PHPMD clean (silent success); QA-09 grep gate green ("GATE OK"). phpstan-baseline.neon SHA UNCHANGED at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a` — Phase 3 introduced ZERO new baseline-suppressed errors. Every L10 finding fixed at source via `phpstan-stubs/Singleton.stub` for upstream October Rain Singleton trait (D-03-03-03), `is_scalar`-narrowing helpers for `mixed` Eloquent attribute reads (D-03-04-01), `instanceof` loops for typed October Rain collection narrowing (D-03-07-03), and explicit body-assignment over PHP 8.4 `new in initializer` (D-03-06-01 / D-03-07-02). No `@var` / `@phpstan-ignore` / inline suppressions added. 03-08-SUMMARY.md ships the 16-row closure table cross-referencing each REQ to a concrete test pin or grep gate; QA-04 concrete measurement table (401 queries / 4 list-store flushes for 200-line apply); per-plan timing table (Phase 3 total ~96 min); test count growth across phases. REQUIREMENTS.md traceability flipped: 16 Phase 3 entries marked `Closed (2026-04-29) — plan NN-NN`. ROADMAP.md Progress table updated: Phase 3 row marked Complete (2026-04-29). Next: Phase 4 plan 04-01 kickoff (Backend Controller, Upload/Preview/Apply UI, Console).
-Last activity: 2026-04-29 — plan 03-08 complete in ~5 min (metadata-only commit). Zero deviations: plan was a no-code QA gate, `make all` already green from 03-07 close, this plan re-ran toolchain for fresh-invocation contract lock + captured concrete numbers + wrote 4 doc artifacts.
+Phase: 4 of 5 (Backend Controller, Upload/Preview/Apply UI, Console) — IN PROGRESS (1 of 8 plans complete)
+Plan: 04-01 complete (Plugin boot self-check + parseIniSize() helper for UI-12). Next: 04-02 (Console command goodsreceived:recompute_active_from_stock for UI-11).
+Status: Plan 04-01 closed UI-12. Plugin::boot() now contains a backend-gated runtime self-check that warn-logs when host PHP `max_file_uploads<20` OR `upload_max_filesize<10M`. Frontend page-loads incur ZERO new code execution (App::runningInBackend() guard short-circuits). New `private static parseIniSize(string): int` helper handles K/M/G suffixes (case-insensitive) + bare numerics; safely degrades to 0 on malformed input. 7 new Pest cases (PluginBootSelfCheckTest) bring suite to 152/152 (708→730 assertions). PHPStan L10 + Pint + PHPMD + QA-09 grep gate all green. phpstan-baseline.neon SHA `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a` UNCHANGED. One deviation logged (D-04-01-01: PHP_INI_PERDIR locks `ini_set` for upload directives at runtime in CLI/PHPUnit; tests reshaped to live-ini-aware contract pins instead of synthetic value injection). Two new Decisions logged: D-04-01-01 + D-04-01-02. Commits: `1a8e167` (test RED) → `ef04d1c` (test refinement, deviation Rule 3) → `c1b49f9` (feat GREEN).
+Last activity: 2026-04-29 — plan 04-01 complete in ~5 min. Plan-level TDD enforced: RED → GREEN sequence verified in git log; no REFACTOR commit needed (implementation is already minimal: 28 LoC for boot + 27 LoC for parseIniSize, max nesting 1, function bodies <70 lines per Tiger-Style).
 
-Progress: [██████████████] 65%
+Progress: [██████████████░] 67%
 
 ## Performance Metrics
 
@@ -53,11 +53,12 @@ Progress: [██████████████] 65%
 | Phase 3 Plan 03-07 | 1 (ApplyOrchestrator + APPLY-07 + APPLY-08 apply-side + QA-03 + QA-08) | ~50m | ~50m |
 | Phase 3 Plan 03-08 | 1 (final QA gate — make all green; 16 REQs Closed) | ~5m | ~5m |
 | **Phase 3 total** | **8 plans (03-01..03-08)** | **~96m** | **~12m** |
+| Phase 4 Plan 04-01 | 1 (Plugin boot self-check + parseIniSize for UI-12) | ~5m | ~5m |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-08 (5m), 03-07 (50m), 03-06 (5m), 03-05 (8m), 03-04 (5m)
-- Trend: 03-08 closed cleanly at the predicted ~5m envelope (no-code QA gate). The 03-07 spike (50m) was the Phase 3 outlier (largest plan by files modified + 3 in-flight deviations + L10 generic-tracking through October Rain Database\Collection); every other Phase 3 plan landed in the 5-12m band. Phase 3 close metric: 8 plans in ~96 min total / ~12 min average. Phase 4 expected to be UI-heavy (multi-file upload + preview screen + apply confirmation modal + audit history list); duration TBD pending plan-phase decomposition.
+- Last 5 plans: 04-01 (5m), 03-08 (5m), 03-07 (50m), 03-06 (5m), 03-05 (8m)
+- Trend: 04-01 landed in the predicted 5m envelope — small surface (~50 LoC production + 1 test file), one in-flight deviation (PHP_INI_PERDIR runtime constraint forced test reshape from synthetic-injection to live-ini-aware), zero PHPStan baseline drift. Phase 4 expected to be UI-heavy from 04-03 onwards (backend controller + multi-file upload + preview screen + apply confirmation modal + audit history list); 04-01 + 04-02 are the small bootstrap pair (boot self-check + console command), 04-03..04-06 will be the larger UX plans.
 
 *Updated after each plan completion*
 
@@ -103,6 +104,8 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent (carried into v1.
 - D-03-07-04 (2026-04-29): No try/catch around DB::transaction in ApplyOrchestrator (in contrast to ParseAndPersistOrchestrator which catches GoodsReceivedException for reject logging). Apply-side has no equivalent need: ApplyAlreadyDoneException is the only orchestrator-thrown plugin exception, and it carries enough context for the controller to render directly. Audit.logApply already ran INSIDE the tx for successful applies; failed applies don't need a separate reject log because the rollback itself is the correct outcome. Tiger-Style fail-fast — let the typed exception propagate.
 - D-03-07-05 (2026-04-29): LockForUpdateSerializesConcurrentApplyTest uses TWO independent assertions: (1) source-grep that ->lockForUpdate() appears inside executeInTransaction's body, (2) runtime query log that the Invoice SELECT precedes any offer UPDATE. SQLite's compileLock returns empty (Laravel SQLiteGrammar.php — by design; SQLite single-file DBs cannot offer cross-process row locks), so the textual `for update` will never appear in executed SQL on the test bootstrap. The source grep is the only reliable pin for the CALL itself; runtime ordering proves the orchestrator runs the lock-acquiring SELECT first; together they pin the contract on every driver.
 - D-03-07-06 (2026-04-29): Lang::get('exception.apply_already_done') used directly (no Translator service). Same pattern as ParseAndPersistOrchestrator's DuplicateInvoiceException construction. The Lang facade is the canonical October CMS i18n entry point; the lang key already exists in lang/en/lang.php (line 42).
+- D-04-01-01 (2026-04-29): ini_set runtime injection abandoned for boot-self-check tests. max_file_uploads + upload_max_filesize are PHP_INI_PERDIR — runtime ini_set() returns false in CLI/PHPUnit on this host (verified empirically). The plan's listed Plugin-subclass fallback was rejected because it only addresses upload_max_filesize (which routes through parseIniSize) and leaves max_file_uploads (which uses ini_get directly) untestable. Reshape: read live ini values once per test, derive whether each warning is expected, pin Mockery expectation conditionally. Same 7 it() blocks, same UI-12 acceptance, but driven by actual host config rather than synthetic injection.
+- D-04-01-02 (2026-04-29): parseIniSize accepts case-insensitive K/M/G suffixes. PHP's ini-syntax docs treat suffix case as canonical-uppercase, but real php.ini files in the wild ship '10m' / '512k' — accepting lowercase is correct safety-first behaviour for a self-check helper that runs at boot. T-04-01-01 (NEVER throw, never crash boot) demands the helper bias toward "accept the input, return a useful number" over "be a strict validator".
 
 ### Pending Todos
 
@@ -121,8 +124,8 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Phase 3 COMPLETE — all 8 plans closed (03-01..03-08), all 16 requirements satisfied (APPLY-01..10 + QA-03/04/05/06/08/09). 03-08 final QA gate: `make all` exit 0 in 8.91s; 145/145 Pest cases / 708 assertions / 7.65s; PHPStan L10 clean (31/31 files); Pint clean; PHPMD clean; QA-09 grep gate green. phpstan-baseline.neon SHA UNCHANGED at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a` (Phase 3 introduced ZERO new baseline-suppressed errors). 03-08-SUMMARY.md ships 16-row REQ closure table + QA-04 concrete measurement (401 queries / 4 list-store flushes for 200-line apply) + Phase 3 cumulative artifacts (8 production files, 1570 LoC; 13 new test files; 53 new Pest cases / 444 new assertions). REQUIREMENTS.md traceability flipped (16 Phase 3 entries Closed). ROADMAP.md Phase 3 row Complete (2026-04-29). Next: Phase 4 plan 04-01 kickoff — Backend Controller (UI-01..12 + QA-10), 13 requirements; planner should run `/gsd-discuss-phase` if no Phase 4 CONTEXT.md exists, else `/gsd-plan-phase`.
-Resume file: `.planning/phases/03-apply-layer-orchestrators/03-08-SUMMARY.md`
+Stopped at: Phase 4 plan 04-01 COMPLETE (UI-12 closed). Plugin::boot() now backend-gates a runtime self-check warn-logging when host PHP `max_file_uploads<20` OR `upload_max_filesize<10M`. New private static parseIniSize(string): int helper handles K/M/G suffixes (case-insensitive) + bare numerics; safely degrades to 0 on malformed input. 7 new Pest cases bring suite to 152/152 (730 assertions). PHPStan L10 + Pint + PHPMD + QA-09 grep gate all green; phpstan-baseline.neon SHA UNCHANGED at 4b3227fa…91530a. One deviation logged (D-04-01-01: PHP_INI_PERDIR locks ini_set for upload directives in CLI/PHPUnit; tests reshaped to live-ini-aware contract pins). Two new Decisions (D-04-01-01 + D-04-01-02). Next: Phase 4 plan 04-02 (Console command goodsreceived:recompute_active_from_stock for UI-11).
+Resume file: `.planning/phases/04-backend-controller-upload-preview-apply-ui-console/04-01-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
 - Run `php artisan october:up` on a dev/staging server, confirm 3 plugin tables + offers.active_managed_by column appear with default 'system'
