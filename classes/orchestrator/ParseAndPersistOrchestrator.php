@@ -60,7 +60,23 @@ use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
  *     uses `Invoice::create()` (Eloquent) + `InvoiceLine::insert(...)`
  *     (Eloquent batched insert). NEVER `DB::statement` or `whereRaw`.
  */
-final class ParseAndPersistOrchestrator
+/**
+ * Boundary note (D-04-06-01 / mirror of D-03-07-01 + D-04-02-01 + D-04-05-01):
+ * NOT marked `final` so the override-and-reimport boundary-mock seam in
+ * `tests/unit/Controllers/OverrideConfirmTest.php` can subclass with a
+ * tracking-spy that records the runOverride() call args without standing up
+ * the full HtmInvoiceParser + EanMatcherService stack against a hermetic
+ * SQLite schema. Production callers always resolve via
+ * `Invoices::resolveParseOrchestrator()` which goes through the IoC
+ * container; the test uses `app()->instance(...)` to swap the spy in for
+ * the duration of one test case. Mirrors the third boundary-mock final
+ * removal in this plugin (after ImportAuditService 03-07 + ActiveFlagService
+ * 04-02 + ApplyOrchestrator 04-05).
+ *
+ * @internal The class behaves as if final at the production-code boundary.
+ *           Subclassing is sanctioned ONLY for unit-test boundary-mock spies.
+ */
+class ParseAndPersistOrchestrator
 {
     /** Internal mode tag for `runWithStrategy()`. */
     private const MODE_NORMAL = 'normal';
