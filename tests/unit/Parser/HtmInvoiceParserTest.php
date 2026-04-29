@@ -91,7 +91,11 @@ it('HandlesUnquotedAttributesTest — parses real fixture with <TR CLASS=R20> un
 
     expect($obParsed)->toBeInstanceOf(ParsedInvoice::class);
     expect($obParsed->invoice_number)->toBe('PRO033328');
-    expect(count($obParsed->lines))->toBe(25);
+    // 25 R20 rows in fixture; 21 are valid product lines, 4 are skipped
+    // (2 footer/totals rows with colspan TDs → insufficient_columns; 2 with
+    // empty EAN cells → invalid_ean). Total 25 rows touched, 21 emitted.
+    expect(count($obParsed->lines))->toBe(21);
+    expect(count($obParsed->skipped_rows))->toBe(4);
     expect($obParsed->lines[0]->row_index)->toBe(1);
     expect($obParsed->lines[0]->ean)->toBe('4752307000097');
     expect($obParsed->lines[0]->qty)->toBe(5);
@@ -140,8 +144,12 @@ it('HandlesBothR20AndR21RowsTest — real fixture with mixed R20/R21 yields comb
     /** @var string $sHtml */
     $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO026712_no_28112024.HTM');
 
-    // Real fixture has 147 R20 + 7 R21 = 154 data rows.
-    expect(count($obParsed->lines))->toBe(154);
+    // Real fixture has 147 R20 + 7 R21 = 154 data rows; 135 are valid
+    // product lines (13-digit EANs), 19 are skipped (non-13-digit internal
+    // codes like '40092454' / footer-summary rows with colspan TDs).
+    // Sum lines + skipped == 154 — pin invariant.
+    expect(count($obParsed->lines) + count($obParsed->skipped_rows))->toBe(154);
+    expect(count($obParsed->lines))->toBe(135);
     expect($obParsed->invoice_number)->toBe('PRO026712');
 });
 
