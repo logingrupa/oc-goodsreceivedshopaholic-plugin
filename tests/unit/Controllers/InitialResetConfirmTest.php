@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\InitialResetService;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ApplyOrchestrator;
-use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
@@ -194,10 +193,10 @@ it('onInitialResetConfirm rejects when typed string is wrong case (D-24 case-sen
 it('onInitialResetConfirm with literal RESET runs reset BEFORE apply, returns success (D-24 happy path)', function (): void {
     resetSettingsForController(bAllow: true);
 
-    // Seed Product + Offer that the fixture invoice's lines will match against
-    // (the EAN 4752307003700 is in the Nr_PRO033328_no_13042026.HTM fixture).
+    // Seed Product + Offer that the fixture invoice's lines will match against.
+    // The EAN 4752307000097 is the first row in Nr_PRO033328_no_13042026.HTM.
     $obProduct = seedApplyProduct('IR-HAPPY-CODE', 'ir-happy-product');
-    $obOffer = seedApplyOffer((int) $obProduct->id, '4752307003700', iQuantity: 50);
+    $obOffer = seedApplyOffer((int) $obProduct->id, '4752307000097', iQuantity: 50);
 
     expect((bool) $obOffer->active)->toBeTrue();
     expect((int) $obOffer->quantity)->toBe(50);

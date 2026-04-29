@@ -1,0 +1,22 @@
+{# UI-08 / D-22 / D-23: Initial-reset section.
+   Renders ONLY when SettingsAccessor::allowInitialReset() is true AND no
+   prior Invoice with initial_reset_applied=true exists. The visibility
+   check is server-side via Invoices::shouldShowInitialReset() (D-22) — the
+   partial itself receives a precomputed flag so the .htm template stays
+   logic-light. The AJAX handler `onInitialResetShowConfirm` re-checks the
+   same gates (T-04-06-02 defense-in-depth) so a stale view cannot bypass. #}
+{% if show_initial_reset %}
+    <div class="initial-reset-section">
+        <hr>
+        <h4>One-shot baseline reset</h4>
+        <p class="help-block">
+            Tick this on your FIRST import to zero all offer quantities and deactivate all products before the new invoice's stock is added. This is one-shot; the catalog snapshot is preserved for audit / rollback.
+        </p>
+        <button type="button"
+                class="btn btn-danger"
+                data-control="popup"
+                data-handler="onInitialResetShowConfirm">
+            Configure initial reset
+        </button>
+    </div>
+{% endif %}

@@ -112,4 +112,12 @@ return [
         'button'     => 'Confirm override',
         'spinner'    => 'Re-importing…',
     ],
+    'initial_reset' => [
+        'title'         => 'Initial Reset — Confirm',
+        'section_title' => 'One-shot baseline reset',
+        'snapshot_warn' => 'This will zero out :offer_count offers and deactivate :product_count products.',
+        'typed_hint'    => 'Type RESET exactly (uppercase) to confirm.',
+        'button'        => 'Run reset + apply',
+        'spinner'       => 'Resetting and applying…',
+    ],
 ];

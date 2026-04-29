@@ -11,13 +11,18 @@ use Cache;
 use Illuminate\Support\Facades\DB;
 use Input;
 use Lang;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\InitialResetService;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\ApplyAlreadyDoneException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\GoodsReceivedException;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InitialResetNotAllowedException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ApplyOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
+use Lovata\Shopaholic\Models\Offer;
+use Lovata\Shopaholic\Models\Product;
 use October\Rain\Exception\AjaxException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Throwable;
@@ -89,6 +94,15 @@ class Invoices extends Controller
      * wrong case` (the lowercase 'override' rejection assertion).
      */
     private const OVERRIDE_LITERAL = 'OVERRIDE';
+
+    /**
+     * Typed-confirmation literal for the initial-reset gate (UI-08 / D-24).
+     * Operator must type this string EXACTLY (case-sensitive) before
+     * InitialResetService::reset is invoked. Source-grep pinned by
+     * `InitialResetConfirmTest::onInitialResetConfirm rejects when typed
+     * string is wrong case`.
+     */
+    private const RESET_LITERAL = 'RESET';
 
     /** @var list<string> */
     public $implement = [
@@ -436,6 +450,210 @@ class Invoices extends Controller
             ]),
             '#invoiceRejectWrap' => '',
         ];
+    }
+
+    /**
+     * AJAX handler: render the RESET warning modal with pre-mutation snapshot
+     * counts (UI-08 / D-22 / D-23).
+     *
+     * Two-gate guard mirrors InitialResetService::assertAllowed: the
+     * SettingsAccessor::allowInitialReset() toggle must be on AND no prior
+     * Invoice with initial_reset_applied=true may exist. Both branches throw
+     * AjaxException with `reason` in `arContents` so the controller can
+     * render distinct error UX per cause (T-04-06-02 defense-in-depth).
+     * Permission-gated by `run_initial_reset` (D-25 / T-04-06-03).
+     *
+     * Snapshot counts (Offer::count() + Product::count()) are surfaced to
+     * the operator BEFORE the destructive op runs — the modal lists them
+     * verbatim so the operator sees exact catalog scale before typing
+     * RESET.
+     *
+     * Response shape:
+     *   ['#initialResetConfirm' => makePartial('_partials/_initial_reset_confirm', [...])]
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onInitialResetShowConfirm(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.run_initial_reset');
+
+        $this->assertInitialResetAllowed();
+
+        $iOfferCount = (int) Offer::count();
+        $iProductCount = (int) Product::count();
+
+        return [
+            '#initialResetConfirm' => $this->makePartial('_partials/_initial_reset_confirm', [
+                'offer_count'   => $iOfferCount,
+                'product_count' => $iProductCount,
+            ]),
+        ];
+    }
+
+    /**
+     * AJAX handler: validate the typed RESET literal, then run InitialReset
+     * BEFORE ApplyOrchestrator::apply on the uploaded invoice (UI-08 / D-24).
+     *
+     * Order is contract: parse-and-persist → reset → apply. The new Invoice
+     * is parsed first (so we have an Invoice id to flip
+     * `initial_reset_applied=true` on); InitialResetService::reset zeros
+     * every offer + deactivates every product; THEN ApplyOrchestrator::apply
+     * increments stock from the new invoice's matched lines. After this,
+     * the offer's quantity reflects the NEW invoice's qty (NOT
+     * prior_qty + qty), which is the test-pinned behavior in
+     * `InitialResetConfirmTest::onInitialResetConfirm with literal RESET
+     * runs reset BEFORE apply`.
+     *
+     * Permission-gated by `run_initial_reset` (D-25). Reset itself runs the
+     * two-gate guard a second time (defense-in-depth — T-04-06-02), so
+     * even if the operator bypasses the controller's guard via curl the
+     * service still refuses to run.
+     *
+     * Response shape on happy path:
+     *   ['#applyResult' => makePartial('_partials/_apply_success', [...])]
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onInitialResetConfirm(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.run_initial_reset');
+
+        $mTyped = Input::get('confirm_typed');
+        $sTyped = is_scalar($mTyped) ? strval($mTyped) : '';
+        if ($sTyped !== self::RESET_LITERAL) {
+            throw new AjaxException([
+                'message' => sprintf('Type %s exactly to confirm initial reset.', self::RESET_LITERAL),
+            ]);
+        }
+
+        $arFiles = $this->getUploadedFiles();
+        if ($arFiles === null || $arFiles === []) {
+            throw new AjaxException(['message' => 'No file provided for initial reset apply.']);
+        }
+        $obFile = $arFiles[0];
+
+        $this->assertHtmFile($obFile);
+        $iUserId = $this->resolveBackendUserId();
+        $sHtml = $this->readFileContents($obFile);
+        $sFilename = (string) $obFile->getClientOriginalName();
+
+        return $this->runInitialResetThenApply($sHtml, $sFilename, $iUserId);
+    }
+
+    /**
+     * Helper: should the initial-reset section be visible on the upload form?
+     *
+     * Public so `preview.htm` (October compiled-template engine, supports
+     * `<?php ?>` blocks in .htm files) can call it inline:
+     *
+     *   $bShow = $this->shouldShowInitialReset();
+     *
+     * Two-gate visibility per D-22: SettingsAccessor::allowInitialReset()
+     * must be true AND no prior Invoice with initial_reset_applied=true
+     * may exist. Either branch returns false to hide the section. The
+     * AJAX handler `onInitialResetShowConfirm` re-checks the same gates
+     * server-side (T-04-06-02 defense-in-depth) so a stale view does
+     * not bypass the gate.
+     */
+    public function shouldShowInitialReset(): bool
+    {
+        if (! SettingsAccessor::allowInitialReset()) {
+            return false;
+        }
+
+        return ! Invoice::where('initial_reset_applied', true)->exists();
+    }
+
+    /**
+     * Two-gate guard for initial reset (D-22 / T-04-06-02). Surfaces the
+     * disposition cause via the `reason` key in AjaxException's `arContents`
+     * so the controller can render distinct error UX per branch:
+     *   - reason='settings_disabled' → operator must enable the toggle
+     *   - reason='already_applied'   → one-shot already consumed; nothing to do
+     *
+     * Mirrors InitialResetService::assertAllowed(); the controller-side
+     * gate exists as defense-in-depth so a misconfigured site never even
+     * renders the modal (the service-side gate is the authoritative
+     * contract per Phase 3 D-17).
+     *
+     * @throws AjaxException
+     */
+    private function assertInitialResetAllowed(): void
+    {
+        if (! SettingsAccessor::allowInitialReset()) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.exception.initial_reset_not_allowed',
+                ),
+                'reason' => 'settings_disabled',
+            ]);
+        }
+
+        if (Invoice::where('initial_reset_applied', true)->exists()) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.exception.initial_reset_not_allowed',
+                ),
+                'reason' => 'already_applied',
+            ]);
+        }
+    }
+
+    /**
+     * Compose the parse → reset → apply triad for the initial-reset confirm
+     * handler. Extracted as a private helper to keep `onInitialResetConfirm`
+     * under the 70-line / max-1-nesting Tiger-Style cap.
+     *
+     * Each step's failure mode propagates: orchestrator typed exceptions
+     * surface as AjaxException via October's dispatcher; the only catch
+     * here is the typed `InitialResetNotAllowedException` from the
+     * service-side gate, which is rethrown as an AjaxException carrying
+     * the same `reason` payload as `assertInitialResetAllowed` for
+     * consistent UI handling.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    private function runInitialResetThenApply(string $sHtml, string $sFilename, int $iUserId): array
+    {
+        $obParse = $this->resolveParseOrchestrator();
+        $obInvoice = $obParse->run($sHtml, $sFilename, $iUserId);
+
+        $obReset = $this->resolveInitialResetService();
+        try {
+            $obReset->reset($obInvoice);
+        } catch (InitialResetNotAllowedException $obException) {
+            throw new AjaxException([
+                'message' => $obException->getMessage(),
+                'reason' => $obException->arContext['reason'] ?? 'unknown',
+            ]);
+        }
+
+        $obApply = $this->resolveApplyOrchestrator();
+        $obResult = $obApply->apply((int) $obInvoice->id, $iUserId);
+
+        return [
+            '#applyResult' => $this->makePartial('_partials/_apply_success', [
+                'invoice_id' => (int) $obInvoice->id,
+                'result'     => $obResult,
+            ]),
+        ];
+    }
+
+    /**
+     * Resolve the InitialResetService from the IoC container. Protected so
+     * the Pest test shim can swap the reset path for a tracking double
+     * (mirrors `resolveApplyOrchestrator` from plan 04-05 D-04-05-01 +
+     * `resolveParseOrchestrator` from plan 04-04 D-04-04-02).
+     */
+    protected function resolveInitialResetService(): InitialResetService
+    {
+        return app(InitialResetService::class);
     }
 
     /**
