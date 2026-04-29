@@ -156,7 +156,7 @@ final class InvoiceNumberResolver
         // `ParsedInvoice.invoice_date` (D-19 strictness).
         $arErrors = DateTimeImmutable::getLastErrors();
 
-        if ($arErrors !== false && (int) ($arErrors['warning_count'] ?? 0) > 0) {
+        if ($arErrors !== false && $arErrors['warning_count'] > 0) {
             return null;
         }
 
