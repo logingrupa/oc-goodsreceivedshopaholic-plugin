@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: GoodsReceivedShopaholic
 status: in_progress
-stopped_at: Phase 3 plan 03-04 COMPLETE (APPLY-03, APPLY-04, QA-05 closed — ActiveFlagService final class with reconcile(list<int>) + reconcileAll(int): int chunked over the full table; provenance gate at TWO layers (per-row + WHERE clause) so operator-managed offers are skipped both in the Apply path and the console-command path; pure decideTargetState() 4-cell matrix; idempotent on repeat reconciles (SELECT only — no UPDATE)). Next: Phase 3 Wave 2 plan 03-05 (InitialResetService) — schema base + SettingsAccessor::allowInitialReset already in place; plan 03-07 (ApplyOrchestrator) waits on 03-05 + 03-06.
-last_updated: "2026-04-29T20:41:23.000Z"
+stopped_at: Phase 3 plan 03-05 COMPLETE (APPLY-05, QA-06 closed — InitialResetService final class with reset(Invoice): void two-gate guard (SettingsAccessor::allowInitialReset() + Invoice::initial_reset_applied one-shot DB exists() check, reason-tagged exception context 'settings_disabled' | 'already_applied') + snapshot-before-write contract via Offer::chunkById(500) → per-chunk Product whereIn hydration → batched InitialResetSnapshot::insert (3 INSERTs / 1500 offers); chunked saveQuietly mutation (1500 individual offer UPDATEs prove no DB::statement bypass); ApplyTestCase extended with logingrupa_goods_received_initial_reset_snapshot table). Next: Phase 3 Wave 3 — plan 03-06 (ParseAndPersistOrchestrator) + 03-07 (ApplyOrchestrator) + 03-08 (final QA gate); both 03-06 and 03-07 depend on Wave 2 services (now all shipped: 03-03 StockApply + 03-04 ActiveFlag + 03-05 InitialReset).
+last_updated: "2026-04-29T20:54:27.000Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -24,11 +24,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 ## Current Position
 
 Phase: 3 of 5 (Apply Layer + Orchestrators) — IN PROGRESS
-Plan: 03-04 complete (4 of 8 Phase 3 plans). Wave 1 (03-01 + 03-02) DONE; Wave 2 (03-03 StockApply + 03-04 ActiveFlag) DONE. Next: Wave 2 remaining — 03-05 (InitialResetService) — schema base + SettingsAccessor::allowInitialReset already in place. Wave 3 (03-06, 03-07, 03-08) blocked on 03-05.
-Status: APPLY-03, APPLY-04, QA-05 closed. `ActiveFlagService` final class ships with `reconcile(list<int>): void` + `reconcileAll(int $iChunkSize=500): int` (Phase 4 console command entry point UI-11). Provenance gate at TWO layers — per-row at the FIRST line of `reconcileSingleOffer` (operator → no-op early return BEFORE settings/qty checks) AND WHERE-clause filter in `reconcileAll` so operator rows never even hydrate (defense-in-depth). Pure `decideTargetState(Offer, bool, bool): ?bool` helper realizes the D-13 4-cell matrix; null sentinel = "no change requested". Idempotent: second reconcile of same ids fires SELECT only (no UPDATE) — proven via query-count delta test. `chunkById` (NOT chunk) — offset-shift safe under mid-iteration updates (T-03-04-03 DoS mitigation). `managedByOperator()` private helper applies `is_scalar()` narrowing for PHPStan L10 mixed→string conversion without inline @var/@phpstan-ignore (project rule). ApplyTestCase extended with `system_settings` table — durable for 03-05/03-07 reuse. 9 new Pest cases / 48 assertions. `make all` green: 127/511 tests, 3.86s. phpstan-baseline.neon SHA unchanged (`4b3227fa…`).
-Last activity: 2026-04-29 — plan 03-04 complete in ~5 min (TDD: RED abcf000 → GREEN f380aba, no REFACTOR needed). Four deviations all auto-fixed: 1 Rule-3 schema add (system_settings table to ApplyTestCase — net positive for 03-05/03-07), 2 Rule-3 PHPStan-L10 typing workarounds (chunkById Eloquent\\Collection signature + is_scalar narrowing helper), 1 Rule-1 QA-09 self-trip (literal "Settings::get(" token inside a docblock comment — rephrased).
+Plan: 03-05 complete (5 of 8 Phase 3 plans). Wave 1 (03-01 + 03-02) DONE; Wave 2 (03-03 StockApply + 03-04 ActiveFlag + 03-05 InitialReset) DONE. Next: Wave 3 — 03-06 (ParseAndPersistOrchestrator) + 03-07 (ApplyOrchestrator) + 03-08 (final QA gate). Both 03-06 and 03-07 depend on Wave 2 services (all shipped); 03-08 is the final make-all gate.
+Status: APPLY-05, QA-06 closed. `InitialResetService` final class ships with `reset(Invoice): void` + 7 private helpers (all <70 lines per Tiger-Style). Two-gate guard in `assertAllowed()`: cheap-first ordering (memo'd `SettingsAccessor::allowInitialReset()` → DB-once `Invoice::where('initial_reset_applied', true)->exists()`); reason-tagged exception context `$arContext['reason']` ∈ {'settings_disabled', 'already_applied'} so Phase 4 controller can render distinct error UX per cause. Snapshot-before-write contract enforced via program order: `snapshotAllOffers()` returns BEFORE `zeroAllOffers()` begins. Per-chunk Product hydration via `whereIn` (NOT `$obOffer->product` magic accessor — Larastan can't see October's array-style $belongsTo on Lovata models, AND the whereIn approach collapses N product fetches per chunk into ONE statement). chunkById(500) on EVERY pass — snapshot, zero, deactivate. Per-row saveQuietly contract enforced by 1500-offer test asserting 1500 individual offer UPDATEs (NOT one bulk UPDATE) — proves no DB::statement bypass. InitialResetSnapshot::insert batched 3 INSERTs for 1500 rows — O(catalog/500) audit-trail rows. ApplyTestCase extended with logingrupa_goods_received_initial_reset_snapshot table — durable for any future plan that exercises the snapshot. 5 new Pest cases / 78 assertions. `make all` green: 132/589 tests, 8.54s. phpstan-baseline.neon SHA unchanged (`4b3227fa…`).
+Last activity: 2026-04-29 — plan 03-05 complete in ~8 min (TDD: RED a4166ff → GREEN 4390e4a, no REFACTOR needed). Three deviations all auto-fixed (Rule 3 — Blocking PHPStan L10 issues): (1) larastan.relationExistence false positive on `$obOffer->product` magic accessor → switched to per-chunk Product whereIn hydration (net positive: avoids N+1 too); (2) function.alreadyNarrowedType on is_numeric($obOffer->product_id) → trusted Lovata's docblock `@property int $product_id`, removed redundant guards (kept defensive zero-check); (3) instanceof.alwaysTrue on $obProduct instanceof Product (consequence of fix 1) → inlined the row builder to use the array<int, bool> map directly. File grew to 281 LoC (target was ≤200) — entirely the Larastan workaround helper; per-method <70 line invariant intact.
 
-Progress: [█████████░] 41%
+Progress: [██████████] 43%
 
 ## Performance Metrics
 
@@ -48,11 +48,12 @@ Progress: [█████████░] 41%
 | Phase 3 Plan 03-02 | 1 (ImportAuditService + APPLY-10) | ~5m | ~5m |
 | Phase 3 Plan 03-03 | 1 (StockApplyService + APPLY-01/02 + QA-04) | ~12m | ~12m |
 | Phase 3 Plan 03-04 | 1 (ActiveFlagService + APPLY-03/04 + QA-05) | ~5m | ~5m |
+| Phase 3 Plan 03-05 | 1 (InitialResetService + APPLY-05 + QA-06) | ~8m | ~8m |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-04 (5m), 03-03 (12m), 03-02 (5m), 03-01 (6m), 02-07 (22m)
-- Trend: 03-04 reverted to the 5-min cadence — 03-03's PHPStan-L10 workarounds (Singleton stub + universalObjectCrates) paid forward: 03-04 reused the intval/strval pattern with a small is_scalar-narrowing helper variant for the active_managed_by string column. The schema add (system_settings) to ApplyTestCase is durable infrastructure for 03-05 + 03-07. TDD cycle was clean: RED detected the missing table immediately; GREEN landed all 9 tests on first try; only the QA gates surfaced the 4 typing/lint deviations (all auto-fixed in the same GREEN commit).
+- Last 5 plans: 03-05 (8m), 03-04 (5m), 03-03 (12m), 03-02 (5m), 03-01 (6m)
+- Trend: 03-05 took 8m vs the 5m cadence of 03-04 — three Larastan/PHPStan-L10 deviations stacked in a single GREEN cycle (the magic-accessor false positive on `$obOffer->product`, then two cascade issues from the fix). All three were Rule-3 blocking and resolved by ONE structural change: per-chunk Product hydration via whereIn instead of the magic accessor. Net positive (avoided N+1 anyway), but the realization arrived only after the second PHPStan run. The TDD cycle was clean (RED a4166ff → GREEN 4390e4a, no REFACTOR); query-log assertions in ChunkedNotSingleStatementTest add 3.5s to the test suite (1500-offer SQLite seed dominates) — acceptable for the contract proof.
 
 *Updated after each plan completion*
 
