@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: GoodsReceivedShopaholic
 status: in_progress
-stopped_at: Phase 1 plans created (8 plans, 4 waves, 21 tasks) — ready to execute
-last_updated: "2026-04-29T14:05:00.000Z"
+stopped_at: Phase 1 complete — verifier human_needed (ops items deferred to UAT)
+last_updated: "2026-04-29T18:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 8
-  completed_plans: 0
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 ## Current Position
 
-Phase: 1 of 5 (Schema, Scaffold, Settings, Permissions)
-Plan: 01-01..01-08 (8 plans across 4 waves)
-Status: Plans verified by gsd-plan-checker (0 BLOCKERs); ready to execute
-Last activity: 2026-04-29 — Plans created + verified; D-13 trait path corrected to `October\Rain\Database\Traits\Multisite` (CommonSettings-internal trait); CONTEXT.md cited paths confirmed nonexistent
+Phase: 1 of 5 (Schema, Scaffold, Settings, Permissions) — COMPLETE
+Plan: 01-01..01-08 all complete (8/8)
+Status: Phase 1 verified — 38/38 must-haves, 5/5 ROADMAP success criteria. Status `human_needed` for live ops checks (migration run, backend UI render, multi-server multisite isolation) — deferred to UAT before milestone completion.
+Last activity: 2026-04-29 — Phase 1 closed. Tooling installed (composer dev deps in parent vendor/), all gates green (PHPStan level 10, pint, phpmd, 12/12 pest tests, baseline locked at 33 bytes).
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -80,5 +80,11 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Phase 1 plans verified; ready for execute-phase
-Resume file: `.planning/phases/01-schema-scaffold-settings-permissions/01-01-PLAN.md`
+Stopped at: Phase 1 complete; Phase 2 ready (Pure Parsers, DTOs, Exceptions, EAN Matcher)
+Resume file: `.planning/phases/02-pure-parsers-dtos-exceptions-ean-matcher/02-CONTEXT.md` (TBD)
+
+## UAT Items Pending (from Phase 1 — defer to milestone completion)
+- Run `php artisan october:up` on a dev/staging server, confirm 3 plugin tables + offers.active_managed_by column appear with default 'system'
+- Load Backend → Settings → Goods Received, confirm 4 toggles render, persist on submit
+- Load Backend → Users → Roles → Edit role, confirm 4 split permissions appear under tab
+- Toggle on .no, confirm value does NOT change on .lv or .lt (per-server DB multisite isolation)
