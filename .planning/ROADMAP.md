@@ -58,7 +58,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Unmatched EANs yield `match_strategy='none'` rows queryable via `WHERE matched_offer_id IS NULL`; partial-match invoices never throw
   6. All parser/matcher tests are hermetic (no reads outside `tests/`) and run green under PHPStan level 10
 
-**Plans**: TBD
+**Plans**: 7 plans
+  - [ ] 02-01-PLAN.md - DTOs: ParsedInvoice + ParsedLine + MatchedLine + ApplyResult (final readonly classes; locks Phase 2/3 data contract)
+  - [ ] 02-02-PLAN.md - Exceptions: abstract GoodsReceivedException + 8 typed subclasses (polymorphic catch + log-injection-safe context)
+  - [ ] 02-03-PLAN.md - Normalizers: QuantityNormalizer (rejects decimal qty BEFORE Eloquent int-clamp) + PriceNormalizer (audit-only)
+  - [ ] 02-04-PLAN.md - InvoiceNumberResolver: body-marker regex + filename pattern fallback + throw on miss
+  - [ ] 02-05-PLAN.md - HtmInvoiceParser: DOMDocument + XPath + BOM strip + LIBXML_NONET; 5 QA-01 real-fixture pin tests
+  - [ ] 02-06-PLAN.md - EanMatcherService: exactly TWO queries (offer.code → product.code single-offer); QA-02 leading-zero EAN preservation
+  - [ ] 02-07-PLAN.md - Phase 2 final QA gate: make all (pint-test + phpstan level 10 + phpmd + pest); baseline unchanged
 
 ### Phase 3: Apply Layer + Orchestrators
 **Goal**: Apply parsed invoices to live stock idempotently inside a single DB transaction with provenance-aware active-flag reconcile, batched cache flush, and one-shot baseline reset; ALL Settings reads go through `SettingsAccessor`
@@ -115,7 +122,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Schema, Scaffold, Settings, Permissions | 8/8 | Complete | 2026-04-29 |
-| 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 0/TBD | Not started | - |
+| 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 0/7 | Not started | - |
 | 3. Apply Layer + Orchestrators | 0/TBD | Not started | - |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
 | 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |
