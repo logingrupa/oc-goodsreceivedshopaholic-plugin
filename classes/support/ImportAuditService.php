@@ -19,7 +19,15 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ParsedInvoice;
  * is a literal); T-03-02-02 PII leak (only int ids + ENUM/parser strings —
  * email/name/raw HTM body NEVER logged); T-03-02-04 cross-call join deferred.
  */
-final class ImportAuditService
+/**
+ * NOTE on `final` removal: the class is a logging boundary (Log::* facade
+ * wrapper); subclassing is permitted as a TEST DOUBLE seam (e.g.
+ * `FailingAuditService` in PartialFailureRollsBackEverythingTest injects a
+ * controlled exception inside the apply transaction). Production callers
+ * still construct `new ImportAuditService()` directly via the orchestrator's
+ * default constructor argument; no production code subclasses this.
+ */
+class ImportAuditService
 {
     public function logApply(int $iInvoiceId, ApplyResult $obResult, int $iAppliedByUserId): void
     {
