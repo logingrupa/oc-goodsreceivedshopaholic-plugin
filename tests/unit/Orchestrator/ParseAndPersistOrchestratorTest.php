@@ -131,11 +131,15 @@ it('runOverride creates a NEW invoice with override_of_invoice_id pointer, NO du
 });
 
 it('parse failure rolls back the transaction — no Invoice or InvoiceLine row remains (D-22 atomicity)', function (): void {
-    $sHtmlBroken = '<html><body>not a valid HTM with no R20 rows</body></html>';
+    // Filename carries a PRO number so InvoiceNumberResolver succeeds via
+    // filename fallback; HTML body has zero R20/R21 rows + zero header tags
+    // → HtmInvoiceParser throws MalformedHtmException with reason
+    // 'no_rows_extracted' (D-17).
+    $sHtmlBroken = '<html><body>nothing here, zero rows</body></html>';
 
     $obOrchestrator = new ParseAndPersistOrchestrator();
 
-    expect(fn () => $obOrchestrator->run($sHtmlBroken, 'broken.HTM', iAppliedByUserId: 1))
+    expect(fn () => $obOrchestrator->run($sHtmlBroken, 'Nr_PRO000001_no_01012026.HTM', iAppliedByUserId: 1))
         ->toThrow(MalformedHtmException::class);
 
     expect(Invoice::count())->toBe(0);
@@ -145,22 +149,26 @@ it('parse failure rolls back the transaction — no Invoice or InvoiceLine row r
 it('logs reject via ImportAuditService AFTER tx rollback on parse failure (boundary contract)', function (): void {
     Log::spy();
 
-    $sHtmlBroken = '<html><body>nothing here</body></html>';
+    // Same shape as the rollback test — filename PRO-number unblocks the
+    // resolver so the failure surfaces as MalformedHtmException at the
+    // row-extraction step (the failure boundary plan 03-06 contracts on).
+    $sHtmlBroken = '<html><body>nothing here, zero rows</body></html>';
+    $sFilename = 'Nr_PRO000002_no_01012026.HTM';
 
     $obOrchestrator = new ParseAndPersistOrchestrator();
 
     try {
-        $obOrchestrator->run($sHtmlBroken, 'broken.HTM', iAppliedByUserId: 1);
+        $obOrchestrator->run($sHtmlBroken, $sFilename, iAppliedByUserId: 1);
     } catch (MalformedHtmException $obCaught) {
         // Expected — assert below that the reject was logged.
     }
 
     Log::shouldHaveReceived('warning')
-        ->withArgs(function (string $sMessage, array $arContext): bool {
+        ->withArgs(function (string $sMessage, array $arContext) use ($sFilename): bool {
             if ($sMessage !== 'goodsreceived.reject') {
                 return false;
             }
-            if (($arContext['source_filename'] ?? null) !== 'broken.HTM') {
+            if (($arContext['source_filename'] ?? null) !== $sFilename) {
                 return false;
             }
             if (($arContext['mode'] ?? null) !== 'normal') {
