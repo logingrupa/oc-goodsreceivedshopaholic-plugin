@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ApplyOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Controllers\Invoices;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -80,6 +81,17 @@ if (! class_exists(TestableInvoices::class, false)) {
         public int $iOrchestratorResolvedCount = 0;
 
         /**
+         * Apply-side orchestrator resolver hook (plan 04-05). Counter pins
+         * "orchestrator was/was-not invoked" assertions on the apply path
+         * (mirror of $iOrchestratorResolvedCount for the parse path).
+         *
+         * @var \Closure(): ApplyOrchestrator|null
+         */
+        public ?\Closure $obApplyOrchestratorResolver = null;
+
+        public int $iApplyOrchestratorResolvedCount = 0;
+
+        /**
          * @param  array<string, mixed>  $vars
          * @param  bool  $throwException
          * @return false|string
@@ -123,6 +135,17 @@ if (! class_exists(TestableInvoices::class, false)) {
             }
 
             return parent::resolveParseOrchestrator();
+        }
+
+        #[\Override]
+        protected function resolveApplyOrchestrator(): ApplyOrchestrator
+        {
+            $this->iApplyOrchestratorResolvedCount++;
+            if ($this->obApplyOrchestratorResolver !== null) {
+                return ($this->obApplyOrchestratorResolver)();
+            }
+
+            return parent::resolveApplyOrchestrator();
         }
     }
 }
