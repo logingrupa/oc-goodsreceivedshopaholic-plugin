@@ -117,16 +117,16 @@ it('honors the --chunk option (large dataset, small chunk)', function (): void {
     }
 
     $iExitCode = \Artisan::call('goodsreceived:recompute_active_from_stock', ['--chunk' => 5]);
+    $sOutput = \Artisan::output();
 
     expect($iExitCode)->toBe(0);
-    expect(\Artisan::output())->toContain('Reconciled 12 offers');
-    expect(\Artisan::output())->toContain('chunk=5');
+    expect($sOutput)->toContain('Reconciled 12 offers');
+    expect($sOutput)->toContain('chunk=5');
 });
 
 it('returns exit 1 and prints error when ActiveFlagService throws', function (): void {
     // Bind a failing fake service into the container so handle() catches it.
-    $this->app->bind(ActiveFlagService::class, fn (): ActiveFlagService => new class extends ActiveFlagService
-    {
+    $this->app->bind(ActiveFlagService::class, fn (): ActiveFlagService => new class () extends ActiveFlagService {
         #[\Override]
         public function reconcileAll(int $iChunkSize = 500): int
         {
@@ -135,8 +135,9 @@ it('returns exit 1 and prints error when ActiveFlagService throws', function ():
     });
 
     $iExitCode = \Artisan::call('goodsreceived:recompute_active_from_stock');
+    $sOutput = \Artisan::output();
 
     expect($iExitCode)->toBe(1);
-    expect(\Artisan::output())->toContain('Recompute failed:');
-    expect(\Artisan::output())->toContain('forced failure for test');
+    expect($sOutput)->toContain('Recompute failed:');
+    expect($sOutput)->toContain('forced failure for test');
 });

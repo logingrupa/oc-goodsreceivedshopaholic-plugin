@@ -48,8 +48,17 @@ use October\Rain\Database\Collection as DbCollection;
  *     Service uses SettingsAccessor exclusively; QA-09 grep gate enforces.
  *   - T-03-04-03 DoS via reconcileAll memory: mitigated. chunkById($iChunkSize)
  *     never holds more than $iChunkSize Offer rows in memory.
+ *
+ * Class is intentionally NOT final — same boundary-mock precedent as
+ * D-03-07-01 (ImportAuditService): plan 04-02 RecomputeActiveFromStock
+ * console-command tests need to inject a failing service to assert the
+ * Throwable-caught + exit-1 contract. ActiveFlagService is a service-layer
+ * boundary (the orchestrator + the new CLI both consume it via app() IoC);
+ * subclassing it for failure injection is the cleanest path. Production
+ * code never subclasses — `app(ActiveFlagService::class)` always resolves
+ * the leaf class via the default container binding. (D-04-02-01.)
  */
-final class ActiveFlagService
+class ActiveFlagService
 {
     private const PROVENANCE_OPERATOR = 'operator';
 
