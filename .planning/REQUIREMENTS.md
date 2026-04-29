@@ -54,7 +54,7 @@
 - [ ] **APPLY-07**: `classes/orchestrator/ApplyOrchestrator` — single public method. Acquires `Invoice::lockForUpdate()`; throws `ApplyAlreadyDoneException` if `status='applied'`; runs `StockApplyService::apply` → `ActiveFlagService::reconcile($arAffected)` → flips `Invoice.status='applied'` → records audit. ALL inside ONE `DB::transaction`. `flushAffectedCaches` fires AFTER commit.
 - [ ] **APPLY-08**: Override-reimport (D12): when operator ticks "Override and re-import" on a duplicate invoice, ApplyOrchestrator re-applies the new lines additively on top of the prior apply. New `Invoice` row with `override_of_invoice_id` = prior. UX warning displayed before submit; operator confirms by typed string.
 - [x] **APPLY-09**: `classes/support/SettingsAccessor` — single accessor for all Settings reads. Memoized per-request. CI grep gate enforces `Settings::get(` only appears in `SettingsAccessor.php` (Makefile target `lint:settings-accessor`). *(closed 2026-04-29 in plan 03-01 — SettingsAccessor with 4 boolean getters + flush(); atomic 4-key bulk-fill memoization; flushPluginSingletons() wired)*
-- [ ] **APPLY-10**: `classes/support/ImportAuditService` — vendor-inlined ~50-80 LoC (per D14). Logs to `Log::*` with structured context array (invoice_id, status, units_added, offers_touched, applied_by). NO soft-dep on ExtendShopaholic.
+- [x] **APPLY-10**: `classes/support/ImportAuditService` — vendor-inlined ~50-80 LoC (per D14). Logs to `Log::*` with structured context array (invoice_id, status, units_added, offers_touched, applied_by). NO soft-dep on ExtendShopaholic. *(closed 2026-04-29 in plan 03-02 — final class with 4 public log methods (logApply/logParse/logReject/logInitialReset) + 3 private helpers; routes through Laravel Log facade with structured context arrays carrying canonical `event` key + uuid v7 `correlation_id`; 96 raw / 65 code lines within ≤100 LoC ceiling per D-04; 6 Pest cases / 130 assertions; PHPStan L10 clean; PHPMD clean; full make all green: 106/407)*
 
 ### Backend UI + Console (Phase 4)
 
@@ -175,7 +175,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | APPLY-07 | Phase 3 | Pending |
 | APPLY-08 | Phase 3 | Pending |
 | APPLY-09 | Phase 3 | Closed (plan 03-01, 2026-04-29) |
-| APPLY-10 | Phase 3 | Pending |
+| APPLY-10 | Phase 3 | Closed (plan 03-02, 2026-04-29) |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |

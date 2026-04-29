@@ -82,7 +82,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Plans**: 8 plans
   - [x] 03-01-PLAN.md - SettingsAccessor + DRY grep gate (APPLY-09 + QA-09); hooks SettingsAccessor::flush into TestCase teardown *(closed 2026-04-29 — APPLY-09 + QA-09 closed; dual-gate enforcement (Makefile + Pest mirror); flushPluginSingletons() first body line populated)*
-  - [ ] 03-02-PLAN.md - ImportAuditService (~50-80 LoC vendor-inlined; APPLY-10 / D-14); 4 log methods (apply/parse/reject/initial_reset)
+  - [x] 03-02-PLAN.md - ImportAuditService (~50-80 LoC vendor-inlined; APPLY-10 / D-14); 4 log methods (apply/parse/reject/initial_reset) *(closed 2026-04-29 — APPLY-10 closed; final class with 4 public log methods + 3 private helpers; uuid v7 correlation_id; 96 raw / 65 code lines within ≤100 LoC ceiling per D-04; 6 tests / 130 assertions; PHPStan L10 clean)*
   - [ ] 03-03-PLAN.md - StockApplyService (saveQuietly + post-commit batched cache flush; APPLY-01 + APPLY-02 + QA-04 200-line cache-flush counter test)
   - [ ] 03-04-PLAN.md - ActiveFlagService (provenance-aware reconcile + reconcileAll chunked; APPLY-03 + APPLY-04 + QA-05 4-cell matrix + SkipsManuallyDeactivated)
   - [ ] 03-05-PLAN.md - InitialResetService (one-shot + snapshot-before-write + chunked; APPLY-05 + 5 QA-06 tests)
