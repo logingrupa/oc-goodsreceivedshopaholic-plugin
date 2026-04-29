@@ -6,6 +6,7 @@ namespace Logingrupa\GoodsReceivedShopaholic\Classes\Parser;
 
 use DOMDocument;
 use DOMElement;
+use DOMNameSpaceNode;
 use DOMNode;
 use DOMNodeList;
 use DOMXPath;
@@ -199,12 +200,26 @@ final class HtmInvoiceParser
 
     /**
      * Convert one DOM `<TR>` node into either a `ParsedLine` or a skip record.
-     * Exactly one of `line` / `skip` is non-null.
+     * Exactly one of `line` / `skip` is non-null. Accepts the union returned
+     * by `DOMNodeList` iteration (`DOMNameSpaceNode|DOMNode`) so PHPStan
+     * level 10 is satisfied without inline type-overrides; non-`DOMNode`
+     * cases are filtered out at the children-iteration step.
      *
      * @return array{line: ?ParsedLine, skip: ?array{row_index: int, reason: string, raw: string}}
      */
-    private function parseOneRow(DOMNode $obRow, int $iRowIndex): array
+    private function parseOneRow(DOMNameSpaceNode|DOMNode $obRow, int $iRowIndex): array
     {
+        if (! $obRow instanceof DOMNode) {
+            return [
+                'line' => null,
+                'skip' => [
+                    'row_index' => $iRowIndex,
+                    'reason' => 'non_element_row',
+                    'raw' => '',
+                ],
+            ];
+        }
+
         $arTds = [];
         foreach ($obRow->childNodes as $obChild) {
             if ($obChild instanceof DOMElement && strtolower($obChild->nodeName) === 'td') {
@@ -249,16 +264,19 @@ final class HtmInvoiceParser
             ['row_index' => $iRowIndex, 'ean' => $sEan],
         );
 
+        // Positions 6..9 are guaranteed to exist because `MIN_TD_COUNT = 10`
+        // was enforced above; PriceNormalizer accepts the trimmed strings
+        // directly and returns `null` for non-numeric content.
         $obLine = new ParsedLine(
             row_index: $iRowIndex,
             ean: $sEan,
             product_name_raw: $sName,
             unit: $sUnit,
             qty: $iQty,
-            unit_price: PriceNormalizer::parsePrice($arTds[6] ?? null),
-            discount: PriceNormalizer::parsePrice($arTds[7] ?? null),
-            line_price: PriceNormalizer::parsePrice($arTds[8] ?? null),
-            total: PriceNormalizer::parsePrice($arTds[9] ?? null),
+            unit_price: PriceNormalizer::parsePrice($arTds[6]),
+            discount: PriceNormalizer::parsePrice($arTds[7]),
+            line_price: PriceNormalizer::parsePrice($arTds[8]),
+            total: PriceNormalizer::parsePrice($arTds[9]),
         );
 
         return ['line' => $obLine, 'skip' => null];
