@@ -88,10 +88,9 @@ abstract class GoodsReceivedTestCase extends TestCase
     /**
      * Flush per-test plugin singletons to prevent cross-test bleed.
      *
-     * Phase 1: empty body — no plugin singletons exist yet.
-     * Phase 2/3: each new singleton (Stores, Caches) MUST add a static `flush()`
-     * method and a corresponding line here, e.g.:
-     *     \Logingrupa\GoodsReceivedShopaholic\Classes\Store\InvoiceListStore::flush();
+     * Each new singleton (Accessors, Stores, Caches) MUST add a static `flush()`
+     * method and a corresponding line here. Subsequent Phase 3 plans MAY add
+     * lines but MUST NOT remove the SettingsAccessor::flush() call.
      *
      * Called from tearDown() AFTER flushModelEventListeners() so any model events
      * are detached before singleton state is wiped, and BEFORE parent::tearDown()
@@ -99,7 +98,9 @@ abstract class GoodsReceivedTestCase extends TestCase
      */
     protected function flushPluginSingletons(): void
     {
-        // Phase 1: no singletons yet — populated by Phases 2/3.
+        // Phase 3 plan 03-01 (APPLY-09 / D-03): drop SettingsAccessor's
+        // request-scoped memo cache so the next test starts from a clean read.
+        \Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor::flush();
     }
 
     protected function guessPluginCodeFromTest()
