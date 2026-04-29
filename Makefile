@@ -20,7 +20,7 @@ rector:
 	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/rector process --config=$(PLUGIN_DIR)/rector.php
 
 phpmd:
-	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/phpmd $(PLUGIN_DIR)/classes,$(PLUGIN_DIR)/components,$(PLUGIN_DIR)/console,$(PLUGIN_DIR)/models,$(PLUGIN_DIR)/Plugin.php text $(PLUGIN_DIR)/phpmd.xml
+	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/phpmd $(PLUGIN_DIR)/classes,$(PLUGIN_DIR)/components,$(PLUGIN_DIR)/console,$(PLUGIN_DIR)/controllers,$(PLUGIN_DIR)/models,$(PLUGIN_DIR)/Plugin.php text $(PLUGIN_DIR)/phpmd.xml
 
 pint:
 	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/pint $(PLUGIN_DIR) --config=$(PLUGIN_DIR)/pint.json
@@ -34,9 +34,9 @@ pint-test:
 # Makefile drift or removed CI steps).
 lint-settings-accessor:
 	@echo "==> QA-09 grep gate: Settings::get( must appear only in classes/support/SettingsAccessor.php"
-	@if grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/console $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php' | grep -q .; then \
+	@if grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/console $(PLUGIN_DIR)/controllers $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php' | grep -q .; then \
 		echo "QA-09 VIOLATION: Settings::get( found outside SettingsAccessor.php"; \
-		grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/console $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php'; \
+		grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/console $(PLUGIN_DIR)/controllers $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php'; \
 		exit 1; \
 	fi
 

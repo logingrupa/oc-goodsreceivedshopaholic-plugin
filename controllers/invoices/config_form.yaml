@@ -1,0 +1,10 @@
+name: 'logingrupa.goodsreceivedshopaholic::lang.controller.update_title'
+modelClass: Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+form: $/logingrupa/goodsreceivedshopaholic/models/invoice/fields.yaml
+defaultRedirect: logingrupa/goodsreceivedshopaholic/invoices
+update:
+    title: 'logingrupa.goodsreceivedshopaholic::lang.controller.update_title'
+    redirect: logingrupa/goodsreceivedshopaholic/invoices
+    redirectClose: logingrupa/goodsreceivedshopaholic/invoices
+preview:
+    title: 'logingrupa.goodsreceivedshopaholic::lang.controller.update_title'

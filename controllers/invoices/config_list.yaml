@@ -1,0 +1,33 @@
+title: 'logingrupa.goodsreceivedshopaholic::lang.controller.list_title'
+modelClass: Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+list: $/logingrupa/goodsreceivedshopaholic/models/invoice/columns.yaml
+recordUrl: 'logingrupa/goodsreceivedshopaholic/invoices/update/:id'
+noRecordsMessage: 'backend::lang.list.no_records'
+defaultSort:
+    column: applied_at
+    direction: desc
+showSetup: true
+showCheckboxes: false
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: 'backend::lang.list.search_prompt'
+filter:
+    scopes:
+        status:
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.status'
+            type: group
+            conditions: 'status in (:filtered)'
+            options:
+                parsed: 'Parsed'
+                applied: 'Applied'
+                failed: 'Failed'
+                rejected_duplicate: 'Rejected (duplicate)'
+        country_code:
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.country_code'
+            type: group
+            conditions: 'country_code in (:filtered)'
+            options:
+                no: 'Norway'
+                lv: 'Latvia'
+                lt: 'Lithuania'

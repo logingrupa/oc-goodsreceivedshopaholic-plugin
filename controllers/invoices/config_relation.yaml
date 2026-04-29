@@ -1,0 +1,10 @@
+lines:
+    label: 'logingrupa.goodsreceivedshopaholic::lang.tab.lines'
+    view:
+        list: $/logingrupa/goodsreceivedshopaholic/models/invoiceline/columns.yaml
+        toolbarButtons: ''
+        recordsPerPage: 50
+        showSorting: true
+        showCheckboxes: false
+    manage:
+        list: $/logingrupa/goodsreceivedshopaholic/models/invoiceline/columns.yaml

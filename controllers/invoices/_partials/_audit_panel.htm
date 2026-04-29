@@ -1,0 +1,19 @@
+{#
+  UI-07: Per-import summary metric panel.
+  Renders inline on Invoice update.htm. The form itself is the source of truth for status/counters; this partial is for at-a-glance metrics.
+  Plans 04-05 / 04-06 may extend with override-of pointer + correlation_id.
+#}
+<div class="audit-panel">
+    <h4>Audit</h4>
+    <ul class="metrics">
+        <li>Status: <strong>{{ formModel.status }}</strong></li>
+        <li>Total lines: <strong>{{ formModel.total_lines }}</strong></li>
+        <li>Matched: <strong>{{ formModel.matched_lines }}</strong> / Unmatched: <strong>{{ formModel.unmatched_lines }}</strong></li>
+        <li>Stock added (units): <strong>{{ formModel.stock_added_units }}</strong></li>
+        <li>Applied by user: <strong>{{ formModel.applied_by_user_id ?: '—' }}</strong></li>
+        <li>Applied at: <strong>{{ formModel.applied_at ? formModel.applied_at|date('Y-m-d H:i:s') : '—' }}</strong></li>
+        {% if formModel.override_of_invoice_id %}
+            <li>Override of invoice: <strong>#{{ formModel.override_of_invoice_id }}</strong></li>
+        {% endif %}
+    </ul>
+</div>

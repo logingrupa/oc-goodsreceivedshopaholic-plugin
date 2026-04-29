@@ -184,9 +184,17 @@ class Plugin extends PluginBase
     }
 
     /**
-     * Register backend Settings menu under the Shopaholic settings group.
+     * Register backend Settings menu entries under the Shopaholic settings group.
      *
-     * Lands at: Backend -> Settings -> Goods Received (NOT main nav, per locked decision D6).
+     * Two entries (per UI-05 / D-04 alternative):
+     *   1. `goodsreceived-settings`  -> Settings model form (per-site toggles).
+     *   2. `goodsreceived-invoices`  -> Invoices controller URL (audit history +
+     *      upload UI). Reachable from Settings menu — NOT main nav (D6).
+     *
+     * The second entry uses `url` instead of `class` so October routes the
+     * Settings click through the standard backend controller dispatcher rather
+     * than the Settings model form widget (the controller itself implements
+     * ListController + FormController + RelationController per D-01).
      *
      * @return array<string, array<string, mixed>>
      */
@@ -201,6 +209,15 @@ class Plugin extends PluginBase
                 'icon'        => 'icon-truck',
                 'class'       => Settings::class,
                 'order'       => 500,
+            ],
+            'goodsreceived-invoices' => [
+                'label'       => 'logingrupa.goodsreceivedshopaholic::lang.controller.list_title',
+                'description' => 'logingrupa.goodsreceivedshopaholic::lang.controller.list_description',
+                'category'    => 'lovata.shopaholic::lang.tab.settings',
+                'icon'        => 'icon-truck',
+                'url'         => 'logingrupa/goodsreceivedshopaholic/invoices',
+                'permissions' => ['logingrupa.goodsreceived.upload_invoices'],
+                'order'       => 510,
             ],
         ];
     }

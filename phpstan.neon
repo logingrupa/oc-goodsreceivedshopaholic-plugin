@@ -8,6 +8,7 @@ parameters:
         - classes
         - components
         - console
+        - controllers
         - models
         - Plugin.php
     excludePaths:

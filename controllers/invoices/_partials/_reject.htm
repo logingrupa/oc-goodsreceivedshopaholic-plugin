@@ -1,0 +1,11 @@
+{# Rendered by onUpload when a duplicate invoice_number is detected pre-parse (plan 04-04 / UI-09 / D-16, D-17). Override checkbox + typed gate ship in 04-06. #}
+<div class="alert alert-warning">
+    <h4>Duplicate invoice rejected</h4>
+    <p>Invoice <strong>#{{ rejected.invoice_number }}</strong> was previously applied.</p>
+    <ul>
+        <li>Prior applied at: <strong>{{ rejected.prior_applied_at }}</strong></li>
+        <li>Prior applied by user: <strong>{{ rejected.prior_applied_by ?: '—' }}</strong></li>
+        <li>Prior stock added (units): <strong>{{ rejected.prior_stock_added_units }}</strong></li>
+    </ul>
+    <p class="help-block">Use the Override flow if reapply is intended (plan 04-06).</p>
+</div>
