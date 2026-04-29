@@ -153,67 +153,6 @@ class Invoices extends Controller
     }
 
     /**
-     * AJAX handler: update `override_qty` / `override_reason` on a single
-     * `InvoiceLine` row — UI-03 / D-09. Triggered by data-track-input
-     * bindings on the preview line table inputs. Returns the updated line as
-     * a small JSON payload so operator edits are reflected without a full
-     * preview re-render.
-     *
-     * Validation:
-     *   - `line_id` required, must resolve to an existing InvoiceLine.
-     *   - `override_qty`, when present, must be a non-negative integer.
-     *   - `override_reason`, when present, is trimmed; empty string ⇒ NULL
-     *     (treated as "clear the override reason").
-     *
-     * @return array<string, mixed>
-     *
-     * @throws AjaxException
-     */
-    public function onUpdateLine(): array
-    {
-        $this->assertPermission('logingrupa.goodsreceived.upload_invoices');
-
-        $iLineId = $this->scalarToInt(Input::get('line_id'));
-        if ($iLineId <= 0) {
-            throw new AjaxException(['message' => 'line_id is required.']);
-        }
-
-        $obLine = InvoiceLine::find($iLineId);
-        if (! $obLine instanceof InvoiceLine) {
-            throw new AjaxException(['message' => sprintf('InvoiceLine #%d not found.', $iLineId)]);
-        }
-
-        $bDirty = false;
-        if (Input::has('override_qty')) {
-            $iOverrideQty = $this->scalarToInt(Input::get('override_qty'));
-            if ($iOverrideQty < 0) {
-                throw new AjaxException(['message' => 'override_qty must be non-negative.']);
-            }
-            $obLine->override_qty = $iOverrideQty;
-            $bDirty = true;
-        }
-
-        if (Input::has('override_reason')) {
-            $mReason = Input::get('override_reason');
-            $sReason = is_scalar($mReason) ? trim(strval($mReason)) : '';
-            $obLine->override_reason = $sReason !== '' ? $sReason : null;
-            $bDirty = true;
-        }
-
-        if (! $bDirty) {
-            return ['line_id' => $iLineId, 'noop' => true];
-        }
-
-        $obLine->saveQuietly();
-
-        return [
-            'line_id'         => $iLineId,
-            'override_qty'    => $obLine->override_qty,
-            'override_reason' => $obLine->override_reason,
-        ];
-    }
-
-    /**
      * Per-file processing: validate, dup-gate, parse-+-persist or boundary-catch.
      * Results aggregate into the three caller arrays passed by reference so the
      * single-pass foreach in `onUpload` stays at <70 lines / max-1 nesting.
