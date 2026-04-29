@@ -105,7 +105,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   7. All 4 permissions enforced at controller boundary (`RequiresApplyPermissionTest`, `RequiresUploadPermissionTest`, `RequiresOverridePermissionTest`, `RequiresInitialResetPermissionTest` all green)
   8. Plugin boot logs a warning if PHP `max_file_uploads<20` or `upload_max_filesize<10M`
 
-**Plans**: TBD
+**Plans**: 8 plans
+  - [ ] 04-01-PLAN.md - Plugin boot self-check + parseIniSize() helper (UI-12)
+  - [ ] 04-02-PLAN.md - Console command goodsreceived:recompute_active_from_stock (UI-11)
+  - [ ] 04-03-PLAN.md - Backend controller foundation + audit history list + Invoice attachOne (UI-01 + UI-05 + UI-06 + UI-07)
+  - [ ] 04-04-PLAN.md - onUpload + onUpdateLine + pre-parse duplicate detection (UI-02 + UI-03 + UI-07 + UI-09)
+  - [ ] 04-05-PLAN.md - onApply + Cache::lock debounce + confirmation modal (UI-04)
+  - [ ] 04-06-PLAN.md - Override-and-reimport + initial-reset typed gates (UI-08 + UI-10)
+  - [ ] 04-07-PLAN.md - 4 permission gate tests (QA-10)
+  - [ ] 04-08-PLAN.md - Phase 4 final QA gate; baseline unchanged
 **UI hint**: yes
 
 ### Phase 5: Ops, Lang, Polish, Public Release
