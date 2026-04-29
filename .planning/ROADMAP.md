@@ -36,7 +36,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 4 split permissions (`upload_invoices`, `apply_invoices`, `override_invoices`, `run_initial_reset`) appear in Backend Users -> Roles UI and gate `BackendAuth::userHasAccess()`
   4. `GoodsReceivedTestCase::tearDown()` flushes model event listeners + every singleton's `flush()` so cross-test bleed is impossible (asserted by Pest run with `--parallel` exhibiting no order-dependent failures)
   5. EAN columns are STRING(13) preserving leading zeros; `Invoice.invoice_number` UNIQUE index enforces idempotency at DB layer
-**Plans**: TBD
+**Plans**: 8 plans
+  - [ ] 01-01-PLAN.md - Migrations: create 3 plugin tables + ADDITIVE column-add on lovata_shopaholic_offers + register in version.yaml 1.0.1
+  - [ ] 01-02-PLAN.md - Eloquent models: Invoice + InvoiceLine + InitialResetSnapshot (PHPStan level 10 @property blocks, Validation trait, relations)
+  - [ ] 01-03-PLAN.md - Lang scaffold: en/lv/no/ru lang.php files (extend EN with permission/exception/validation; lv/no/ru EN-stubs per D-19)
+  - [ ] 01-04-PLAN.md - Test fixtures: copy 3 representative HTM files from production uploads to tests/fixtures/invoices/ (hermetic per D-21)
+  - [ ] 01-05-PLAN.md - Settings model + fields.yaml + Plugin::registerSettings() (Multisite trait per D15 reconciliation)
+  - [ ] 01-06-PLAN.md - Plugin::registerPermissions() with 4 split permissions (upload/apply/override/run_initial_reset)
+  - [ ] 01-07-PLAN.md - Test base extension: flushPluginSingletons() hook + QA-07 multisite tests + QA-11 teardown lifecycle test
+  - [ ] 01-08-PLAN.md - Final QA gate: make all (pint-test + analyse + phpmd + test) green; phpstan-baseline.neon unchanged
 
 ### Phase 2: Pure Parsers, DTOs, Exceptions, EAN Matcher
 **Goal**: Convert any real `.HTM` distributor file into a typed `ParsedInvoice` DTO and resolve every line's EAN to an offer (or null) deterministically, with zero side effects outside DB reads
@@ -106,7 +114,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schema, Scaffold, Settings, Permissions | 0/TBD | Not started | - |
+| 1. Schema, Scaffold, Settings, Permissions | 0/8 | Not started | - |
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 0/TBD | Not started | - |
 | 3. Apply Layer + Orchestrators | 0/TBD | Not started | - |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
