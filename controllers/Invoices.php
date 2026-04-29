@@ -21,8 +21,21 @@ use BackendMenu;
  * Registered under Settings menu (NOT main nav per locked decision D6 / D-04).
  * The Settings menu wiring lives in Plugin::registerSettings — TWO entries:
  * one for the Settings model (existing) and one for this controller (UI-05).
+ *
+ * Boundary note (D-04-04-01 / mirror of D-03-07-01 + D-04-02-01): NOT marked
+ * `final` so the controller-level `makePartial` rendering seam can be
+ * overridden by a `TestableInvoices` shim in Pest unit tests
+ * (`tests/unit/Controllers/UploadHandlerTest.php`). Backend\Classes\Controller
+ * itself is not final; the rendering pipeline (route → view registrar → Twig)
+ * cannot be stood up under SQLite-in-memory unit-test bootstrap, so a
+ * deterministic capture-string return from a subclass is the cleanest seam.
+ * Production code never subclasses — October's backend dispatcher always
+ * routes to this leaf class.
+ *
+ * @internal The class behaves as if final at the production-code boundary.
+ *           Subclassing is sanctioned ONLY for unit-test partial-rendering shims.
  */
-final class Invoices extends Controller
+class Invoices extends Controller
 {
     /** @var list<string> */
     public $implement = [

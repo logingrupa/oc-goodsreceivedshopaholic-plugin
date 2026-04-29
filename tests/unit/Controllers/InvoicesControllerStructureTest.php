@@ -44,10 +44,13 @@ it('controller class exists in the canonical namespace', function (): void {
     expect(class_exists(Invoices::class))->toBeTrue();
 });
 
-it('controller extends Backend\\Classes\\Controller and is final', function (): void {
+it('controller extends Backend\\Classes\\Controller (final removed in 04-04 for boundary-mock — D-04-04-01)', function (): void {
     $obReflection = new \ReflectionClass(Invoices::class);
-    expect($obReflection->isFinal())->toBeTrue();
     expect($obReflection->getParentClass()?->getName())->toBe('Backend\\Classes\\Controller');
+    // `final` was removed in plan 04-04 to enable a TestableInvoices shim
+    // for Pest unit tests of the AJAX handlers (mirrors D-03-07-01 +
+    // D-04-02-01 precedent for ImportAuditService + ActiveFlagService
+    // boundary-mock support).
 });
 
 it('controller implements ListController + FormController + RelationController behaviors', function (): void {
