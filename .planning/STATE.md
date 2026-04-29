@@ -42,7 +42,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |---|---|---|---|
-| — | — | — | — |
+| Phase 2 | 1 (02-04) | 2m 52s | 2m 52s |
 
 **Recent Trend:**
 
@@ -80,8 +80,8 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Phase 1 complete; Phase 2 ready (Pure Parsers, DTOs, Exceptions, EAN Matcher)
-Resume file: `.planning/phases/02-pure-parsers-dtos-exceptions-ean-matcher/02-CONTEXT.md` (TBD)
+Stopped at: Phase 2 plan 02-04 complete (PARSE-04 closed). Next: plan 02-05 HtmInvoiceParser.
+Resume file: `.planning/phases/02-pure-parsers-dtos-exceptions-ean-matcher/02-04-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
 - Run `php artisan october:up` on a dev/staging server, confirm 3 plugin tables + offers.active_managed_by column appear with default 'system'

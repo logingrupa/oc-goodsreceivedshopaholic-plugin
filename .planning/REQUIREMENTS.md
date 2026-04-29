@@ -33,7 +33,7 @@
 - [ ] **PARSE-01**: PHP 8.4 readonly DTOs in `classes/dto/`: `ParsedInvoice` (header + lines), `ParsedLine` (row_index, ean, product_name_raw, qty, unit_price), `MatchedLine` (line + matched_offer_id + match_strategy), `ApplyResult` (units_added, offers_touched, lines_applied, lines_skipped). Immutable, fully typed.
 - [ ] **PARSE-02**: Typed exceptions in `classes/exception/`: `InvoiceNumberMissingException`, `DuplicateInvoiceException`, `InvalidEanException`, `InvalidQuantityException`, `ApplyAlreadyDoneException`, `InitialResetNotAllowedException`, `OperatorOverridesActiveFlagException`, `MalformedHtmException`. All extend `GoodsReceivedException`.
 - [ ] **PARSE-03**: `classes/parser/HtmInvoiceParser` — pure (no DB, no IO beyond input string). Uses `DOMDocument::loadHTML()` with BOM strip + `libxml_use_internal_errors(true)`. XPath extracts `<TR class="R20|R21">` rows handling unquoted `CLASS=R20` (verified in real fixtures), CRLF, UTF-8 BOM. Returns `ParsedInvoice` DTO.
-- [ ] **PARSE-04**: `classes/parser/InvoiceNumberResolver` — pure. Body match first; filename pattern `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM` fallback; throws `InvoiceNumberMissingException` if neither yields number.
+- [x] **PARSE-04**: `classes/parser/InvoiceNumberResolver` — pure. Body match first; filename pattern `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM` fallback; throws `InvoiceNumberMissingException` if neither yields number. *(2026-04-29: closed by plan 02-04 — 11 tests / 34 assertions, all 3 hermetic fixtures pinned, PHPStan L10 + Pint green)*
 - [ ] **PARSE-05**: `classes/parser/QuantityNormalizer` — pure. `parseQuantity(string): int` throws `InvalidQuantityException` on non-integer (including decimal-comma `5,12`). Strict validation BEFORE Eloquent's silent `setQuantityAttribute` int-clamp can silently lose stock.
 - [ ] **PARSE-06**: `classes/parser/PriceNormalizer` — pure. Decimal-comma normalizer for unit_price/discount/total columns ONLY (not qty). Returns float or null.
 - [ ] **PARSE-07**: `tests/fixtures/invoices/` contains 3 representative real `.HTM` files copied from `storage/app/uploads/invoices/`. Hermetic — parser tests never read outside `tests/`.
@@ -160,7 +160,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | PARSE-01 | Phase 2 | Pending |
 | PARSE-02 | Phase 2 | Pending |
 | PARSE-03 | Phase 2 | Pending |
-| PARSE-04 | Phase 2 | Pending |
+| PARSE-04 | Phase 2 | Closed (2026-04-29) — plan 02-04 |
 | PARSE-05 | Phase 2 | Pending |
 | PARSE-06 | Phase 2 | Pending |
 | PARSE-07 | Phase 2 | Pending |

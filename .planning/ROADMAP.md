@@ -62,7 +62,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [ ] 02-01-PLAN.md - DTOs: ParsedInvoice + ParsedLine + MatchedLine + ApplyResult (final readonly classes; locks Phase 2/3 data contract)
   - [ ] 02-02-PLAN.md - Exceptions: abstract GoodsReceivedException + 8 typed subclasses (polymorphic catch + log-injection-safe context)
   - [ ] 02-03-PLAN.md - Normalizers: QuantityNormalizer (rejects decimal qty BEFORE Eloquent int-clamp) + PriceNormalizer (audit-only)
-  - [ ] 02-04-PLAN.md - InvoiceNumberResolver: body-marker regex + filename pattern fallback + throw on miss
+  - [x] 02-04-PLAN.md - InvoiceNumberResolver: body-marker regex + filename pattern fallback + throw on miss *(closed 2026-04-29)*
   - [ ] 02-05-PLAN.md - HtmInvoiceParser: DOMDocument + XPath + BOM strip + LIBXML_NONET; 5 QA-01 real-fixture pin tests
   - [ ] 02-06-PLAN.md - EanMatcherService: exactly TWO queries (offer.code → product.code single-offer); QA-02 leading-zero EAN preservation
   - [ ] 02-07-PLAN.md - Phase 2 final QA gate: make all (pint-test + phpstan level 10 + phpmd + pest); baseline unchanged
