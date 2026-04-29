@@ -31,6 +31,21 @@ abstract class ApplyTestCase extends GoodsReceivedTestCase
     {
         parent::setUp();
 
+        // System settings — required by tests that drive plugin Settings via
+        // `Settings::set(...)` (e.g. ActiveFlagService reading SettingsAccessor
+        // toggles). Same hermetic-slice pattern as `SettingsAccessorTestCase`:
+        // SettingModel writes here through the Multisite trait, so site_id /
+        // site_root_id / site_group_id columns are nullable to permit single-
+        // site test saves.
+        \Schema::create('system_settings', function ($obTable): void {
+            $obTable->increments('id');
+            $obTable->string('item')->nullable()->index();
+            $obTable->mediumtext('value')->nullable();
+            $obTable->unsignedInteger('site_id')->nullable();
+            $obTable->unsignedInteger('site_root_id')->nullable();
+            $obTable->unsignedInteger('site_group_id')->nullable();
+        });
+
         \Schema::create('lovata_shopaholic_products', function ($obTable): void {
             $obTable->increments('id');
             $obTable->string('code')->nullable();
@@ -106,6 +121,7 @@ abstract class ApplyTestCase extends GoodsReceivedTestCase
         \Schema::dropIfExists('logingrupa_goods_received_invoices');
         \Schema::dropIfExists('lovata_shopaholic_offers');
         \Schema::dropIfExists('lovata_shopaholic_products');
+        \Schema::dropIfExists('system_settings');
         parent::tearDown();
     }
 }
