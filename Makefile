@@ -2,7 +2,7 @@ PROJECT_ROOT := $(shell cd ../../.. && pwd)
 PLUGIN_DIR := $(shell pwd)
 VENDOR_BIN := $(PROJECT_ROOT)/vendor/bin
 
-.PHONY: test analyse baseline rector-dry rector phpmd pint lint all
+.PHONY: test analyse baseline rector-dry rector phpmd pint pint-test lint-settings-accessor all
 
 test:
 	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/pest --configuration $(PLUGIN_DIR)/phpunit.xml
@@ -28,4 +28,16 @@ pint:
 pint-test:
 	cd $(PROJECT_ROOT) && $(VENDOR_BIN)/pint $(PLUGIN_DIR) --config=$(PLUGIN_DIR)/pint.json --test
 
-all: pint-test analyse phpmd test
+# QA-09: Settings::get( must appear only in classes/support/SettingsAccessor.php.
+# Mirrored by tests/unit/Support/SettingsAccessorIsSoleConsumerOfSettingsGetTest.php
+# (defense-in-depth — either gate alone is sufficient; both together survive
+# Makefile drift or removed CI steps).
+lint-settings-accessor:
+	@echo "==> QA-09 grep gate: Settings::get( must appear only in classes/support/SettingsAccessor.php"
+	@if grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php' | grep -q .; then \
+		echo "QA-09 VIOLATION: Settings::get( found outside SettingsAccessor.php"; \
+		grep -rn 'Settings::get(' $(PLUGIN_DIR)/classes $(PLUGIN_DIR)/components $(PLUGIN_DIR)/models $(PLUGIN_DIR)/Plugin.php 2>/dev/null | grep -v 'classes/support/SettingsAccessor.php'; \
+		exit 1; \
+	fi
+
+all: pint-test lint-settings-accessor analyse phpmd test
