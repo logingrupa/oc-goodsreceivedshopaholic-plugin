@@ -1,0 +1,29 @@
+# Goods Received Notes — backend Settings field definitions.
+# Each switch persists per-site via October Rain's Multisite trait on the Settings model.
+# All defaults are OFF (operator must opt-in to each behavior).
+# Labels resolve via lang keys defined in lang/{en,lv,no,ru}/lang.php under `field.*`.
+
+fields:
+    enabled:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.field.enabled'
+        commentAbove: 'logingrupa.goodsreceivedshopaholic::lang.field.enabled_comment'
+        type: switch
+        default: false
+
+    auto_deactivate_on_zero:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.field.auto_deactivate_on_zero'
+        commentAbove: 'logingrupa.goodsreceivedshopaholic::lang.field.auto_deactivate_on_zero_comment'
+        type: switch
+        default: false
+
+    auto_activate_on_stock:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.field.auto_activate_on_stock'
+        commentAbove: 'logingrupa.goodsreceivedshopaholic::lang.field.auto_activate_on_stock_comment'
+        type: switch
+        default: false
+
+    allow_initial_reset:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.field.allow_initial_reset'
+        commentAbove: 'logingrupa.goodsreceivedshopaholic::lang.field.allow_initial_reset_comment'
+        type: switch
+        default: false
