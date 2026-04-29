@@ -13,6 +13,16 @@ namespace Logingrupa\GoodsReceivedShopaholic\Classes\Dto;
  * in dedicated normalizer classes (QuantityNormalizer / PriceNormalizer in
  * plan 02-03). EAN is preserved as STRING so leading zeros survive (D-27).
  *
+ * Field names `ean` and `qty` are canonical domain terms from the distributor
+ * invoice schema (PROJECT.md / captures) — EAN is the GS1 industry standard
+ * for the 13-digit barcode; qty matches Shopaholic `offers.quantity` semantics.
+ * Renaming is rejected: `ean` → `code` would collide with `offers.code` (the
+ * product SKU), and `qty` → `quantity` is verbose without disambiguation gain.
+ *
+ * Note: PHPMD ShortVariable (min 4) and ExcessiveParameterList (max 8) thresholds
+ * are tuned in phpmd.xml to accommodate this DTO — see `goodsreceivedshopaholic`
+ * project notes (Phase 2 plan 02-07 QA gate).
+ *
  * @property-read int $row_index
  * @property-read string $ean
  * @property-read string $product_name_raw
