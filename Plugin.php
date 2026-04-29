@@ -6,6 +6,7 @@ namespace Logingrupa\GoodsReceivedShopaholic;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Logingrupa\GoodsReceivedShopaholic\Console\RecomputeActiveFromStock;
 use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 use System\Classes\PluginBase;
 
@@ -38,6 +39,29 @@ class Plugin extends PluginBase
             'author'      => 'Logingrupa',
             'icon'        => 'icon-truck',
         ];
+    }
+
+    /**
+     * Register method, called when the plugin is first registered (UI-11 / D-33).
+     *
+     * Wires the artisan console command `goodsreceived:recompute_active_from_stock`
+     * which reconciles every offer's `active` flag from current `quantity` while
+     * honoring the `active_managed_by='operator'` provenance gate. See
+     * `console/RecomputeActiveFromStock.php` for the contract details.
+     *
+     * The first argument to `registerConsoleCommand` is October's IoC binding
+     * key (dotted alias — matches the `storeextender.sqlimport` style); the
+     * artisan dispatcher consumes the command's own `$signature` property
+     * which carries the colon-separated `goodsreceived:recompute_active_from_stock`
+     * name.
+     */
+    #[\Override]
+    public function register(): void
+    {
+        $this->registerConsoleCommand(
+            'goodsreceived:recompute_active_from_stock',
+            RecomputeActiveFromStock::class,
+        );
     }
 
     /**
