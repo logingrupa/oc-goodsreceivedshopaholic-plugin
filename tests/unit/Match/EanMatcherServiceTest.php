@@ -66,6 +66,9 @@ abstract class EanMatcherTestCase extends GoodsReceivedTestCase
             $obTable->string('name');
             $obTable->boolean('active')->default(true);
             $obTable->integer('quantity')->default(0);
+            // Lovata\Shopaholic\Models\Offer uses October's Sortable trait,
+            // which orders queries by `sort_order` and writes back on save.
+            $obTable->integer('sort_order')->default(0);
             $obTable->timestamps();
             $obTable->softDeletes();
             $obTable->index('code');
@@ -86,6 +89,11 @@ uses(EanMatcherTestCase::class);
 /**
  * Seed a minimum-viable Product row for matcher tests. Lovata Product requires
  * `name` + `slug` (slug unique). `code` is the column the matcher queries.
+ *
+ * Uses `saveQuietly()` to skip Lovata's model event handlers (afterSave hooks
+ * load `main_price` / multisite relations from tables our hermetic schema
+ * doesn't provide). The matcher only ever issues SELECT against `code` /
+ * `id` / `product_id`, so quiet save is safe.
  */
 function seedProduct(string $sCode, string $sSlug): Product
 {
@@ -94,7 +102,7 @@ function seedProduct(string $sCode, string $sSlug): Product
     $obProduct->slug = $sSlug;
     $obProduct->code = $sCode;
     $obProduct->active = true;
-    $obProduct->save();
+    $obProduct->saveQuietly();
 
     return $obProduct;
 }
@@ -102,6 +110,10 @@ function seedProduct(string $sCode, string $sSlug): Product
 /**
  * Seed a minimum-viable Offer row attached to a Product. Lovata Offer requires
  * `name`. `code` is the EAN-bearing column queried by `Pass 1`.
+ *
+ * Uses `saveQuietly()` for the same reason as `seedProduct()` — Offer's
+ * `afterSave` queries `lovata_shopaholic_prices` which is intentionally
+ * absent from the hermetic schema.
  */
 function seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer'): Offer
 {
@@ -110,7 +122,7 @@ function seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer
     $obOffer->name = $sName;
     $obOffer->code = $sCode;
     $obOffer->active = true;
-    $obOffer->save();
+    $obOffer->saveQuietly();
 
     return $obOffer;
 }
@@ -195,19 +207,6 @@ it('returns offer_code strategy for direct offer match', function (): void {
     expect($arResult['4752307000097']['match_strategy'])->toBe('offer_code');
     expect($arResult['4752307000097']['matched_offer_id'])->toBe((int) $obOffer->id);
 });
-
-it('returns product_code_single_offer when product matches and has exactly one offer', function (): void {
-    // Product code IS the EAN; product has ONE offer with a different code.
-    $obProduct = seedProduct('UNIQUE_PRODUCT_CODE', 'prod-single');
-    $obOffer = seedOffer($obProduct->id, 'OFFER-INNER-CODE');
-
-    $arResult = (new EanMatcherService())->matchBatch(['UNIQUE_PRODUCT_CODE']);
-
-    // Wait — UNIQUE_PRODUCT_CODE is not 13 digits — would be rejected at
-    // assertAllEansValid boundary. Skip this assertion path; instead use a
-    // 13-digit code-as-EAN.
-    expect(true)->toBeTrue();
-})->skip('UNIQUE_PRODUCT_CODE is not 13 digits; covered by 13-digit variant below');
 
 it('returns product_code_single_offer when product matches with 13-digit EAN code and has exactly one offer', function (): void {
     $obProduct = seedProduct('1234567890123', 'prod-single-13d');
