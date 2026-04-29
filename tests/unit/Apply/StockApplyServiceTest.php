@@ -187,10 +187,12 @@ it('returns StockApplyOutcome with correct ApplyResult shape and affected_offer_
     expect($obOutcome->result->lines_applied)->toBe(3);
     expect($obOutcome->result->lines_skipped)->toBe(0);
 
-    sort($obOutcome->affected_offer_ids);
+    // Copy the readonly list before sorting (PHP forbids in-place mutation).
+    $arActual = $obOutcome->affected_offer_ids;
+    sort($arActual);
     $arExpected = [(int) $obOfferA->id, (int) $obOfferB->id];
     sort($arExpected);
-    expect($obOutcome->affected_offer_ids)->toBe($arExpected);
+    expect($arActual)->toBe($arExpected);
     // Dedup proof: 3 lines, 2 offers, list length = 2.
     expect($obOutcome->affected_offer_ids)->toHaveCount(2);
 });

@@ -6,8 +6,10 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\StockApplyService;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Lovata\Shopaholic\Classes\Item\OfferItem;
+use Lovata\Shopaholic\Classes\Store\Offer\ActiveListStore as OfferActiveListStore;
+use Lovata\Shopaholic\Classes\Store\Offer\SortingListStore as OfferSortingListStore;
 use Lovata\Shopaholic\Classes\Store\OfferListStore;
-use Lovata\Shopaholic\Classes\Store\ProductListStore;
+use Lovata\Shopaholic\Classes\Store\Product\ActiveListStore as ProductActiveListStore;
 use Lovata\Shopaholic\Models\Offer;
 
 require_once __DIR__.'/ApplyTestCase.php';
@@ -35,29 +37,29 @@ uses(ApplyTestCase::class);
  * an unbounded loop bug regresses this from "constant" to "linear" instantly,
  * the test goes red, the regression is caught at CI gate.
  *
- * Spy mechanism: each Lovata `OfferListStore::instance()` and
- * `ProductListStore::instance()` exposes its sub-stores via the protected
- * `arStoreList` property. We replace each with a Mockery spy via reflection,
- * call apply + flushAffectedCaches, and assert counters. tearDown forgets
- * the singleton instance via `Singleton::forgetInstance()` (October Rain) so
- * the spy state never leaks into another test.
+ * Spy mechanism: each Lovata sub-store (`OfferActiveListStore`,
+ * `OfferSortingListStore`, `ProductActiveListStore`) is its own singleton via
+ * the October Rain `Singleton` trait. The trait's `static::$instance` static
+ * property is `protected`; we replace it with a Mockery spy via reflection
+ * BEFORE calling `flushAffectedCaches()` so the service's call to
+ * `OfferActiveListStore::instance()` returns the spy. tearDown calls
+ * `forgetInstance()` on each so the spy never leaks into another test.
  */
-function spyOnListStore(object $obStore, string $sFieldName, object $obSpy): void
+function injectSingletonSpy(string $sLeafClass, object $obSpy): void
 {
-    $obReflection = new \ReflectionClass($obStore);
-    $obProp = $obReflection->getProperty('arStoreList');
+    $obReflection = new \ReflectionClass($sLeafClass);
+    $obProp = $obReflection->getProperty('instance');
     $obProp->setAccessible(true);
-
-    /** @var array<string, mixed> $arStoreList */
-    $arStoreList = $obProp->getValue($obStore);
-    $arStoreList[$sFieldName] = $obSpy;
-    $obProp->setValue($obStore, $arStoreList);
+    // The trait property is static; null instance → setValue(null, $obSpy).
+    $obProp->setValue(null, $obSpy);
 }
 
 afterEach(function (): void {
-    // Forget singletons so spies don't leak. Next test rebuilds via init().
-    OfferListStore::forgetInstance();
-    ProductListStore::forgetInstance();
+    // Forget singletons so the spy state never leaks. Next test rebuilds
+    // each instance fresh via the trait's lazy `instance()` factory.
+    OfferActiveListStore::forgetInstance();
+    OfferSortingListStore::forgetInstance();
+    ProductActiveListStore::forgetInstance();
     \Mockery::close();
 });
 
@@ -100,15 +102,18 @@ it('200-line apply triggers ≤ 5 list-store cache flushes (QA-04 — saveQuietl
         $obLine->saveQuietly();
     }
 
-    // Install spies on the singleton sub-stores. Mockery::spy returns a
-    // null-object that records every method call without throwing.
-    $obSpyOfferActive = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Offer\ActiveListStore::class);
-    $obSpyOfferSorting = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Offer\SortingListStore::class);
-    $obSpyProductActive = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Product\ActiveListStore::class);
+    // Install spies on the leaf-singleton static::$instance slots. Mockery
+    // ::spy returns a null-object that records every method call without
+    // throwing. Each leaf class (Offer\ActiveListStore, Offer\SortingListStore,
+    // Product\ActiveListStore) is its own Singleton trait user, so injecting
+    // into the static::$instance slot intercepts every `::instance()` call.
+    $obSpyOfferActive = \Mockery::spy(OfferActiveListStore::class);
+    $obSpyOfferSorting = \Mockery::spy(OfferSortingListStore::class);
+    $obSpyProductActive = \Mockery::spy(ProductActiveListStore::class);
 
-    spyOnListStore(OfferListStore::instance(), 'active', $obSpyOfferActive);
-    spyOnListStore(OfferListStore::instance(), 'sorting', $obSpyOfferSorting);
-    spyOnListStore(ProductListStore::instance(), 'active', $obSpyProductActive);
+    injectSingletonSpy(OfferActiveListStore::class, $obSpyOfferActive);
+    injectSingletonSpy(OfferSortingListStore::class, $obSpyOfferSorting);
+    injectSingletonSpy(ProductActiveListStore::class, $obSpyProductActive);
 
     // Run the apply + post-commit flush sequence the orchestrator (03-07) will use.
     $obService = new StockApplyService();
@@ -155,13 +160,13 @@ it('200-line apply triggers ≤ 5 list-store cache flushes (QA-04 — saveQuietl
 });
 
 it('flushAffectedCaches with empty offer-id list is a no-op (orchestrator safety)', function (): void {
-    $obSpyOfferActive = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Offer\ActiveListStore::class);
-    $obSpyOfferSorting = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Offer\SortingListStore::class);
-    $obSpyProductActive = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Product\ActiveListStore::class);
+    $obSpyOfferActive = \Mockery::spy(OfferActiveListStore::class);
+    $obSpyOfferSorting = \Mockery::spy(OfferSortingListStore::class);
+    $obSpyProductActive = \Mockery::spy(ProductActiveListStore::class);
 
-    spyOnListStore(OfferListStore::instance(), 'active', $obSpyOfferActive);
-    spyOnListStore(OfferListStore::instance(), 'sorting', $obSpyOfferSorting);
-    spyOnListStore(ProductListStore::instance(), 'active', $obSpyProductActive);
+    injectSingletonSpy(OfferActiveListStore::class, $obSpyOfferActive);
+    injectSingletonSpy(OfferSortingListStore::class, $obSpyOfferSorting);
+    injectSingletonSpy(ProductActiveListStore::class, $obSpyProductActive);
 
     $obService = new StockApplyService();
     $obService->flushAffectedCaches([]);
@@ -186,10 +191,19 @@ it('flushAffectedCaches calls OfferItem::clearCache exactly once per affected of
     $obOffer1 = seedApplyOffer($obProduct->id, '4752307001001', iQuantity: 0);
     $obOffer2 = seedApplyOffer($obProduct->id, '4752307001002', iQuantity: 0);
 
-    // Spy on list stores so we can verify item-cache loop is bounded by the
-    // offer-id list, not by some accidental per-line iteration.
-    $obSpyOfferActive = \Mockery::spy(\Lovata\Shopaholic\Classes\Store\Offer\ActiveListStore::class);
-    spyOnListStore(OfferListStore::instance(), 'active', $obSpyOfferActive);
+    // Spy on the OfferActiveListStore singleton so we can verify the
+    // item-cache loop is bounded by the offer-id list, not by some
+    // accidental per-line iteration.
+    $obSpyOfferActive = \Mockery::spy(OfferActiveListStore::class);
+    injectSingletonSpy(OfferActiveListStore::class, $obSpyOfferActive);
+    // ProductListStore::active needs spying too because flushAffectedCaches
+    // touches it; without injecting a spy the real call dispatches a SQL
+    // query against the deleted_at column, which is fine, but we keep the
+    // surface clean by spying on it as well.
+    $obSpyProductActive = \Mockery::spy(ProductActiveListStore::class);
+    injectSingletonSpy(ProductActiveListStore::class, $obSpyProductActive);
+    $obSpyOfferSorting = \Mockery::spy(OfferSortingListStore::class);
+    injectSingletonSpy(OfferSortingListStore::class, $obSpyOfferSorting);
 
     $obService = new StockApplyService();
     $obService->flushAffectedCaches([(int) $obOffer1->id, (int) $obOffer2->id]);

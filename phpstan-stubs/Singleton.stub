@@ -1,0 +1,39 @@
+<?php
+
+namespace October\Rain\Support\Traits;
+
+/**
+ * Stub for `October\Rain\Support\Traits\Singleton::instance()`.
+ *
+ * The upstream trait method has no return type annotation but its body
+ * returns `static::$instance` (typed `?static`). Without the stub PHPStan
+ * level 10 sees the call site as `mixed` and rejects every chained method
+ * call on a singleton instance — even though every concrete user of the
+ * trait carries the static-return guarantee at runtime.
+ *
+ * This stub does NOT change behavior; it only gives PHPStan the static-self
+ * return type it cannot infer from the untyped trait. Per PHPStan docs, stub
+ * files are the sanctioned way to declare types for untyped third-party code
+ * (https://phpstan.org/user-guide/stub-files). Distinct from `@var`/`assert`
+ * suppression — this is a project-wide type declaration external to call sites.
+ */
+trait Singleton
+{
+    /** @var ?static */
+    protected static $instance;
+
+    /**
+     * @return static
+     */
+    final public static function instance() {}
+
+    final public static function forgetInstance(): void {}
+
+    final protected function __construct() {}
+
+    protected function init(): void {}
+
+    public function __clone(): void {}
+
+    public function __wakeup(): void {}
+}

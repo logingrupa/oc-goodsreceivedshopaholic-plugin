@@ -16,5 +16,21 @@ parameters:
         - assets
     tmpDir: ../../../storage/temp/phpstan/goodsreceived
 
+    # Stub for October\Rain\Support\Traits\Singleton::instance() — the
+    # upstream trait method has no return-type declaration; the stub gives
+    # PHPStan the `static`-self return so chained calls on Lovata Singleton
+    # users (Stores, Helpers, ItemStorage) type-check without inline @var
+    # decorations. Sanctioned mechanism per PHPStan docs / user guide.
+    stubFiles:
+        - phpstan-stubs/Singleton.stub
+
     universalObjectCratesClasses:
         - Lovata\Toolbox\Classes\Item\ElementItem
+        # Lovata Shopaholic models behave as property crates (Eloquent magic
+        # properties). Larastan cannot infer column-typed attributes from
+        # upstream models without docblock annotations PHPStan trusts. The
+        # Apply layer (plan 03-03) reads `Offer.quantity` and Phase 3+
+        # services may extend to Product as well — both are added here so
+        # the runtime-correct attribute access is statically accepted.
+        - Lovata\Shopaholic\Models\Offer
+        - Lovata\Shopaholic\Models\Product
