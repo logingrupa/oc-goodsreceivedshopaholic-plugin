@@ -1,4 +1,6 @@
-{# Placeholder; populated by 04-04 onUpload + 04-05 onApply. Provides the body for the AJAX-rendered preview screen. #}
-<div id="invoicePreviewWrap" class="preview-wrap">
-    <p class="empty">No preview available — upload .HTM files to generate one.</p>
-</div>
+{# UI-02 / UI-03 / UI-09: upload + preview screen entry point.
+   Mounts the upload widget plus the three AJAX-target containers
+   (#invoiceUploadErrors / #invoiceRejectWrap / #invoicePreviewWrap) — the
+   onUpload handler returns matching selectors so each section refreshes
+   independently. #}
+<?= $this->makePartial('_partials/_upload_form') ?>

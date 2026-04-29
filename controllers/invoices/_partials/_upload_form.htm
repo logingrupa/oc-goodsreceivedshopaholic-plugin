@@ -1,0 +1,24 @@
+{# UI-02 (D-05 / D-06 / D-07): multi-file .HTM upload widget.
+   The native <input type="file" multiple> + October's data-request="onUpload"
+   data-request-files attribute together drive the AJAX submit; backend's
+   FileUpload widget is reserved for the Settings sidebar use-case. The three
+   AJAX-target containers (#invoiceUploadErrors / #invoiceRejectWrap /
+   #invoicePreviewWrap) update independently per the response selectors
+   returned by onUpload. #}
+<?= Form::open(['files' => true]) ?>
+    <div class="form-group">
+        <label>Upload .HTM delivery receipts</label>
+        <input type="file"
+               name="files[]"
+               accept=".htm,.HTM"
+               multiple
+               data-request="onUpload"
+               data-request-files
+               data-request-loading=".upload-progress">
+    </div>
+    <div class="upload-progress" style="display:none;">Uploading…</div>
+<?= Form::close() ?>
+
+<div id="invoiceUploadErrors"></div>
+<div id="invoiceRejectWrap"></div>
+<div id="invoicePreviewWrap"></div>

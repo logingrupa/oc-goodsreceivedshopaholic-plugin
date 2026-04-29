@@ -1,0 +1,63 @@
+{# UI-03 / UI-07 (D-08, D-09, D-10): preview screen line-by-line table for each
+   uploaded invoice. Shows row_index / EAN / product_name / qty / match_strategy /
+   matched offer; per-line override_qty + override_reason inputs trigger the
+   onUpdateLine AJAX handler via October's data-track-input. The Apply button at
+   the bottom invokes the onApply handler shipped in plan 04-05 (popup
+   confirmation modal). #}
+{% if invoices|length > 0 %}
+    {% for preview in invoices %}
+        <div class="invoice-preview" data-invoice-id="{{ preview.invoice.id }}">
+            {{ this.makePartial('_partials/_summary_panel', preview) }}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Row #</th>
+                        <th>EAN</th>
+                        <th>Product name</th>
+                        <th>Qty</th>
+                        <th>Override qty</th>
+                        <th>Override reason</th>
+                        <th>Match strategy</th>
+                        <th>Matched offer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in preview.lines %}
+                        <tr class="{{ line.matched_offer_id ? 'matched' : 'unmatched' }}" data-line-id="{{ line.id }}">
+                            <td>{{ line.row_index }}</td>
+                            <td>{{ line.ean }}</td>
+                            <td>{{ line.product_name_raw }}</td>
+                            <td>{{ line.qty }}</td>
+                            <td>
+                                <input type="number"
+                                       min="0"
+                                       value="{{ line.override_qty|default('') }}"
+                                       data-request="onUpdateLine"
+                                       data-request-data="line_id: {{ line.id }}"
+                                       data-track-input
+                                       name="override_qty">
+                            </td>
+                            <td>
+                                <input type="text"
+                                       value="{{ line.override_reason|default('') }}"
+                                       data-request="onUpdateLine"
+                                       data-request-data="line_id: {{ line.id }}"
+                                       data-track-input
+                                       name="override_reason">
+                            </td>
+                            <td>{{ line.match_strategy }}</td>
+                            <td>{{ line.matched_offer_id|default('—') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="button"
+                    class="btn btn-primary"
+                    data-control="popup"
+                    data-handler="onApplyShowConfirm"
+                    data-request-data="invoice_id: {{ preview.invoice.id }}">
+                Apply to stock
+            </button>
+        </div>
+    {% endfor %}
+{% endif %}

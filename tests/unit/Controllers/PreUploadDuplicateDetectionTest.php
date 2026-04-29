@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Controllers\Invoices;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 
 require_once __DIR__.'/../Apply/ApplyTestCase.php';
-require_once __DIR__.'/UploadHandlerTest.php';
+require_once __DIR__.'/InvoiceUploadTestHelpers.php';
 
 uses(ApplyTestCase::class);
 
@@ -97,31 +96,15 @@ it('returns null for filenames that do not match the pattern (D-16 fallthrough)'
 it('short-circuits parse when prior applied invoice exists (UI-09 happy path)', function (): void {
     $obPrior = seedPriorAppliedInvoice('PRO033328', iStockAdded: 105, iAppliedBy: 42);
 
-    // Bind a tracking orchestrator: if the gate is honored, this NEVER fires.
-    $iOrchestratorCalls = 0;
-    \App::bind(ParseAndPersistOrchestrator::class, function () use (&$iOrchestratorCalls) {
-        return new class($iOrchestratorCalls) extends ParseAndPersistOrchestrator
-        {
-            public function __construct(private int &$iCalls)
-            {
-                parent::__construct();
-            }
-
-            public function run(string $sHtmlContent, string $sSourceFilename, int $iAppliedByUserId): Invoice
-            {
-                $this->iCalls++;
-
-                return parent::run($sHtmlContent, $sSourceFilename, $iAppliedByUserId);
-            }
-        };
-    });
-
     $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
     $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
     $arResponse = $obController->onUpload();
 
-    // Orchestrator was NOT invoked.
-    expect($iOrchestratorCalls)->toBe(0);
+    // Orchestrator was NEVER resolved — the dup-gate short-circuit returned
+    // before processSingleUpload reached the parse path. Counter pin
+    // proves the optimization (D-16) is honored: zero parser invocations,
+    // zero file reads, zero transaction overhead.
+    expect($obController->iOrchestratorResolvedCount)->toBe(0);
 
     // Reject partial captured prior invoice context.
     expect($arResponse)->toHaveKey('#invoiceRejectWrap');
@@ -161,37 +144,16 @@ it('does NOT short-circuit when prior status is parsed (gate is applied-only)', 
     $obPrior->parsed_at = Carbon::now()->subHour();
     $obPrior->saveQuietly();
 
-    $iOrchestratorCalls = 0;
-    \App::bind(ParseAndPersistOrchestrator::class, function () use (&$iOrchestratorCalls) {
-        return new class($iOrchestratorCalls) extends ParseAndPersistOrchestrator
-        {
-            public function __construct(private int &$iCalls)
-            {
-                parent::__construct();
-            }
-
-            public function run(string $sHtmlContent, string $sSourceFilename, int $iAppliedByUserId): Invoice
-            {
-                $this->iCalls++;
-                // Throw to keep this test isolated from the orchestrator's
-                // own duplicate detection — we ONLY assert the gate did not
-                // short-circuit. The throw routes to per-file error array
-                // (boundary catch) but NEVER to the reject partial.
-                throw new \Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException(
-                    'Test-only sentinel: gate-passed branch reached the parser.',
-                    [],
-                );
-            }
-        };
-    });
-
     $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
     $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
     $obController->onUpload();
 
-    // The gate did NOT short-circuit — orchestrator was reached (then threw
-    // the sentinel error, which is caught and routed to errors, not rejects).
-    expect($iOrchestratorCalls)->toBe(1);
+    // The gate did NOT short-circuit — orchestrator WAS resolved. Counter
+    // proves the gate is applied-only (per D-22 / D-16): a prior parsed
+    // row does not trigger the optimization. The orchestrator runs its
+    // own body-side dup detection inside lockForUpdate and decides the
+    // outcome from there (covered by ParseAndPersistOrchestratorTest).
+    expect($obController->iOrchestratorResolvedCount)->toBe(1);
 
     // Reject partial received an EMPTY rejects list (gate did not fire).
     $arRejectCall = null;

@@ -1,11 +1,27 @@
-{# Rendered by onUpload when a duplicate invoice_number is detected pre-parse (plan 04-04 / UI-09 / D-16, D-17). Override checkbox + typed gate ship in 04-06. #}
-<div class="alert alert-warning">
-    <h4>Duplicate invoice rejected</h4>
-    <p>Invoice <strong>#{{ rejected.invoice_number }}</strong> was previously applied.</p>
-    <ul>
-        <li>Prior applied at: <strong>{{ rejected.prior_applied_at }}</strong></li>
-        <li>Prior applied by user: <strong>{{ rejected.prior_applied_by ?: '—' }}</strong></li>
-        <li>Prior stock added (units): <strong>{{ rejected.prior_stock_added_units }}</strong></li>
-    </ul>
-    <p class="help-block">Use the Override flow if reapply is intended (plan 04-06).</p>
-</div>
+{# UI-09 / D-16 / D-17: pre-parse duplicate-detection reject screen.
+   Renders one warning panel per matched prior `Invoice@status='applied'` row.
+   The Override flow (plan 04-06) wires the data-handler='onOverrideShowConfirm'
+   button — clicking it before 04-06 ships yields a 404 AJAX (acceptable since
+   04-06 is a downstream consumer). #}
+{% if rejects|length > 0 %}
+    {% for rejected in rejects %}
+        <div class="alert alert-warning" data-prior-invoice-id="{{ rejected.prior_invoice_id }}">
+            <h4>Duplicate invoice rejected</h4>
+            <p>Invoice <strong>#{{ rejected.invoice_number }}</strong> was previously applied.</p>
+            <ul>
+                <li>Prior applied at: <strong>{{ rejected.prior_applied_at|default('—') }}</strong></li>
+                <li>Prior applied by user: <strong>{{ rejected.prior_applied_by|default('—') }}</strong></li>
+                <li>Prior stock added (units): <strong>{{ rejected.prior_stock_added_units }}</strong></li>
+                <li>Prior invoice id: <strong>{{ rejected.prior_invoice_id }}</strong></li>
+            </ul>
+            <button type="button"
+                    class="btn btn-warning btn-sm"
+                    data-control="popup"
+                    data-handler="onOverrideShowConfirm"
+                    data-request-data="prior_invoice_id: {{ rejected.prior_invoice_id }}">
+                Override and re-import
+            </button>
+            <p class="help-block">Use the Override flow if reapply is intended (plan 04-06).</p>
+        </div>
+    {% endfor %}
+{% endif %}

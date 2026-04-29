@@ -1,0 +1,14 @@
+{# UI-07 / D-10: per-import summary metric panel. Renders inline above each
+   preview's line table. The 5 metrics map directly to the orchestrator's
+   persisted Invoice header (source_filename / parsed_at / total_units /
+   matched_count / unmatched_count). #}
+<div class="summary-panel">
+    <h4>Summary</h4>
+    <dl>
+        <dt>Source filename</dt><dd>{{ invoice.source_filename }}</dd>
+        <dt>Parsed at</dt><dd>{{ invoice.parsed_at ? invoice.parsed_at|date('Y-m-d H:i:s') : '—' }}</dd>
+        <dt>Total units to add</dt><dd>{{ total_units }}</dd>
+        <dt>Matched lines</dt><dd>{{ matched_count }}</dd>
+        <dt>Unmatched lines</dt><dd>{{ unmatched_count }}</dd>
+    </dl>
+</div>

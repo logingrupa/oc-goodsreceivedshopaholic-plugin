@@ -85,5 +85,11 @@ return [
     ],
     'flash' => [
         'apply_in_progress' => 'Apply already in progress for this invoice; please wait.',
+        'forbidden'         => 'You do not have permission to perform this action.',
+    ],
+    'upload' => [
+        'no_files'      => 'No files were uploaded.',
+        'bad_extension' => 'Only .HTM files are accepted; received extension: :extension.',
+        'too_large'     => 'File exceeds 10 MB; received: :size bytes.',
     ],
 ];
