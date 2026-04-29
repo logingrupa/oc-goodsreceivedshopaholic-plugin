@@ -58,6 +58,7 @@ abstract class GoodsReceivedTestCase extends TestCase
     protected function tearDown(): void
     {
         $this->flushModelEventListeners();
+        $this->flushPluginSingletons();
         parent::tearDown();
         unset($this->app);
     }
@@ -82,6 +83,23 @@ abstract class GoodsReceivedTestCase extends TestCase
         }
 
         ActiveRecord::flushEventListeners();
+    }
+
+    /**
+     * Flush per-test plugin singletons to prevent cross-test bleed.
+     *
+     * Phase 1: empty body — no plugin singletons exist yet.
+     * Phase 2/3: each new singleton (Stores, Caches) MUST add a static `flush()`
+     * method and a corresponding line here, e.g.:
+     *     \Logingrupa\GoodsReceivedShopaholic\Classes\Store\InvoiceListStore::flush();
+     *
+     * Called from tearDown() AFTER flushModelEventListeners() so any model events
+     * are detached before singleton state is wiped, and BEFORE parent::tearDown()
+     * so the framework teardown still happens after our cleanup. (Per QA-11 / D-22.)
+     */
+    protected function flushPluginSingletons(): void
+    {
+        // Phase 1: no singletons yet — populated by Phases 2/3.
     }
 
     protected function guessPluginCodeFromTest()
