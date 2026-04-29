@@ -32,7 +32,7 @@
 
 - [ ] **PARSE-01**: PHP 8.4 readonly DTOs in `classes/dto/`: `ParsedInvoice` (header + lines), `ParsedLine` (row_index, ean, product_name_raw, qty, unit_price), `MatchedLine` (line + matched_offer_id + match_strategy), `ApplyResult` (units_added, offers_touched, lines_applied, lines_skipped). Immutable, fully typed.
 - [ ] **PARSE-02**: Typed exceptions in `classes/exception/`: `InvoiceNumberMissingException`, `DuplicateInvoiceException`, `InvalidEanException`, `InvalidQuantityException`, `ApplyAlreadyDoneException`, `InitialResetNotAllowedException`, `OperatorOverridesActiveFlagException`, `MalformedHtmException`. All extend `GoodsReceivedException`.
-- [ ] **PARSE-03**: `classes/parser/HtmInvoiceParser` — pure (no DB, no IO beyond input string). Uses `DOMDocument::loadHTML()` with BOM strip + `libxml_use_internal_errors(true)`. XPath extracts `<TR class="R20|R21">` rows handling unquoted `CLASS=R20` (verified in real fixtures), CRLF, UTF-8 BOM. Returns `ParsedInvoice` DTO.
+- [x] **PARSE-03**: `classes/parser/HtmInvoiceParser` — pure (no DB, no IO beyond input string). Uses `DOMDocument::loadHTML()` with BOM strip + `libxml_use_internal_errors(true)`. XPath extracts `<TR class="R20|R21">` rows handling unquoted `CLASS=R20` (verified in real fixtures), CRLF, UTF-8 BOM. Returns `ParsedInvoice` DTO. *(2026-04-29: closed by plan 02-05 — `final class HtmInvoiceParser` with `MAX_ROWS=10000` DoS guard, `LIBXML_NONET` XXE guard, throw-vs-skip decision matrix locked. 8 tests / 35 assertions, PHPStan L10 + Pint green, baseline unchanged.)*
 - [x] **PARSE-04**: `classes/parser/InvoiceNumberResolver` — pure. Body match first; filename pattern `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM` fallback; throws `InvoiceNumberMissingException` if neither yields number. *(2026-04-29: closed by plan 02-04 — 11 tests / 34 assertions, all 3 hermetic fixtures pinned, PHPStan L10 + Pint green)*
 - [ ] **PARSE-05**: `classes/parser/QuantityNormalizer` — pure. `parseQuantity(string): int` throws `InvalidQuantityException` on non-integer (including decimal-comma `5,12`). Strict validation BEFORE Eloquent's silent `setQuantityAttribute` int-clamp can silently lose stock.
 - [ ] **PARSE-06**: `classes/parser/PriceNormalizer` — pure. Decimal-comma normalizer for unit_price/discount/total columns ONLY (not qty). Returns float or null.
@@ -82,7 +82,7 @@
 
 ### Cross-cutting QA (verified across all phases)
 
-- [ ] **QA-01**: HTM parser real-fixture pin tests: `HandlesUnquotedAttributesTest`, `StripsBomBeforeParseTest`, `HandlesBothR20AndR21RowsTest`, `HandlesCRLFLineEndingsTest`, `RejectsMalformedHtmTest`.
+- [x] **QA-01**: HTM parser real-fixture pin tests: `HandlesUnquotedAttributesTest`, `StripsBomBeforeParseTest`, `HandlesBothR20AndR21RowsTest`, `HandlesCRLFLineEndingsTest`, `RejectsMalformedHtmTest`. *(2026-04-29: closed by plan 02-05 — all 5 sub-tests as `it()` blocks in `tests/unit/Parser/HtmInvoiceParserTest.php` plus 3 round-out invariants; pinned to PRO033328 + PRO026712 real fixtures with exact line/skip counts.)*
 - [ ] **QA-02**: Stock-write guard tests: `RejectsDecimalQuantityTest`, `PreservesLeadingZeroEanTest`, `Offer setQuantityAttribute clamp test boundary`.
 - [ ] **QA-03**: Idempotency tests: `DuplicateInvoiceRejectedTest`, `OverrideReimportAddsOnTopTest`, `ApplyAlreadyDoneThrowsTest`, `LockForUpdateSerializesConcurrentApplyTest`.
 - [ ] **QA-04**: Cache-cascade smoke test: `Apply200LinesTriggersBatchedFlushNotPerSaveTest` (asserts ≤ N flushes, not N×lines).
@@ -159,7 +159,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | SCHEMA-08 | Phase 1 | Pending |
 | PARSE-01 | Phase 2 | Pending |
 | PARSE-02 | Phase 2 | Pending |
-| PARSE-03 | Phase 2 | Pending |
+| PARSE-03 | Phase 2 | Closed (2026-04-29) — plan 02-05 |
 | PARSE-04 | Phase 2 | Closed (2026-04-29) — plan 02-04 |
 | PARSE-05 | Phase 2 | Pending |
 | PARSE-06 | Phase 2 | Pending |
@@ -194,7 +194,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | OPS-04 | Phase 5 | Pending |
 | OPS-05 | Phase 5 | Pending |
 | OPS-06 | Phase 5 | Pending |
-| QA-01 | Phase 2 | Pending |
+| QA-01 | Phase 2 | Closed (2026-04-29) — plan 02-05 |
 | QA-02 | Phase 2 | Pending |
 | QA-03 | Phase 3 | Pending |
 | QA-04 | Phase 3 | Pending |
