@@ -22,3 +22,5 @@ Out-of-scope discoveries during execution. Not blocking; track for follow-up.
 **Action:** Run `composer install` at `/home/forge/nailscosmetics.lv/` with dev dependencies before next plan that depends on PHPStan-level-10 gate (likely Phase 2 service work). Add to ops/setup runbook.
 
 **Owner:** Whoever runs `/gsd:execute-phase` for Phase 02 — must install QA tooling first or surface a checkpoint asking the user to install it.
+
+**Status (2026-04-29, Plan 01-08):** RESOLVED. QA tooling installed at `/home/forge/nailscosmetics.lv/vendor/bin/` (pest 4.4.5, phpstan + Larastan, phpmd 2.15.0, pint 1.26+, rector 2.4.0). All four sub-gates of `make all` now run from the plugin Makefile. Plan 01-08 ran the full gate end-to-end: `make all` exits 0 with `phpstan-baseline.neon` byte-identical (33 bytes, sha256 4b3227fa…). Carry-over to Phase 02: NONE.
