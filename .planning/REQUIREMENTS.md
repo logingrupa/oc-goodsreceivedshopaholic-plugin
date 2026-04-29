@@ -166,16 +166,16 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | PARSE-07 | Phase 2 | Pending |
 | MATCH-01 | Phase 2 | Closed (2026-04-29) — plan 02-06 |
 | MATCH-02 | Phase 2 | Closed (2026-04-29) — plan 02-06 |
-| APPLY-01 | Phase 3 | Pending |
-| APPLY-02 | Phase 3 | Pending |
-| APPLY-03 | Phase 3 | Pending |
-| APPLY-04 | Phase 3 | Pending |
-| APPLY-05 | Phase 3 | Closed (plan 03-05, 2026-04-29) |
-| APPLY-06 | Phase 3 | Closed (plan 03-06, 2026-04-29) |
-| APPLY-07 | Phase 3 | Closed (plan 03-07, 2026-04-29) |
-| APPLY-08 | Phase 3 | Closed (parse-side plan 03-06; apply-side plan 03-07; 2026-04-29) |
-| APPLY-09 | Phase 3 | Closed (plan 03-01, 2026-04-29) |
-| APPLY-10 | Phase 3 | Closed (plan 03-02, 2026-04-29) |
+| APPLY-01 | Phase 3 | Closed (2026-04-29) — plan 03-03 |
+| APPLY-02 | Phase 3 | Closed (2026-04-29) — plan 03-03 |
+| APPLY-03 | Phase 3 | Closed (2026-04-29) — plan 03-04 |
+| APPLY-04 | Phase 3 | Closed (2026-04-29) — plan 03-04 |
+| APPLY-05 | Phase 3 | Closed (2026-04-29) — plan 03-05 |
+| APPLY-06 | Phase 3 | Closed (2026-04-29) — plan 03-06 |
+| APPLY-07 | Phase 3 | Closed (2026-04-29) — plan 03-07 |
+| APPLY-08 | Phase 3 | Closed (2026-04-29) — plans 03-06 + 03-07 |
+| APPLY-09 | Phase 3 | Closed (2026-04-29) — plan 03-01 |
+| APPLY-10 | Phase 3 | Closed (2026-04-29) — plan 03-02 |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |
@@ -196,13 +196,13 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | OPS-06 | Phase 5 | Pending |
 | QA-01 | Phase 2 | Closed (2026-04-29) — plan 02-05 |
 | QA-02 | Phase 2 | Closed (2026-04-29) — plans 02-03 + 02-06 |
-| QA-03 | Phase 3 | Closed (plan 03-07, 2026-04-29) |
-| QA-04 | Phase 3 | Pending |
-| QA-05 | Phase 3 | Pending |
-| QA-06 | Phase 3 | Closed (plan 03-05, 2026-04-29) |
+| QA-03 | Phase 3 | Closed (2026-04-29) — plan 03-07 |
+| QA-04 | Phase 3 | Closed (2026-04-29) — plan 03-03 |
+| QA-05 | Phase 3 | Closed (2026-04-29) — plan 03-04 |
+| QA-06 | Phase 3 | Closed (2026-04-29) — plan 03-05 |
 | QA-07 | Phase 1 | Pending |
-| QA-08 | Phase 3 | Closed (plan 03-07, 2026-04-29) |
-| QA-09 | Phase 3 | Closed (plan 03-01, 2026-04-29) |
+| QA-08 | Phase 3 | Closed (2026-04-29) — plan 03-07 |
+| QA-09 | Phase 3 | Closed (2026-04-29) — plan 03-01 |
 | QA-10 | Phase 4 | Pending |
 | QA-11 | Phase 1 | Pending |
 
