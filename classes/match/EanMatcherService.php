@@ -158,9 +158,9 @@ final class EanMatcherService
             /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
             $sCode = (string) $obRow->code;
             /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $iId = (int) $obRow->id;
+            $iOfferId = (int) $obRow->id;
 
-            $arOfferMap[$sCode] = $iId;
+            $arOfferMap[$sCode] = $iOfferId;
         }
 
         return $arOfferMap;
