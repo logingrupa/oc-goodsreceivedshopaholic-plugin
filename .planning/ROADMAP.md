@@ -64,7 +64,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [ ] 02-03-PLAN.md - Normalizers: QuantityNormalizer (rejects decimal qty BEFORE Eloquent int-clamp) + PriceNormalizer (audit-only)
   - [x] 02-04-PLAN.md - InvoiceNumberResolver: body-marker regex + filename pattern fallback + throw on miss *(closed 2026-04-29)*
   - [x] 02-05-PLAN.md - HtmInvoiceParser: DOMDocument + XPath + BOM strip + LIBXML_NONET; 5 QA-01 real-fixture pin tests *(closed 2026-04-29)*
-  - [ ] 02-06-PLAN.md - EanMatcherService: exactly TWO queries (offer.code → product.code single-offer); QA-02 leading-zero EAN preservation
+  - [x] 02-06-PLAN.md - EanMatcherService: exactly TWO queries (offer.code → product.code single-offer); QA-02 leading-zero EAN preservation *(closed 2026-04-29)*
   - [ ] 02-07-PLAN.md - Phase 2 final QA gate: make all (pint-test + phpstan level 10 + phpmd + pest); baseline unchanged
 
 ### Phase 3: Apply Layer + Orchestrators

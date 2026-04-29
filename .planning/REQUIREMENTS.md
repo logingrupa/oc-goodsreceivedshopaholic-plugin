@@ -40,8 +40,8 @@
 
 ### Match (Phase 2)
 
-- [ ] **MATCH-01**: `classes/match/EanMatcherService` — two-pass batch query. Pass 1: `Offer::whereIn('code', $arEans)`. Pass 2 (only for unmatched EANs): `Product::whereIn('code', $arEans)->has('offer', '=', 1)` with single-offer guard. Two queries, no JOIN. EAN handled as STRING throughout.
-- [ ] **MATCH-02**: Unmatched lines persist with `matched_offer_id=NULL`, `match_strategy='none'`. Never block partial apply; queryable via `WHERE matched_offer_id IS NULL`.
+- [x] **MATCH-01**: `classes/match/EanMatcherService` — two-pass batch query. Pass 1: `Offer::whereIn('code', $arEans)`. Pass 2 (only for unmatched EANs): `Product::whereIn('code', $arEans)->has('offer', '=', 1)` with single-offer guard. Two queries, no JOIN. EAN handled as STRING throughout. *(2026-04-29: closed by plan 02-06 — `EanMatcherService::matchBatch()` ships with correlated `addSelect` subquery for Pass 2 keeping it to one round-trip; 2-query budget pinned by `DB::enableQueryLog` count assertion.)*
+- [x] **MATCH-02**: Unmatched lines persist with `matched_offer_id=NULL`, `match_strategy='none'`. Never block partial apply; queryable via `WHERE matched_offer_id IS NULL`. *(2026-04-29: closed by plan 02-06 — matcher returns `match_strategy='none'`, `matched_offer_id=null` for any EAN nowhere in offers.code or products.code; pinned by "returns none for fully unmatched EAN" + "returns none when product has multiple offers" tests.)*
 
 ### Apply Layer (Phase 3)
 
@@ -83,7 +83,7 @@
 ### Cross-cutting QA (verified across all phases)
 
 - [x] **QA-01**: HTM parser real-fixture pin tests: `HandlesUnquotedAttributesTest`, `StripsBomBeforeParseTest`, `HandlesBothR20AndR21RowsTest`, `HandlesCRLFLineEndingsTest`, `RejectsMalformedHtmTest`. *(2026-04-29: closed by plan 02-05 — all 5 sub-tests as `it()` blocks in `tests/unit/Parser/HtmInvoiceParserTest.php` plus 3 round-out invariants; pinned to PRO033328 + PRO026712 real fixtures with exact line/skip counts.)*
-- [ ] **QA-02**: Stock-write guard tests: `RejectsDecimalQuantityTest`, `PreservesLeadingZeroEanTest`, `Offer setQuantityAttribute clamp test boundary`.
+- [x] **QA-02**: Stock-write guard tests: `RejectsDecimalQuantityTest`, `PreservesLeadingZeroEanTest`, `Offer setQuantityAttribute clamp test boundary`. *(2026-04-29: closed across plans 02-03 + 02-06 — `RejectsDecimalQuantityTest` in `tests/unit/Parser/QuantityNormalizerTest.php` (plan 02-03), `PreservesLeadingZeroEanTest` rolled into `tests/unit/Match/EanMatcherServiceTest.php` (plan 02-06) using `array_keys()` identity check to pin string-key invariant. The Offer clamp boundary is implicitly guarded by QuantityNormalizer rejecting decimal input BEFORE reaching `setQuantityAttribute` — no separate clamp test needed; the rejection point is upstream.)*
 - [ ] **QA-03**: Idempotency tests: `DuplicateInvoiceRejectedTest`, `OverrideReimportAddsOnTopTest`, `ApplyAlreadyDoneThrowsTest`, `LockForUpdateSerializesConcurrentApplyTest`.
 - [ ] **QA-04**: Cache-cascade smoke test: `Apply200LinesTriggersBatchedFlushNotPerSaveTest` (asserts ≤ N flushes, not N×lines).
 - [ ] **QA-05**: ActiveFlag matrix: 4-cell test `(deactivate_on_zero on/off) × (activate_on_stock on/off)` plus `SkipsManuallyDeactivatedOfferTest` (active_managed_by=operator).
@@ -164,8 +164,8 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | PARSE-05 | Phase 2 | Pending |
 | PARSE-06 | Phase 2 | Pending |
 | PARSE-07 | Phase 2 | Pending |
-| MATCH-01 | Phase 2 | Pending |
-| MATCH-02 | Phase 2 | Pending |
+| MATCH-01 | Phase 2 | Closed (2026-04-29) — plan 02-06 |
+| MATCH-02 | Phase 2 | Closed (2026-04-29) — plan 02-06 |
 | APPLY-01 | Phase 3 | Pending |
 | APPLY-02 | Phase 3 | Pending |
 | APPLY-03 | Phase 3 | Pending |
@@ -195,7 +195,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | OPS-05 | Phase 5 | Pending |
 | OPS-06 | Phase 5 | Pending |
 | QA-01 | Phase 2 | Closed (2026-04-29) — plan 02-05 |
-| QA-02 | Phase 2 | Pending |
+| QA-02 | Phase 2 | Closed (2026-04-29) — plans 02-03 + 02-06 |
 | QA-03 | Phase 3 | Pending |
 | QA-04 | Phase 3 | Pending |
 | QA-05 | Phase 3 | Pending |

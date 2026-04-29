@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: GoodsReceivedShopaholic
 status: in_progress
-stopped_at: Phase 2 plan 02-05 complete (PARSE-03 + QA-01 closed). Next: plan 02-06 EanMatcherService.
-last_updated: "2026-04-29T18:54:00.000Z"
+stopped_at: Phase 2 plan 02-06 complete (MATCH-01 + MATCH-02 + QA-02 closed). Next: plan 02-07 Phase 2 final QA gate.
+last_updated: "2026-04-29T19:30:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -24,11 +24,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 ## Current Position
 
 Phase: 2 of 5 (Pure Parsers, DTOs, Exceptions, EAN Matcher) — IN PROGRESS
-Plan: 02-01..02-05 complete (5/?). Next: 02-06 EanMatcherService.
-Status: PARSE-01..06 closed (DTOs, exceptions, normalizers, resolver, parser); QA-01 closed (5 sub-tests pinning real fixtures). Phase 2 still has MATCH-01/MATCH-02 (plan 02-06) and the full QA gate (plan 02-07) pending.
-Last activity: 2026-04-29 — plan 02-05 complete. HtmInvoiceParser ships with LIBXML_NONET XXE guard, MAX_ROWS bounded loop, BOM strip, throw-vs-skip decision matrix locked. 79/79 plugin tests green, PHPStan level 10 clean, baseline unchanged.
+Plan: 02-01..02-06 complete (6/7). Next: 02-07 Phase 2 final QA gate.
+Status: PARSE-01..06 closed (DTOs, exceptions, normalizers, resolver, parser); MATCH-01/MATCH-02 closed (EanMatcherService two-query batch); QA-01 + QA-02 closed (real-fixture pin tests + leading-zero EAN guard). Phase 2 only has plan 02-07 (full make-all QA gate) pending.
+Last activity: 2026-04-29 — plan 02-06 complete. EanMatcherService ships with two-query budget proven by `DB::queryLog` count assertion (correlated `addSelect` subquery keeps Pass 2 to one round-trip), defense-in-depth EAN regex guard rejecting non-13-digit input BEFORE any DB query (T-02-06-01), and QA-02 leading-zero EAN preservation pinned by `array_keys()` identity check. 92/92 plugin tests green (+13 new), PHPStan level 10 clean, Pint clean, phpstan-baseline.neon unchanged.
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [██░░░░░░░░] 14%
 
 ## Performance Metrics
 
@@ -42,7 +42,7 @@ Progress: [█░░░░░░░░░] 13%
 
 | Phase | Plans | Total | Avg/Plan |
 |---|---|---|---|
-| Phase 2 | 2 (02-04, 02-05) | ~9m | ~4m 30s |
+| Phase 2 | 3 (02-04, 02-05, 02-06) | ~21m | ~7m |
 
 **Recent Trend:**
 
@@ -80,8 +80,8 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Phase 2 plan 02-05 complete (PARSE-03 + QA-01 closed). Next: plan 02-06 EanMatcherService.
-Resume file: `.planning/phases/02-pure-parsers-dtos-exceptions-ean-matcher/02-05-SUMMARY.md`
+Stopped at: Phase 2 plan 02-06 complete (MATCH-01 + MATCH-02 + QA-02 closed). Next: plan 02-07 Phase 2 final QA gate.
+Resume file: `.planning/phases/02-pure-parsers-dtos-exceptions-ean-matcher/02-06-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
 - Run `php artisan october:up` on a dev/staging server, confirm 3 plugin tables + offers.active_managed_by column appear with default 'system'
