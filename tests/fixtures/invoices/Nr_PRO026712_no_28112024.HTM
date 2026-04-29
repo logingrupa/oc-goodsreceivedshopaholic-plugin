@@ -1,0 +1,2689 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8"/>
+<TITLE></TITLE>
+<STYLE TYPE="text/css">
+body { background: #ffffff; margin: 0; font-family: Arial; font-size: 8pt; font-style: normal; }
+tr.R0{ height: 15px; }
+tr.R0 td.R0C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C2{ text-align: left; vertical-align: top; }
+tr.R0 td.R11C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R0 td.R11C7{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C8{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R16C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; border-top: #000000 1px solid; }
+tr.R0 td.R16C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #000000 1px solid; border-bottom: #ffffff 1px none; }
+tr.R0 td.R16C5{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #000000 1px solid; }
+tr.R0 td.R177C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R180C1{ font-family: Arial; font-size: 7pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R0 td.R180C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R180C9{ text-align: left; }
+tr.R0 td.R181C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: right; vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R181C3{ text-align: left; border-bottom: #ffffff 1px none; }
+tr.R0 td.R181C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: right; vertical-align: bottom; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R181C7{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; border-bottom: #ffffff 1px none; }
+tr.R0 td.R182C1{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R0 td.R182C9{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: center; vertical-align: top; }
+tr.R0 td.R185C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-top: #ffffff 1px none; border-bottom: #000000 1px solid; }
+tr.R0 td.R185C9{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: center; vertical-align: top; border-bottom: #000000 1px solid; }
+tr.R0 td.R186C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: center; vertical-align: bottom; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R186C9{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: center; vertical-align: top; border-bottom: #ffffff 1px none; }
+tr.R1{ height: 19px; }
+tr.R1 td.R1C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R1 td.R1C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R1 td.R1C9{ font-family: Arial; font-size: 18pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: top; }
+tr.R12{ height: 29px; }
+tr.R12 td.R12C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R12 td.R12C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R12 td.R12C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R12 td.R12C8{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R173{ height: 16px; }
+tr.R173 td.R173C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R173 td.R173C1{ text-align: left; overflow: visible;border-top: #000000 1px solid; border-bottom: #ffffff 1px none; }
+tr.R173 td.R173C9{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R173 td.R175C1{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: bottom; overflow: visible;border-bottom: #000000 1px solid; }
+tr.R19{ height: 57px; }
+tr.R19 td.R19C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R19 td.R19C1{ font-family: Arial; font-size: 8pt; font-style: normal; background-color: #9ecf5d; text-align: center; vertical-align: middle; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R2{ height: 20px; }
+tr.R2 td.R2C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R2 td.R2C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R2 td.R2C8{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: right; vertical-align: middle; }
+tr.R2 td.R2C9{ font-family: Arial; font-size: 11pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: middle; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R20{ height: 15px; }
+tr.R20 td.R171C1{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; }
+tr.R20 td.R171C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-top: #000000 2px solid; border-bottom: #ffffff 1px none; }
+tr.R20 td.R171C4{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R20 td.R171C5{ text-align: center; border-left: #000000 1px solid; border-top: #000000 2px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R20 td.R171C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: center; border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R20 td.R171C7{ text-align: center; vertical-align: top; border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R20 td.R171C9{ text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #000000 2px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R20 td.R172C1{ text-align: left; overflow: visible;border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R20 td.R172C7{ text-align: left; overflow: visible;border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R20 td.R172C8{ text-align: left; }
+tr.R20 td.R172C9{ text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R20 td.R174C1{ text-align: left; overflow: visible;border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000 2px solid; border-right: #ffffff 1px none; }
+tr.R20 td.R174C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-bottom: #000000 2px solid; }
+tr.R20 td.R174C6{ text-align: left; border-bottom: #000000 2px solid; }
+tr.R20 td.R174C9{ text-align: right; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000 2px solid; border-right: #ffffff 1px none; }
+tr.R20 td.R20C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R20 td.R20C1{ text-align: center; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R20 td.R20C2{ text-align: left; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R20 td.R20C9{ text-align: right; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R21{ height: 29px; }
+tr.R21 td.R21C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R21 td.R21C1{ text-align: center; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R21 td.R21C2{ text-align: left; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R21 td.R21C9{ text-align: right; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R4{ height: 25px; }
+tr.R4 td.R4C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R4 td.R4C1{ font-family: Arial; font-size: 14pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R5{ height: 16px; }
+tr.R5 td.R10C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; }
+tr.R5 td.R10C2{ text-align: left; vertical-align: top; }
+tr.R5 td.R10C3{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R5 td.R10C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; }
+tr.R5 td.R10C8{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R5 td.R5C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R5 td.R5C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R5 td.R5C4{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; }
+tr.R5 td.R6C8{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R5 td.R7C9{ text-align: left; }
+tr.R8{ height: 28px; }
+tr.R8 td.R8C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R9{ height: 17px; }
+tr.R9 td.R178C1{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R9 td.R178C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R9 td.R178C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R9 td.R178C7{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R9 td.R9C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R9 td.R9C1{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; background-color: #9ecf5d; text-align: left; vertical-align: top; border-top: #9ecf5d 1px none; }
+tr.R9 td.R9C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; }
+tr.R9 td.R9C7{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; background-color: #9ecf5d; text-align: left; vertical-align: top; border-top: #9ecf5d 1px none; border-bottom: #9ecf5d 1px none; }
+table {table-layout: fixed; padding: 0; padding-left: 2px; vertical-align:bottom; border-collapse:collapse;width: 100%; font-family: Arial; font-size: 8pt; font-style: normal; }
+td { padding: 0; padding-left: 2px; overflow:hidden; vertical-align: bottom;}
+</STYLE>
+</HEAD>
+<BODY STYLE="background: #ffffff; margin: 0; font-family: Arial; font-size: 8pt; font-style: normal; ">
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=131>
+<COL WIDTH=132>
+<COL WIDTH=51>
+<COL WIDTH=52>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=201>
+<COL WIDTH=63>
+<COL WIDTH=63>
+<COL>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3 ROWSPAN=4 ALIGN=LEFT VALIGN=TOP STYLE="padding-left: 0"><IMG SRC = "v8_ECF8_137_files/image000.png" ALT = "" width = 155 height = 62 style = "margin-left:117pt;margin-top:7pt;"></TD>
+<TD COLSPAN=2 ROWSPAN=4 ALIGN=LEFT VALIGN=TOP STYLE="padding-left: 0"><IMG SRC = "v8_ECF8_137_files/image001.png" ALT = "" width = 117 height = 62 style = "margin-left:0pt;margin-top:8pt;"></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R1>
+<TD CLASS="R1C0"><DIV STYLE="position:relative; height:19px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R1C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">Tel.nr.&nbsp;+371&nbsp;20446646</SPAN></TD>
+<TD><DIV STYLE="position:relative; height:19px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="width:100%;height:19px;overflow:hidden;"></DIV></TD>
+</TR>
+<TR CLASS=R2>
+<TD CLASS="R2C0"><SPAN></SPAN></TD>
+<TD CLASS="R2C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">veikals@naiscosmetics.lv</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R2>
+<TD CLASS="R2C0"><SPAN></SPAN></TD>
+<TD CLASS="R2C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">naiscosmetics.lv</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R4>
+<TD CLASS="R4C0"><SPAN></SPAN></TD>
+<TD CLASS="R4C1" COLSPAN=10><SPAN STYLE="white-space:nowrap;max-width:0px;">INVOICE</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">Invoice&nbsp;No:</SPAN></TD>
+<TD CLASS="R5C4" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">PRO026712</SPAN></TD>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Date:</SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">28.11.2024</SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">Invoice&nbsp;printed:</SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">29.04.2026&nbsp;10:53:10</SPAN></TD>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R6C8" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Term&nbsp;of&nbsp;payement:</SPAN></TD>
+<TD CLASS="R6C8" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">28.11.2024</SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Method&nbsp;of&nbsp;payement</SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">Direct&nbsp;bank&nbsp;transfer</SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R8>
+<TD CLASS="R8C0"><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0"><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=3><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="width:100%;height:28px;overflow:hidden;">&nbsp;</DIV></TD>
+</TR>
+<TR CLASS=R9>
+<TD CLASS="R9C0"><SPAN></SPAN></TD>
+<TD CLASS="R9C1" COLSPAN=5><SPAN STYLE="white-space:nowrap;max-width:0px;">Sender</SPAN></TD>
+<TD CLASS="R9C6"><SPAN></SPAN></TD>
+<TD CLASS="R9C7" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">Buyer:</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R10C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Seller:</SPAN></TD>
+<TD CLASS="R10C3" COLSPAN=3>Prominence SIA</TD>
+<TD CLASS="R10C6"><SPAN></SPAN></TD>
+<TD CLASS="R10C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Buyer:</SPAN></TD>
+<TD CLASS="R10C8" COLSPAN=3>Agnese Kraveca Studio</TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Address:</SPAN></TD>
+<TD CLASS="R11C3" COLSPAN=3>Baldones iela 34b, Ogre, LV-5001, Latvija</TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C7">Address:</TD>
+<TD CLASS="R11C8" COLSPAN=3>, +4796859499</TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R12>
+<TD CLASS="R12C0"><SPAN></SPAN></TD>
+<TD CLASS="R12C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Address:</SPAN></TD>
+<TD CLASS="R12C3" COLSPAN=3>Mālkalnes prospekts 27-48, Ogre, Ogres novads, LV-5001, Latvija</TD>
+<TD CLASS="R12C0"><SPAN></SPAN></TD>
+<TD CLASS="R12C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Address:</SPAN></TD>
+<TD CLASS="R12C8" COLSPAN=3>Norway Kongens gate 28, 1530 Moss</TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Reg.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C3" COLSPAN=3>40103186559</TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Reg.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=3>893342052</TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Bank:</SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=2>Luminor Bank AS (DNB), swift: RIKOLV2X   </TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Account:</SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=2>LV37RIKO0000082814159, EUR</TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R16C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Transporter:</SPAN></TD>
+<TD CLASS="R16C3" COLSPAN=2>No</TD>
+<TD CLASS="R16C5" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R16C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Transport:</SPAN></TD>
+<TD CLASS="R16C3" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Reg.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Driver:</SPAN></TD>
+<TD CLASS="R11C8" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=37>
+<COL WIDTH=137>
+<COL WIDTH=322>
+<COL WIDTH=36>
+<COL WIDTH=48>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=96>
+<COL>
+<TR CLASS=R19>
+<TD CLASS="R19C0"><SPAN></SPAN></TD>
+<TD CLASS="R19C1">Nr.</TD>
+<TD CLASS="R19C1">Bar code</TD>
+<TD CLASS="R19C1">Product description</TD>
+<TD CLASS="R19C1">Unit</TD>
+<TD CLASS="R19C1">Quantity</TD>
+<TD CLASS="R19C1">Price/per Unit, EUR</TD>
+<TD CLASS="R19C1">Discount, %</TD>
+<TD CLASS="R19C1">Price/per Unit with discount, EUR</TD>
+<TD CLASS="R19C1">Amount, EUR</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C2">4751039484748</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Creamy Satin</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">2</TD>
+<TD CLASS="R21C2">4751039480061</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Sweet Dream</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">10</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C2">4751039480047</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Milkshake</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">4</TD>
+<TD CLASS="R21C2">4751039482560</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Milkshake with Shimmer</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">5</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">5</TD>
+<TD CLASS="R21C2">4751039484809</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Creamy Satin with Shimmer</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">10</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">6</TD>
+<TD CLASS="R21C2">4751039484731</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Fresh Menthol</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">3</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">15,36</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">7</TD>
+<TD CLASS="R20C2">4751039482706</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, May Lilac</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">15,36</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">8</TD>
+<TD CLASS="R20C2">4751039484199</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Pink Peony</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">15,36</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">9</TD>
+<TD CLASS="R20C2">4751039482713</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Tenerife Blue</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">10,24</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C2">4751039480054</TD>
+<TD CLASS="R20C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Sakura</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">11</TD>
+<TD CLASS="R21C2">4751039482553</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Sweet Dream with Shimmer</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">10</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">12</TD>
+<TD CLASS="R21C2">4751039482546</TD>
+<TD CLASS="R21C2">Quick Builder COVER BASE UV/LED base/gel, 15ml, Sakura with Shimmer</TD>
+<TD CLASS="R21C1">PCE</TD>
+<TD CLASS="R21C1">5</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C1">0,00</TD>
+<TD CLASS="R21C1">5,12</TD>
+<TD CLASS="R21C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">13</TD>
+<TD CLASS="R20C2">4751039480528</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Nude Sparkle</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">14</TD>
+<TD CLASS="R20C2">4751039482003</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Mood</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C2">4751039480535</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Macchiato</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">16</TD>
+<TD CLASS="R20C2">4751039482027</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Caramel</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">26,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">17</TD>
+<TD CLASS="R20C2">4751039482010</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Dream Rose</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">10,68</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">18</TD>
+<TD CLASS="R20C2">4751039480481</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Pastel Porcelain</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">19</TD>
+<TD CLASS="R20C2">4751039483369</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Bubble Gum</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">20</TD>
+<TD CLASS="R20C2">4751039484021</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Milky Way</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">21</TD>
+<TD CLASS="R20C2">4751039484519</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Pale Pink</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">26,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">22</TD>
+<TD CLASS="R20C2">4751039484502</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Hot Chocolate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">23</TD>
+<TD CLASS="R20C2">4751039484526</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Dust Rose</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">26,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">24</TD>
+<TD CLASS="R20C2">4751039484564</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Zephyr</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">26,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">25</TD>
+<TD CLASS="R20C2">4751039484595</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED Builder Gel, 15ml, Peach Sparkle</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,34</TD>
+<TD CLASS="R20C9">32,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">26</TD>
+<TD CLASS="R20C2">4751039480436</TD>
+<TD CLASS="R20C2">Brilliant Bond Acid-Free Primer, 15 ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">30</TD>
+<TD CLASS="R20C1">5,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,03</TD>
+<TD CLASS="R20C9">150,90</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">27</TD>
+<TD CLASS="R20C2">4751039483390</TD>
+<TD CLASS="R20C2">Quick Builder Clear HYBRID Base UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">25</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">128,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">28</TD>
+<TD CLASS="R20C2">4751039480702</TD>
+<TD CLASS="R20C2">Wipe Off Solution 3 in 1, 100ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">25</TD>
+<TD CLASS="R20C1">2,82</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">2,82</TD>
+<TD CLASS="R20C9">70,50</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">29</TD>
+<TD CLASS="R20C2">4751039484205</TD>
+<TD CLASS="R20C2">Sanitizer SOFT SILK  Forasept Strong, 100ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C1">2,13</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">2,13</TD>
+<TD CLASS="R20C9">31,95</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">30</TD>
+<TD CLASS="R20C2">4751039484137</TD>
+<TD CLASS="R20C2">Quick Builder NUDE BASE UV/LED base/gel,15ml, Baby Boomer</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">31</TD>
+<TD CLASS="R20C2">4751039484151</TD>
+<TD CLASS="R20C2">Quick Builder NUDE BASE UV/LED base/gel,15ml, Latte</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">32</TD>
+<TD CLASS="R20C2">4751039484144</TD>
+<TD CLASS="R20C2">Quick Builder NUDE BASE UV/LED base/gel,15ml, Romantic</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">33</TD>
+<TD CLASS="R20C2">4751039484236</TD>
+<TD CLASS="R20C2">Quick Builder NUDE BASE UV/LED base/gel,15ml, Rose Lilac</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">34</TD>
+<TD CLASS="R20C2">4751039483109</TD>
+<TD CLASS="R20C2">Quick CRYSTAL SHINE UV/LED Top, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">30</TD>
+<TD CLASS="R20C1">5,58</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,58</TD>
+<TD CLASS="R20C9">167,40</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">35</TD>
+<TD CLASS="R20C2">4751039481907</TD>
+<TD CLASS="R20C2">Chrome Top Coat UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C1">5,23</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,23</TD>
+<TD CLASS="R20C9">78,45</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">36</TD>
+<TD CLASS="R20C2">4751039483352</TD>
+<TD CLASS="R20C2">BUILDER Top Coat UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C1">5,58</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,58</TD>
+<TD CLASS="R20C9">83,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">37</TD>
+<TD CLASS="R20C2">4751039484427</TD>
+<TD CLASS="R20C2">MILKY Builder Base UV/LED Gel, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C1">5,88</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,88</TD>
+<TD CLASS="R20C9">88,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">38</TD>
+<TD CLASS="R20C2">4751039484410</TD>
+<TD CLASS="R20C2">WANTED Q5 UV/LED builder gel kit</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">15,60</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">15,60</TD>
+<TD CLASS="R20C9">78,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">39</TD>
+<TD CLASS="R20C2">4751039483925</TD>
+<TD CLASS="R20C2">Velveteen Matte Top UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">40</TD>
+<TD CLASS="R20C2">4751039483802</TD>
+<TD CLASS="R20C2">Blooming Base UV/LED, 8ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">30</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C9">108,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">41</TD>
+<TD CLASS="R20C2">4751039484373</TD>
+<TD CLASS="R20C2">Metalic Gel UV/LED  in Jar, 5ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">20</TD>
+<TD CLASS="R20C1">4,17</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,17</TD>
+<TD CLASS="R20C9">83,40</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">42</TD>
+<TD CLASS="R20C2">4751039484762</TD>
+<TD CLASS="R20C2">Chrome Liquid - Aurora Series 5ml, 03 AURORA</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">4,80</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,80</TD>
+<TD CLASS="R20C9">28,80</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">43</TD>
+<TD CLASS="R20C2">4751039484786</TD>
+<TD CLASS="R20C2">Chrome Liquid - Aurora Series 5ml, 05 MAGENTA</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">4,80</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,80</TD>
+<TD CLASS="R20C9">48,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">44</TD>
+<TD CLASS="R20C2">4751039480559</TD>
+<TD CLASS="R20C2">Gel Modeling Brush with NAILS logo</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">3,67</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,67</TD>
+<TD CLASS="R20C9">36,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">45</TD>
+<TD CLASS="R20C2">4751039483123</TD>
+<TD CLASS="R20C2">Brush Universal Kolinsky, 00</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,50</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,50</TD>
+<TD CLASS="R20C9">22,50</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">46</TD>
+<TD CLASS="R20C2">4751039480269</TD>
+<TD CLASS="R20C2">File/Buffer, 180/180</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">1,22</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,22</TD>
+<TD CLASS="R20C9">12,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">47</TD>
+<TD CLASS="R20C2">4751039482911</TD>
+<TD CLASS="R20C2">File/buffer, 180/220</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">1,27</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,27</TD>
+<TD CLASS="R20C9">12,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">48</TD>
+<TD CLASS="R20C2">4751039480221</TD>
+<TD CLASS="R20C2">Nail file/buffer 180/240</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">1,17</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,17</TD>
+<TD CLASS="R20C9">11,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">49</TD>
+<TD CLASS="R20C2">4751039480252</TD>
+<TD CLASS="R20C2">Wooden Nail File 180/240</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">0,56</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">0,56</TD>
+<TD CLASS="R20C9">5,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">50</TD>
+<TD CLASS="R20C2">4751039482652</TD>
+<TD CLASS="R20C2">File Pink Core, 100/180</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">0,90</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">0,90</TD>
+<TD CLASS="R20C9">9,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">51</TD>
+<TD CLASS="R20C2">4751039482669</TD>
+<TD CLASS="R20C2">Straight Nail File 180/240</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">0,67</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">0,67</TD>
+<TD CLASS="R20C9">6,70</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">52</TD>
+<TD CLASS="R20C2">4751039480238</TD>
+<TD CLASS="R20C2">File Pink Core, 100/100</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">0,74</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">0,74</TD>
+<TD CLASS="R20C9">7,40</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">53</TD>
+<TD CLASS="R20C2">4751039480757</TD>
+<TD CLASS="R20C2">Quick French White Line UV/LED Gel, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">4,10</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,10</TD>
+<TD CLASS="R20C9">41,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">54</TD>
+<TD CLASS="R20C2">4751039480764</TD>
+<TD CLASS="R20C2">Quick Intensive Black UV/LED Gel, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">4,10</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,10</TD>
+<TD CLASS="R20C9">41,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">55</TD>
+<TD CLASS="R20C2">4751039484663</TD>
+<TD CLASS="R20C2">Liner Art Gel UV/LED, 6ml, Black</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">22,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">56</TD>
+<TD CLASS="R20C2">4751039484694</TD>
+<TD CLASS="R20C2">Liner Art Gel UV/LED, 6ml, Champagne Gold</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">13,29</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">57</TD>
+<TD CLASS="R20C2">4751039484700</TD>
+<TD CLASS="R20C2">Liner Art Gel UV/LED, 6ml, Rose Gold</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">22,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">58</TD>
+<TD CLASS="R20C2">4751039484687</TD>
+<TD CLASS="R20C2">Liner Art Gel UV/LED, 6ml, Silver</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">22,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">59</TD>
+<TD CLASS="R20C2">4751039484670</TD>
+<TD CLASS="R20C2">Liner Art Gel UV/LED, 6ml, White</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">22,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">60</TD>
+<TD CLASS="R20C2">4751039484359</TD>
+<TD CLASS="R20C2">Cuticle SPA Oil, 15ml, Banana</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C9">8,95</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">61</TD>
+<TD CLASS="R20C2">4751039484403</TD>
+<TD CLASS="R20C2">Cuticle SPA Oil, 15ml, Blueberry</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C9">8,95</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">62</TD>
+<TD CLASS="R20C2">4751039484366</TD>
+<TD CLASS="R20C2">Cuticle SPA Oil, 15ml, Rose</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,79</TD>
+<TD CLASS="R20C9">8,95</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">63</TD>
+<TD CLASS="R20C2">40092454</TD>
+<TD CLASS="R20C2">Magnet for Nail Design</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">3,00</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,00</TD>
+<TD CLASS="R20C9">30,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">64</TD>
+<TD CLASS="R20C2">4751039483864</TD>
+<TD CLASS="R20C2">Nail Design Brush, #2 - Kolinsky brush</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">2,84</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">2,84</TD>
+<TD CLASS="R20C9">14,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">65</TD>
+<TD CLASS="R20C2">4751039483918</TD>
+<TD CLASS="R20C2">Milky Top UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">5,12</TD>
+<TD CLASS="R20C9">51,20</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">66</TD>
+<TD CLASS="R20C2">4751039480115</TD>
+<TD CLASS="R20C2">Nail Forms for Gel Modeling - NEW, 30pcs</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">15</TD>
+<TD CLASS="R20C1">1,02</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,02</TD>
+<TD CLASS="R20C9">15,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">67</TD>
+<TD CLASS="R20C2">4751039482423</TD>
+<TD CLASS="R20C2">Quick Dot Gloss Top UV/LED, 8ml, Small White dots C04</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,27</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,27</TD>
+<TD CLASS="R20C9">9,81</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">68</TD>
+<TD CLASS="R20C2">4751039482447</TD>
+<TD CLASS="R20C2">Quick Dot Gloss Top UV/LED, 8ml, Large White&Black dots B10</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,27</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,27</TD>
+<TD CLASS="R20C9">9,81</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">69</TD>
+<TD CLASS="R20C2">4751039483307</TD>
+<TD CLASS="R20C2">Quick Dot Matte Top UV/LED, 8ml, Large&Small White dots B05</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,28</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,28</TD>
+<TD CLASS="R20C9">9,84</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">70</TD>
+<TD CLASS="R20C2">4751039484168</TD>
+<TD CLASS="R20C2">Quick Sparkle Shine UV/LED Top 8ml, Majestic</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C9">10,86</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">71</TD>
+<TD CLASS="R20C2">4751039484175</TD>
+<TD CLASS="R20C2">Quick Sparkle Shine UV/LED Top 8ml, Star Light</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C9">10,86</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">72</TD>
+<TD CLASS="R20C2">4751039484182</TD>
+<TD CLASS="R20C2">Quick Sparkle Shine UV/LED Top 8ml, Tender</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,62</TD>
+<TD CLASS="R20C9">10,86</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">73</TD>
+<TD CLASS="R20C2">4751039483888</TD>
+<TD CLASS="R20C2">Lint-Free Wipes</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,23</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,23</TD>
+<TD CLASS="R20C9">21,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">74</TD>
+<TD CLASS="R20C2">4752307000035</TD>
+<TD CLASS="R20C2">Stamping nail art polish, 12 ml, Black</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,39</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,39</TD>
+<TD CLASS="R20C9">10,17</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">75</TD>
+<TD CLASS="R20C2">4752307000042</TD>
+<TD CLASS="R20C2">Stamping nail art polish, 12 ml, White</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,39</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,39</TD>
+<TD CLASS="R20C9">10,17</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">76</TD>
+<TD CLASS="R20C2">4751039481839</TD>
+<TD CLASS="R20C2">Stamping nail art polish, 8 ml, Silver 12</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,05</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,05</TD>
+<TD CLASS="R20C9">6,10</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">77</TD>
+<TD CLASS="R20C2">4751039481747</TD>
+<TD CLASS="R20C2">Stamping nail art polish, 8 ml, Gold 26</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,05</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,05</TD>
+<TD CLASS="R20C9">6,10</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">78</TD>
+<TD CLASS="R20C2">4751039482454</TD>
+<TD CLASS="R20C2">Double-sided nail stamper</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,43</TD>
+<TD CLASS="R20C9">13,29</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">79</TD>
+<TD CLASS="R20C2">40059297</TD>
+<TD CLASS="R20C2">Stamping metal plates, YICAI-354 Stamping Plate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C9">1,57</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">80</TD>
+<TD CLASS="R20C2">40059273</TD>
+<TD CLASS="R20C2">Stamping metal plates, YICAI-254 Stamping Plate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C9">1,57</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">81</TD>
+<TD CLASS="R20C2">4751039484014</TD>
+<TD CLASS="R20C2">Molecular Base UV/LED, 15ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">10</TD>
+<TD CLASS="R20C1">4,19</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,19</TD>
+<TD CLASS="R20C9">41,90</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">82</TD>
+<TD CLASS="R20C2">4751039480184</TD>
+<TD CLASS="R20C2">Diamond Glue UV/LED Clear 8ml</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,78</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,78</TD>
+<TD CLASS="R20C9">11,34</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">83</TD>
+<TD CLASS="R20C2">40077116</TD>
+<TD CLASS="R20C2">Bag with NAI_S logo, Big</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">5,58</TD>
+<TD CLASS="R20C1">99,90</TD>
+<TD CLASS="R20C1">0,01</TD>
+<TD CLASS="R20C9">0,01</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">84</TD>
+<TD CLASS="R20C2">41176177</TD>
+<TD CLASS="R20C2">Stamping metal plates, PY-J028 Stamping Plate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C9">1,57</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">85</TD>
+<TD CLASS="R20C2">4751039482966</TD>
+<TD CLASS="R20C2">Stamping metal plates, PY-J003 Stamping Plate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C9">1,57</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">86</TD>
+<TD CLASS="R20C2">40117683</TD>
+<TD CLASS="R20C2">Stamping metal plates, PY-J004 Stamping Plate</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">1,57</TD>
+<TD CLASS="R20C9">1,57</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">87</TD>
+<TD CLASS="R20C2">4751039480634</TD>
+<TD CLASS="R20C2">Cuticle Remover, 15ml with a pipette</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">30</TD>
+<TD CLASS="R20C1">2,20</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">2,20</TD>
+<TD CLASS="R20C9">66,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">88</TD>
+<TD CLASS="R20C2">4751039485363</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 702Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">89</TD>
+<TD CLASS="R20C2">4751039487510</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 579Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">21,96</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">90</TD>
+<TD CLASS="R20C2">4751039481464</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 537Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">9</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">32,94</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">91</TD>
+<TD CLASS="R20C2">4751039487206</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 511Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">6</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">21,96</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">92</TD>
+<TD CLASS="R20C2">4751039487770</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, Milky DREAM</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">93</TD>
+<TD CLASS="R20C2">4751039481556</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 600Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">94</TD>
+<TD CLASS="R20C2">4751039485332</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1079</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">95</TD>
+<TD CLASS="R20C2">4751039487381</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 551Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">96</TD>
+<TD CLASS="R20C2">4751039486087</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1069</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">97</TD>
+<TD CLASS="R20C2">4751039486155</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1076</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">98</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 257v</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">99</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 155g</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">100</TD>
+<TD CLASS="R20C2">4751039486360</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1101</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">101</TD>
+<TD CLASS="R20C2">4751039486711</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 227c</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">102</TD>
+<TD CLASS="R20C2">4751039480962</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 138c</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">103</TD>
+<TD CLASS="R20C2">4751039486858</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 857c</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">104</TD>
+<TD CLASS="R20C2">4751039481143</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 881b</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">105</TD>
+<TD CLASS="R20C2">4751039487671</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 814Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">106</TD>
+<TD CLASS="R20C2">4751039487749</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 821Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">107</TD>
+<TD CLASS="R20C2">4751039486940</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, RAINBOW 04</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">108</TD>
+<TD CLASS="R20C2">4751039485301</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 111g</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">109</TD>
+<TD CLASS="R20C2">4751039486643</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 136g</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">110</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1086</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">111</TD>
+<TD CLASS="R20C2">4751039486209</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1083</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">112</TD>
+<TD CLASS="R20C2">4751039485493</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, GALAXY 21</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">113</TD>
+<TD CLASS="R20C2">4751039485608</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, GALAXY 05</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">114</TD>
+<TD CLASS="R20C2">4751039485592</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, GALAXY 03</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">115</TD>
+<TD CLASS="R20C2">4751039481235</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, GALAXY 01</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">116</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 096v</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">117</TD>
+<TD CLASS="R20C2">4751039486698</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 169b</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">118</TD>
+<TD CLASS="R20C2">4751039486278</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1092</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">119</TD>
+<TD CLASS="R20C2">4751039486384</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1103</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">120</TD>
+<TD CLASS="R20C2">4751039485547</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 31</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">121</TD>
+<TD CLASS="R20C2">4751039485714</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 16H</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">122</TD>
+<TD CLASS="R20C2">4751039482775</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 23</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">123</TD>
+<TD CLASS="R20C2">4751039485578</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 22F</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">124</TD>
+<TD CLASS="R20C2">4751039485721</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 17H</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">125</TD>
+<TD CLASS="R20C2">4751039487886</TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, 10D-08</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">16,12</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">126</TD>
+<TD CLASS="R20C2">4751039481341</TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, 704</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">12,09</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">127</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, DISCO 56</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">20,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">128</TD>
+<TD CLASS="R20C2">4751039488043</TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, SATIN SILVER</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">20,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">129</TD>
+<TD CLASS="R20C2">4751039488012</TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, SATIN PEACH</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">20,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">130</TD>
+<TD CLASS="R20C2">4751039485059</TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, Holographic Cat Eye</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">20,15</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">131</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Magnetic UV/LED Gel Polish, 12ml, 610</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">4,03</TD>
+<TD CLASS="R20C9">12,09</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">132</TD>
+<TD CLASS="R20C2">4751039487664</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 813Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">133</TD>
+<TD CLASS="R20C2">4751039487596</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 804Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">134</TD>
+<TD CLASS="R20C2">4751039483451</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 602Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">135</TD>
+<TD CLASS="R20C2">4751039487602</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 805Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">136</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 808Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">137</TD>
+<TD CLASS="R20C2">4751039487695</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 816Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">138</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 822Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">139</TD>
+<TD CLASS="R20C2">4751039487688</TD>
+<TD CLASS="R20C2">Quick Polish LED/UV Gel Polish, 12ml, 815Q</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">140</TD>
+<TD CLASS="R20C2">4751039481624</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 01</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">141</TD>
+<TD CLASS="R20C2">4751039481228</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, RAINBOW 10</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">142</TD>
+<TD CLASS="R20C2">4751039486889</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 978c</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">143</TD>
+<TD CLASS="R20C2">4751039486582</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1050 Holographic</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">3</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">10,98</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">144</TD>
+<TD CLASS="R20C2">4751039485950</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1028</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">145</TD>
+<TD CLASS="R20C2">4751039485974</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1042</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">4</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">14,64</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">146</TD>
+<TD CLASS="R20C2">4751039486339</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, 1098</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">147</TD>
+<TD CLASS="R20C2">4751039485530</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 33</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">148</TD>
+<TD CLASS="R20C2">4751039485585</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, DISCO 32</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">5</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">18,30</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">149</TD>
+<TD CLASS="R20C2">4751039481242</TD>
+<TD CLASS="R20C2">Gel Polish UV/LED, 12ml, GALAXY 02</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">2</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">3,66</TD>
+<TD CLASS="R20C9">7,32</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R20C1">150</TD>
+<TD CLASS="R20C2"><SPAN></SPAN></TD>
+<TD CLASS="R20C2">zPAK - Shipping cost</TD>
+<TD CLASS="R20C1">PCE</TD>
+<TD CLASS="R20C1">1</TD>
+<TD CLASS="R20C1">380,00</TD>
+<TD CLASS="R20C1">0,00</TD>
+<TD CLASS="R20C1">380,00</TD>
+<TD CLASS="R20C9">380,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=131>
+<COL WIDTH=132>
+<COL WIDTH=51>
+<COL WIDTH=52>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=201>
+<COL WIDTH=63>
+<COL WIDTH=63>
+<COL>
+<TR>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=37>
+<COL WIDTH=137>
+<COL WIDTH=322>
+<COL WIDTH=36>
+<COL WIDTH=48>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=96>
+<COL>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R171C1" COLSPAN=4 STYLE="border-right: #ffffff 1px none; "><SPAN STYLE="white-space:nowrap;max-width:0px;">Total:</SPAN></TD>
+<TD CLASS="R171C5">947</TD>
+<TD CLASS="R171C6"><SPAN></SPAN></TD>
+<TD CLASS="R171C7"><SPAN></SPAN></TD>
+<TD CLASS="R171C7"><SPAN></SPAN></TD>
+<TD CLASS="R171C9">4 140,04</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R172C1" COLSPAN=7 STYLE="border-right: #ffffff 1px none; "><SPAN STYLE="white-space:nowrap;max-width:0px;">VAT&nbsp;without&nbsp;VAT:</SPAN></TD>
+<TD CLASS="R172C8"><SPAN></SPAN></TD>
+<TD CLASS="R172C9">0,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R173>
+<TD CLASS="R173C0"><SPAN></SPAN></TD>
+<TD CLASS="R173C1" COLSPAN=8><SPAN STYLE="white-space:nowrap;max-width:0px;">TOTAL:</SPAN></TD>
+<TD CLASS="R173C9">4 140,04 EUR</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R20>
+<TD CLASS="R20C0"><SPAN></SPAN></TD>
+<TD CLASS="R174C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Debt&nbsp;(+)/Prepayment&nbsp;(-)&nbsp;on&nbsp;28.11.2024:&nbsp;4 140,04</SPAN></TD>
+<TD CLASS="R174C2"><SPAN></SPAN></TD>
+<TD CLASS="R174C2"><SPAN></SPAN></TD>
+<TD CLASS="R174C2"><SPAN></SPAN></TD>
+<TD CLASS="R174C2"><SPAN></SPAN></TD>
+<TD CLASS="R174C6"><SPAN></SPAN></TD>
+<TD CLASS="R174C6"><SPAN></SPAN></TD>
+<TD CLASS="R174C6"><SPAN></SPAN></TD>
+<TD CLASS="R174C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R173>
+<TD CLASS="R173C0"><SPAN></SPAN></TD>
+<TD CLASS="R175C1" COLSPAN=9><SPAN STYLE="white-space:nowrap;max-width:0px;">Four&nbsp;thousand&nbsp;one&nbsp;hundred&nbsp;forty&nbsp;&nbsp;04&nbsp;</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=131>
+<COL WIDTH=132>
+<COL WIDTH=51>
+<COL WIDTH=52>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=201>
+<COL WIDTH=63>
+<COL WIDTH=63>
+<COL>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C0" COLSPAN=10>Article 146 (1)(a) of the EU VAT Directive (2006/112/EC)<BR>Article 44 of the EU VAT Directive (2006/112/EC)</TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=56>
+<COL WIDTH=35>
+<COL WIDTH=35>
+<COL WIDTH=71>
+<COL WIDTH=142>
+<COL WIDTH=33>
+<COL WIDTH=66>
+<COL WIDTH=68>
+<COL WIDTH=230>
+<COL>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R177C2" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R177C2"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R9>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R178C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Notes!&nbsp;Please&nbsp;show&nbsp;Invoice&nbsp;No&nbsp;in&nbsp;your&nbsp;payment&nbsp;details:&nbsp;PRO026712&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
+<TD CLASS="R178C2"><SPAN></SPAN></TD>
+<TD CLASS="R178C3"><SPAN></SPAN></TD>
+<TD CLASS="R178C3"><SPAN></SPAN></TD>
+<TD CLASS="R178C3"><SPAN></SPAN></TD>
+<TD CLASS="R9C0"><SPAN></SPAN></TD>
+<TD CLASS="R178C7"><SPAN></SPAN></TD>
+<TD CLASS="R178C2"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R177C2" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R177C2"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R180C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">For&nbsp;the&nbsp;invoice&nbsp;checkout&nbsp;and&nbsp;packaging&nbsp;of&nbsp;goods&nbsp;responsible&nbsp;person&nbsp;is:</SPAN></TD>
+<TD CLASS="R177C2"><SPAN></SPAN></TD>
+<TD CLASS="R180C3"><SPAN></SPAN></TD>
+<TD CLASS="R180C3"><SPAN></SPAN></TD>
+<TD CLASS="R180C3"><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R180C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Responsible&nbsp;person&nbsp;for&nbsp;receivin&nbsp;goods</SPAN></TD>
+<TD CLASS="R177C2"><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Name,&nbsp;surename:</SPAN></TD>
+<TD CLASS="R181C2"><SPAN></SPAN></TD>
+<TD CLASS="R181C3" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">Agnese&nbsp;Skaldere-Jakovinenko&nbsp;e-veikals</SPAN></TD>
+<TD CLASS="R181C6"><SPAN></SPAN></TD>
+<TD CLASS="R181C7" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Name,&nbsp;surename:</SPAN></TD>
+<TD CLASS="R181C6"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R182C1">Date:</TD>
+<TD CLASS="R180C9" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">28.11.2024</SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C1">Date:</TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R182C1"><SPAN></SPAN></TD>
+<TD CLASS="R180C9" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C1"><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R182C1"><SPAN></SPAN></TD>
+<TD CLASS="R180C9" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C1"><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R182C1">Signature:</TD>
+<TD CLASS="R185C2" COLSPAN=4><SPAN></SPAN></TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C1">Signature:</TD>
+<TD CLASS="R185C2"><SPAN></SPAN></TD>
+<TD CLASS="R185C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R182C1"><SPAN></SPAN></TD>
+<TD CLASS="R186C2" COLSPAN=4>Place for Seal</TD>
+<TD CLASS="R180C9"><SPAN></SPAN></TD>
+<TD CLASS="R182C1" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R186C9" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Place&nbsp;for&nbsp;Seal</SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
