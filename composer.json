@@ -1,0 +1,41 @@
+{
+    "name": "logingrupa/oc-goodsreceived-plugin",
+    "type": "october-plugin",
+    "description": "Distributor goods-received note (GRN) import for Lovata Shopaholic — parses HTM delivery receipts, increments offer stock, manages active flags per site.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Logingrupa",
+            "email": "info@logingrupa.lv"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "october/system": "^4.0",
+        "october/rain": "^4.0",
+        "lovata/toolbox-plugin": "^2.2",
+        "lovata/shopaholic-plugin": "^1.32"
+    },
+    "autoload": {
+        "psr-4": {
+            "Logingrupa\\GoodsReceivedShopaholic\\": ""
+        }
+    },
+    "scripts": {
+        "test": "../../../vendor/bin/pest --configuration phpunit.xml",
+        "analyse": "../../../vendor/bin/phpstan analyse --configuration=phpstan.neon",
+        "baseline": "../../../vendor/bin/phpstan analyse --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon",
+        "phpmd": "../../../vendor/bin/phpmd classes,components,models,Plugin.php text phpmd.xml",
+        "pint": "../../../vendor/bin/pint . --config=pint.json",
+        "pint-test": "../../../vendor/bin/pint . --config=pint.json --test",
+        "rector-dry": "../../../vendor/bin/rector process --config=rector.php --dry-run",
+        "rector": "../../../vendor/bin/rector process --config=rector.php",
+        "qa": ["@pint-test", "@analyse", "@phpmd", "@test"]
+    },
+    "extra": {
+        "october": {
+            "plugin": "Logingrupa.GoodsReceivedShopaholic",
+            "installer-name": "goodsreceivedshopaholic"
+        }
+    }
+}

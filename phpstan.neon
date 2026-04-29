@@ -1,0 +1,20 @@
+includes:
+    - ../../../vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 10
+    paths:
+        - classes
+        - components
+        - models
+        - Plugin.php
+    excludePaths:
+        - tests
+        - updates
+        - lang
+        - assets
+    tmpDir: ../../../storage/temp/phpstan/goodsreceived
+
+    universalObjectCratesClasses:
+        - Lovata\Toolbox\Classes\Item\ElementItem

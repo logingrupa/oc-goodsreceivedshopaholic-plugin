@@ -1,0 +1,6 @@
+plugin:
+    name: logingrupa.goodsreceivedshopaholic::lang.plugin.name
+    description: logingrupa.goodsreceivedshopaholic::lang.plugin.description
+    author: Logingrupa
+    icon: icon-truck
+    homepage: ''
