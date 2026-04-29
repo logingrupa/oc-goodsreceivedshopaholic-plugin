@@ -68,7 +68,7 @@
 - [ ] **UI-08**: Initial-reset checkbox on upload preview. Disabled unless Settings.allow_initial_reset=true. When ticked, requires operator type literal string `RESET` into a confirmation field before Apply enabled. Pre-mutation snapshot count shown in confirmation copy.
 - [ ] **UI-09**: Pre-parse duplicate detection — on upload, controller checks invoice_number from filename pattern BEFORE running parse; if duplicate exists, shows reject screen with prior-apply summary + override checkbox (D12) before parse cost incurred.
 - [ ] **UI-10**: Override-and-reimport UX — explicit warning copy: "This re-applies the invoice ADDITIVELY on top of the prior apply. Stock will be incremented by new line quantities. This is NOT a delta calculation. Continue?" Operator types `OVERRIDE` to confirm.
-- [ ] **UI-11**: Console command `goodsreceived:recompute_active_from_stock` registered via `Plugin::register()` → `registerConsoleCommand()`. Calls `ActiveFlagService::reconcileAll()` chunked (500). Sync execution. Honors `active_managed_by='operator'` skip.
+- [x] **UI-11**: Console command `goodsreceived:recompute_active_from_stock` registered via `Plugin::register()` → `registerConsoleCommand()`. Calls `ActiveFlagService::reconcileAll()` chunked (500). Sync execution. Honors `active_managed_by='operator'` skip.
 - [x] **UI-12**: Plugin boot self-check: warn-log if PHP `max_file_uploads` < 20 OR `upload_max_filesize` < 10M (multi-file upload prerequisite).
 
 ### Operations + QA + Polish (Phase 5)
@@ -186,7 +186,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | UI-08 | Phase 4 | Pending |
 | UI-09 | Phase 4 | Pending |
 | UI-10 | Phase 4 | Pending |
-| UI-11 | Phase 4 | Pending |
+| UI-11 | Phase 4 | Closed (2026-04-29) — plan 04-02 |
 | UI-12 | Phase 4 | Closed (2026-04-29) — plan 04-01 |
 | OPS-01 | Phase 5 | Pending |
 | OPS-02 | Phase 5 | Pending |

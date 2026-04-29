@@ -107,7 +107,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Plans**: 8 plans
   - [x] 04-01-PLAN.md - Plugin boot self-check + parseIniSize() helper (UI-12)
-  - [ ] 04-02-PLAN.md - Console command goodsreceived:recompute_active_from_stock (UI-11)
+  - [x] 04-02-PLAN.md - Console command goodsreceived:recompute_active_from_stock (UI-11) *(closed 2026-04-29 — final class RecomputeActiveFromStock extends Illuminate\Console\Command, signature `goodsreceived:recompute_active_from_stock {--chunk=500}`, handle() returns 0 on success / 1 on Throwable; Plugin::register() wires registerConsoleCommand for UI-11/D-33; ActiveFlagService final removed for boundary-mock support (D-04-02-01 mirrors D-03-07-01); progress bar deferred to V2-OPS-04 per D-04-02-03; phpstan.neon + Makefile scopes extended to console/ for L10 + phpmd + QA-09 grep-gate symmetry; 7 new Pest cases (5 RecomputeActiveFromStock + 2 PluginRegistersConsoleCommand source-grep) bring suite to 159/159 (was 152, +7) / 770 assertions (+40); make all green; phpstan-baseline.neon SHA UNCHANGED at 4b3227fa…91530a)
   - [ ] 04-03-PLAN.md - Backend controller foundation + audit history list + Invoice attachOne (UI-01 + UI-05 + UI-06 + UI-07)
   - [ ] 04-04-PLAN.md - onUpload + onUpdateLine + pre-parse duplicate detection (UI-02 + UI-03 + UI-07 + UI-09)
   - [ ] 04-05-PLAN.md - onApply + Cache::lock debounce + confirmation modal (UI-04)
@@ -140,5 +140,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Schema, Scaffold, Settings, Permissions | 8/8 | Complete | 2026-04-29 |
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
-| 4. Backend Controller, Upload/Preview/Apply UI, Console | 1/8 | In progress | - |
+| 4. Backend Controller, Upload/Preview/Apply UI, Console | 2/8 | In progress | - |
 | 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |
