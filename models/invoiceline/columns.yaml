@@ -1,0 +1,27 @@
+columns:
+    row_index:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.row_index'
+        type: number
+        sortable: true
+    ean:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.ean'
+        type: text
+    product_name_raw:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.product_name'
+        type: text
+        searchable: true
+    qty:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.qty'
+        type: number
+    override_qty:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.override_qty'
+        type: number
+    matched_offer_id:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.matched_offer_id'
+        type: number
+    match_strategy:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.match_strategy'
+        type: text
+    applied:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied'
+        type: switch

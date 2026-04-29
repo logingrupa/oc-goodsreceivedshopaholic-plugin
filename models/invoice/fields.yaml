@@ -1,0 +1,77 @@
+tabs:
+    fields:
+        invoice_number:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.invoice_number'
+            type: text
+            disabled: true
+            span: left
+        status:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.status'
+            type: text
+            disabled: true
+            span: right
+        applied_by_user_id:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_by'
+            type: text
+            disabled: true
+            span: left
+        applied_at:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_at'
+            type: datepicker
+            disabled: true
+            mode: datetime
+            span: right
+        total_lines:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.total_lines'
+            type: number
+            disabled: true
+            span: left
+        matched_lines:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.matched_lines'
+            type: number
+            disabled: true
+            span: right
+        unmatched_lines:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.unmatched_lines'
+            type: number
+            disabled: true
+            span: left
+        stock_added_units:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.stock_added_units'
+            type: number
+            disabled: true
+            span: right
+        country_code:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.country_code'
+            type: text
+            disabled: true
+            span: left
+        source_filename:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.source_filename'
+            type: text
+            disabled: true
+            span: right
+        original_file:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.field.original_file'
+            type: fileupload
+            mode: file
+            disabled: true
+            span: full
+        notes:
+            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
+            label: 'logingrupa.goodsreceivedshopaholic::lang.column.notes'
+            type: textarea
+            disabled: true
+            size: tiny
+            span: full

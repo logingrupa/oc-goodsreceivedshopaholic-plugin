@@ -48,6 +48,7 @@ use October\Rain\Database\Traits\Validation;
  * @property-read \October\Rain\Database\Collection|InitialResetSnapshot[] $snapshots
  * @property-read Invoice|null $overrideOf
  * @property-read \October\Rain\Database\Collection|Invoice[] $overrides
+ * @property-read \System\Models\File|null $original_file
  */
 class Invoice extends Model
 {
@@ -114,5 +115,18 @@ class Invoice extends Model
     /** @var array<string, array<int|string, mixed>> */
     public $belongsTo = [
         'overrideOf' => [self::class, 'key' => 'override_of_invoice_id'],
+    ];
+
+    /**
+     * Attach the original distributor `.HTM` delivery receipt for audit / re-parse.
+     *
+     * Per UI-06 + D-28: backend operators can download the original file from the
+     * Invoice detail screen. October's System\Models\File handles UUID-based file
+     * paths and content-disposition — no custom serving code required (T-04-03-02).
+     *
+     * @var array<string, array<int|string, mixed>>
+     */
+    public $attachOne = [
+        'original_file' => [\System\Models\File::class],
     ];
 }

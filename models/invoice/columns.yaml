@@ -1,0 +1,32 @@
+columns:
+    invoice_number:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.invoice_number'
+        searchable: true
+        sortable: true
+    status:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.status'
+        type: text
+        sortable: true
+    total_lines:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.total_lines'
+        type: number
+    matched_lines:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.matched_lines'
+        type: number
+    unmatched_lines:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.unmatched_lines'
+        type: number
+    stock_added_units:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.stock_added_units'
+        type: number
+    applied_by_user_id:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_by'
+        type: number
+    applied_at:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_at'
+        type: datetime
+        sortable: true
+    country_code:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.country_code'
+        type: text
+        invisible: true
