@@ -1,4 +1,8 @@
-{# Rendered by onApply when Cache::lock cannot be acquired (plan 04-05). #}
+{# UI-04 / D-13 / T-04-05-01: rendered by onApply when Cache::lock cannot be
+   acquired (concurrent click holding the lock). First line of defense before
+   ApplyOrchestrator's body-side lockForUpdate kicks in. The operator gets a
+   user-visible "wait" message instead of a server error. #}
 <div class="alert alert-warning">
-    {{ 'logingrupa.goodsreceivedshopaholic::lang.flash.apply_in_progress'|trans }}
+    <p>{{ 'logingrupa.goodsreceivedshopaholic::lang.flash.apply_in_progress'|trans }}</p>
+    <p class="help-block">{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.in_progress_help'|trans }}</p>
 </div>

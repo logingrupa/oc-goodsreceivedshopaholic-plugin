@@ -82,8 +82,19 @@ use October\Rain\Database\Collection as DbCollection;
  * `ApplyAlreadyDoneException` and any other `GoodsReceivedException` reach
  * the caller cleanly. Tiger-Style fail-fast — log + rethrow happens at the
  * boundary layer (controller / console command), not here.
+ *
+ * Boundary-mock note (D-04-05-01 / mirror of D-03-07-01 + D-04-02-01): NOT
+ * marked `final` so the Phase 4 `onApply` AJAX handler can be exercised in
+ * Pest unit tests with a synthetic failing-orchestrator subclass that pins
+ * the `try { ... } finally { $obLock->release(); }` lock-release contract
+ * (T-04-05-02). Production code never subclasses — `app(ApplyOrchestrator::class)`
+ * always resolves the leaf class.
+ *
+ * @internal The class behaves as if final at the production-code boundary.
+ *           Subclassing is sanctioned ONLY for unit-test failing-orchestrator
+ *           shims used to pin boundary-layer cleanup contracts.
  */
-final class ApplyOrchestrator
+class ApplyOrchestrator
 {
     private readonly StockApplyService $obStockApply;
 

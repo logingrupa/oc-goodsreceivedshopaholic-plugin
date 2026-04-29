@@ -1,0 +1,17 @@
+{# UI-04 / T-04-05-04: rendered by onApply when ApplyAlreadyDoneException is
+   raised inside ApplyOrchestrator (status='applied' idempotency gate). The
+   handler catches the typed exception and presents its prior-result context
+   in this structured surface so the operator understands why their click
+   did nothing. Override-and-reimport (plan 04-06) is the documented path
+   for intentional re-application. #}
+<div class="alert alert-info">
+    <h4>{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.already_done_title'|trans }}</h4>
+    <p>This invoice was previously applied:</p>
+    <ul>
+        <li>Invoice number: <strong>{{ context.invoice_number }}</strong></li>
+        <li>Applied at: <strong>{{ context.prior_applied_at|default('—') }}</strong></li>
+        <li>Applied by user: <strong>{{ context.prior_applied_by|default('—') }}</strong></li>
+        <li>Prior stock added (units): <strong>{{ context.prior_stock_added_units }}</strong></li>
+    </ul>
+    <p class="help-block">{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.already_done_help'|trans }}</p>
+</div>

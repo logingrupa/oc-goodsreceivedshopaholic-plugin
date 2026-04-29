@@ -161,7 +161,9 @@ it('onApplyShowConfirm throws when invoice_id does not exist', function (): void
     }
 
     expect($obException)->not->toBeNull();
-    expect((string) $obException->getContents()['message'])->toContain('99999');
+    // Lang::get returns the key path under the unit-bootstrap (D-04-04-07);
+    // assert on the key fragment that uniquely pins the not-found throw site.
+    expect(strtolower((string) $obException->getContents()['message']))->toContain('invoice_not_found');
 });
 
 it('onApply happy path applies stock + flips status + returns success partial (UI-04 happy path)', function (): void {
@@ -263,8 +265,7 @@ it('onApply releases lock in finally even when ApplyOrchestrator throws (T-04-05
 
     // Bind a failing orchestrator into the container — the boundary-mock pattern
     // sanctioned by D-03-07-01 for this kind of throw-injected lock-release pin.
-    $obFailing = new class extends ApplyOrchestrator
-    {
+    $obFailing = new class () extends ApplyOrchestrator {
         #[\Override]
         public function apply(int $iInvoiceId, int $iAppliedByUserId): ApplyResult
         {

@@ -92,4 +92,15 @@ return [
         'bad_extension' => 'Only .HTM files are accepted; received extension: :extension.',
         'too_large'     => 'File exceeds 10 MB; received: :size bytes.',
     ],
+    'apply' => [
+        'confirm_title'        => 'Confirm Apply',
+        'success_title'        => 'Invoice applied',
+        'already_done_title'   => 'Already applied',
+        'already_done_help'    => 'Apply is idempotent. Use the override-and-reimport flow if reapply is intended.',
+        'in_progress_help'     => 'A concurrent apply is in progress. Wait a few seconds and try again.',
+        'button_now'           => 'Apply now',
+        'spinner'              => 'Applying…',
+        'invoice_id_required'  => 'invoice_id is required.',
+        'invoice_not_found'    => 'Invoice #:id not found.',
+    ],
 ];

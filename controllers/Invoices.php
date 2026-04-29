@@ -7,10 +7,14 @@ namespace Logingrupa\GoodsReceivedShopaholic\Controllers;
 use Backend\Classes\Controller;
 use BackendAuth;
 use BackendMenu;
+use Cache;
+use Illuminate\Support\Facades\DB;
 use Input;
 use Lang;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\ApplyAlreadyDoneException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\GoodsReceivedException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ApplyOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Orchestrator\ParseAndPersistOrchestrator;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
@@ -65,6 +69,17 @@ class Invoices extends Controller
      * Case-insensitive (production filenames mix `Nr_PRO` / `nr_pro`).
      */
     private const FILENAME_INVOICE_NUMBER_REGEX = '/^Nr_PRO(\d+)_/i';
+
+    /**
+     * Cache::lock TTL (seconds) for `onApply` debouncing — D-13. 60s is well
+     * above the apply-orchestrator's typical wall time; the lock is released
+     * in a `finally` block immediately after the orchestrator returns or
+     * throws, so the TTL is a SAFETY-NET against a process crash mid-apply,
+     * NOT the load-bearing release path. Source-grep pinned by
+     * `ApplyDoubleClickDebounceTest` (literal `APPLY_LOCK_TTL_SECONDS = 60`
+     * + lock-key shape `apply-invoice-`).
+     */
+    private const APPLY_LOCK_TTL_SECONDS = 60;
 
     /** @var list<string> */
     public $implement = [
@@ -221,6 +236,150 @@ class Invoices extends Controller
             'override_qty'    => $obLine->override_qty,
             'override_reason' => $obLine->override_reason,
         ];
+    }
+
+    /**
+     * AJAX handler: render the Apply confirmation modal listing total units,
+     * matched offer count, and unmatched line count for an invoice the
+     * operator is about to apply (UI-04 / D-12).
+     *
+     * Total-units math sums `COALESCE(override_qty, qty)` across matched
+     * lines because StockApplyService applies `override_qty ?? qty` per line
+     * (Phase 3 plan 03-03). DB::raw avoids the N+1 hydration cost of a
+     * Collection iteration.
+     *
+     * Response shape:
+     *   ['#applyConfirm' => makePartial('_partials/_apply_confirm', [...])]
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onApplyShowConfirm(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.apply_invoices');
+
+        $iInvoiceId = $this->scalarToInt(Input::get('invoice_id'));
+        $obInvoice = Invoice::find($iInvoiceId);
+        if (! $obInvoice instanceof Invoice) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.apply.invoice_not_found',
+                    ['id' => $iInvoiceId],
+                ),
+            ]);
+        }
+
+        $iTotalUnits = (int) InvoiceLine::where('invoice_id', $iInvoiceId)
+            ->whereNotNull('matched_offer_id')
+            ->sum(DB::raw('COALESCE(override_qty, qty)'));
+
+        return [
+            '#applyConfirm' => $this->makePartial('_partials/_apply_confirm', [
+                'invoice'         => $obInvoice,
+                'total_units'     => $iTotalUnits,
+                'offer_count'     => (int) $obInvoice->matched_lines,
+                'unmatched_count' => (int) $obInvoice->unmatched_lines,
+            ]),
+        ];
+    }
+
+    /**
+     * AJAX handler: execute apply via ApplyOrchestrator. Cache::lock prevents
+     * double-click double-apply (D-13 / T-04-05-01). The orchestrator itself
+     * uses Invoice::lockForUpdate() inside its DB::transaction (Phase 3 D-24)
+     * — the Cache::lock here is a CHEAPER first line of defense that fails
+     * fast on the SECOND click instead of waiting for the DB row lock to
+     * release.
+     *
+     * The `try/finally` is the load-bearing pattern (T-04-05-02 mitigation):
+     * even if ApplyOrchestrator throws ANY exception, the finally releases
+     * the cache lock. The inner try/catch around the orchestrator call is
+     * for the typed `ApplyAlreadyDoneException` only — every other exception
+     * propagates with the lock still released by the outer finally.
+     *
+     * Response shape:
+     *   - lock-not-acquired: ['#applyResult' => makePartial('_partials/_apply_in_progress')]
+     *   - already-applied:   ['#applyResult' => makePartial('_partials/_apply_already_done', [...])]
+     *   - success:           ['#applyResult' => makePartial('_partials/_apply_success', [...])]
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onApply(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.apply_invoices');
+
+        $iInvoiceId = $this->scalarToInt(Input::get('invoice_id'));
+        if ($iInvoiceId <= 0) {
+            throw new AjaxException([
+                'message' => (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.apply.invoice_id_required'),
+            ]);
+        }
+
+        $iUserId = $this->resolveBackendUserId();
+
+        $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
+        if (! $obLock->get()) {
+            return [
+                '#applyResult' => $this->makePartial('_partials/_apply_in_progress'),
+            ];
+        }
+
+        try {
+            return $this->runApplyUnderLock($iInvoiceId, $iUserId);
+        } finally {
+            $obLock->release();
+        }
+    }
+
+    /**
+     * Inner apply path executed inside the Cache::lock try/finally. Catches
+     * `ApplyAlreadyDoneException` to render the structured already-done
+     * partial (T-04-05-04); all other exceptions propagate so the outer
+     * finally still releases the lock.
+     *
+     * @return array<string, mixed>
+     */
+    private function runApplyUnderLock(int $iInvoiceId, int $iUserId): array
+    {
+        $obOrchestrator = $this->resolveApplyOrchestrator();
+
+        try {
+            $obResult = $obOrchestrator->apply($iInvoiceId, $iUserId);
+
+            return [
+                '#applyResult' => $this->makePartial('_partials/_apply_success', [
+                    'invoice_id' => $iInvoiceId,
+                    'result'     => $obResult,
+                ]),
+            ];
+        } catch (ApplyAlreadyDoneException $obException) {
+            return [
+                '#applyResult' => $this->makePartial('_partials/_apply_already_done', [
+                    'context' => $obException->arContext,
+                ]),
+            ];
+        }
+    }
+
+    /**
+     * Resolve the apply orchestrator from the IoC container. Protected so the
+     * Pest test shim can swap the apply path for a tracking double without
+     * needing to subclass the (now non-final) orchestrator itself —
+     * D-04-05-01 opens ApplyOrchestrator from `final` for boundary-mock
+     * support, mirroring D-03-07-01 (ImportAuditService) + D-04-02-01
+     * (ActiveFlagService) precedent.
+     *
+     * Larastan's `app()` extension narrows the typed return — no defensive
+     * `instanceof` guard needed (mirrors D-04-02-02). Production callers
+     * always resolve via this hook; the shim subclass overrides it directly
+     * without forging the IoC binding.
+     */
+    protected function resolveApplyOrchestrator(): ApplyOrchestrator
+    {
+        return app(ApplyOrchestrator::class);
     }
 
     /**
