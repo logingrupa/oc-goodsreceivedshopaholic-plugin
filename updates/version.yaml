@@ -1,2 +1,8 @@
 "1.0.0":
     - "Initialize Goods Received Notes plugin scaffold."
+"1.0.1":
+    - "Schema lock: invoices, lines, initial-reset snapshot, offers active_managed_by."
+    - create_logingrupa_goods_received_invoices_table.php
+    - create_logingrupa_goods_received_invoice_lines_table.php
+    - create_logingrupa_goods_received_initial_reset_snapshot_table.php
+    - update_lovata_shopaholic_offers_add_active_managed_by.php
