@@ -34,11 +34,6 @@ use October\Rain\Database\Traits\Validation;
  * @property \Carbon\Carbon|null $created_at
  *
  * @property-read Invoice $invoice
- *
- * @method static \October\Rain\Database\Builder|InitialResetSnapshot newQuery()
- * @method static \October\Rain\Database\Builder|InitialResetSnapshot query()
- *
- * @mixin \Eloquent
  */
 class InitialResetSnapshot extends Model
 {

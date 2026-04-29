@@ -48,11 +48,6 @@ use October\Rain\Database\Traits\Validation;
  * @property-read \October\Rain\Database\Collection|InitialResetSnapshot[] $snapshots
  * @property-read Invoice|null $overrideOf
  * @property-read \October\Rain\Database\Collection|Invoice[] $overrides
- *
- * @method static \October\Rain\Database\Builder|Invoice newQuery()
- * @method static \October\Rain\Database\Builder|Invoice query()
- *
- * @mixin \Eloquent
  */
 class Invoice extends Model
 {

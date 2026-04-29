@@ -41,11 +41,6 @@ use October\Rain\Database\Traits\Validation;
  * @property \Carbon\Carbon $updated_at
  *
  * @property-read Invoice $invoice
- *
- * @method static \October\Rain\Database\Builder|InvoiceLine newQuery()
- * @method static \October\Rain\Database\Builder|InvoiceLine query()
- *
- * @mixin \Eloquent
  */
 class InvoiceLine extends Model
 {

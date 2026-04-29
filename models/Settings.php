@@ -22,11 +22,6 @@ use System\Models\SettingModel;
  * @property bool $auto_deactivate_on_zero
  * @property bool $auto_activate_on_stock
  * @property bool $allow_initial_reset
- *
- * @method static \October\Rain\Database\Builder|Settings newQuery()
- *
- * @mixin \System\Models\SettingModel
- * @mixin \Eloquent
  */
 class Settings extends SettingModel
 {
