@@ -145,9 +145,80 @@
 
 ## Traceability
 
-(Filled by roadmapper after phase mapping.)
+Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/56 requirements mapped (100% coverage).
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SCHEMA-01 | Phase 1 | Pending |
+| SCHEMA-02 | Phase 1 | Pending |
+| SCHEMA-03 | Phase 1 | Pending |
+| SCHEMA-04 | Phase 1 | Pending |
+| SCHEMA-05 | Phase 1 | Pending |
+| SCHEMA-06 | Phase 1 | Pending |
+| SCHEMA-07 | Phase 1 | Pending |
+| SCHEMA-08 | Phase 1 | Pending |
+| PARSE-01 | Phase 2 | Pending |
+| PARSE-02 | Phase 2 | Pending |
+| PARSE-03 | Phase 2 | Pending |
+| PARSE-04 | Phase 2 | Pending |
+| PARSE-05 | Phase 2 | Pending |
+| PARSE-06 | Phase 2 | Pending |
+| PARSE-07 | Phase 2 | Pending |
+| MATCH-01 | Phase 2 | Pending |
+| MATCH-02 | Phase 2 | Pending |
+| APPLY-01 | Phase 3 | Pending |
+| APPLY-02 | Phase 3 | Pending |
+| APPLY-03 | Phase 3 | Pending |
+| APPLY-04 | Phase 3 | Pending |
+| APPLY-05 | Phase 3 | Pending |
+| APPLY-06 | Phase 3 | Pending |
+| APPLY-07 | Phase 3 | Pending |
+| APPLY-08 | Phase 3 | Pending |
+| APPLY-09 | Phase 3 | Pending |
+| APPLY-10 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| UI-04 | Phase 4 | Pending |
+| UI-05 | Phase 4 | Pending |
+| UI-06 | Phase 4 | Pending |
+| UI-07 | Phase 4 | Pending |
+| UI-08 | Phase 4 | Pending |
+| UI-09 | Phase 4 | Pending |
+| UI-10 | Phase 4 | Pending |
+| UI-11 | Phase 4 | Pending |
+| UI-12 | Phase 4 | Pending |
+| OPS-01 | Phase 5 | Pending |
+| OPS-02 | Phase 5 | Pending |
+| OPS-03 | Phase 5 | Pending |
+| OPS-04 | Phase 5 | Pending |
+| OPS-05 | Phase 5 | Pending |
+| OPS-06 | Phase 5 | Pending |
+| QA-01 | Phase 2 | Pending |
+| QA-02 | Phase 2 | Pending |
+| QA-03 | Phase 3 | Pending |
+| QA-04 | Phase 3 | Pending |
+| QA-05 | Phase 3 | Pending |
+| QA-06 | Phase 3 | Pending |
+| QA-07 | Phase 1 | Pending |
+| QA-08 | Phase 3 | Pending |
+| QA-09 | Phase 3 | Pending |
+| QA-10 | Phase 4 | Pending |
+| QA-11 | Phase 1 | Pending |
+
+**Coverage by phase:**
+
+| Phase | REQ count | REQ-IDs |
+|-------|-----------|---------|
+| Phase 1: Schema, Scaffold, Settings, Permissions | 10 | SCHEMA-01..08, QA-07, QA-11 |
+| Phase 2: Pure Parsers, DTOs, Exceptions, EAN Matcher | 11 | PARSE-01..07, MATCH-01..02, QA-01, QA-02 |
+| Phase 3: Apply Layer + Orchestrators | 16 | APPLY-01..10, QA-03, QA-04, QA-05, QA-06, QA-08, QA-09 |
+| Phase 4: Backend Controller, Upload/Preview/Apply UI, Console | 13 | UI-01..12, QA-10 |
+| Phase 5: Ops, Lang, Polish, Public Release | 6 | OPS-01..06 |
+| **Total** | **56** | All v1 REQ-IDs mapped exactly once |
 
 ---
 
 *Requirements defined: 2026-04-29*
 *Open questions OQ1-OQ5 resolved with user 2026-04-29 → D11-D15 locked*
+*Roadmap traceability populated 2026-04-29*

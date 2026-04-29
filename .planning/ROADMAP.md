@@ -1,0 +1,113 @@
+# Roadmap: GoodsReceivedShopaholic
+
+**Milestone:** v1.0
+**Created:** 2026-04-29
+**Granularity:** coarse (5 phases)
+**Total v1 requirements:** 56 (8 SCHEMA + 7 PARSE + 2 MATCH + 10 APPLY + 12 UI + 6 OPS + 11 QA)
+**Coverage:** 56 / 56 mapped (100%)
+
+## Overview
+
+Five-phase journey from empty scaffold to a production-grade backend GRN import plugin. Phase 1 locks the persistence + permissions + Settings contract (everything else hangs off these). Phase 2 builds the pure, deterministic parse + match pipeline against real `.HTM` fixtures. Phase 3 implements all stock-mutating services + orchestrators with one transaction boundary, batched cache flush, and provenance-aware active-flag reconcile. Phase 4 ships the operator-facing backend controller, multi-file upload, preview/apply UX, override-and-reimport flow, and the reconcile console command. Phase 5 hardens for release: lang packs, README/runbook, multi-site smoke, public Composer publish, full `make all` green. QA requirements cross-cut: each is assigned to the phase where the production code under test ships.
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+Decimal phases appear between their surrounding integers in numeric order.
+
+- [ ] **Phase 1: Schema, Scaffold, Settings, Permissions** - Lock the persistence contract, Settings model with Multisite, 4 split permissions, lang scaffold, fixtures
+- [ ] **Phase 2: Pure Parsers, DTOs, Exceptions, EAN Matcher** - HTM string -> ParsedInvoice DTO; two-query EAN match; zero IO outside input
+- [ ] **Phase 3: Apply Layer + Orchestrators** - StockApply, ActiveFlag, InitialReset, ParseAndPersist + Apply orchestrators in one transaction with batched cache flush
+- [ ] **Phase 4: Backend Controller, Upload/Preview/Apply UI, Console** - Operator-facing multi-file upload, preview, override-and-reimport, audit history, recompute console
+- [ ] **Phase 5: Ops, Lang, Polish, Public Release** - Full lang packs, README + runbook, multi-site verification, public Composer publish, make all green
+
+## Phase Details
+
+### Phase 1: Schema, Scaffold, Settings, Permissions
+**Goal**: Lock the persistence contract, Settings model with Multisite isolation, split permissions, lang scaffold, and hermetic test fixtures so every downstream service has a stable foundation
+**Depends on**: Nothing (first phase)
+**Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04, SCHEMA-05, SCHEMA-06, SCHEMA-07, SCHEMA-08, QA-07, QA-11
+**Success Criteria** (what must be TRUE):
+  1. `php artisan october:up` creates `logingrupa_goods_received_invoices`, `logingrupa_goods_received_invoice_lines`, `logingrupa_goods_received_initial_reset_snapshot` tables and adds `lovata_shopaholic_offers.active_managed_by` column with default `system`
+  2. Backend Settings page at `Settings -> GoodsReceivedShopaholic` exposes 4 toggles (`enabled`, `auto_deactivate_on_zero`, `auto_activate_on_stock`, `allow_initial_reset`) and persists per-site (verified by `IsMultisiteAwareTest` and `MultisiteContextSwitchClearsCacheTest`)
+  3. 4 split permissions (`upload_invoices`, `apply_invoices`, `override_invoices`, `run_initial_reset`) appear in Backend Users -> Roles UI and gate `BackendAuth::userHasAccess()`
+  4. `GoodsReceivedTestCase::tearDown()` flushes model event listeners + every singleton's `flush()` so cross-test bleed is impossible (asserted by Pest run with `--parallel` exhibiting no order-dependent failures)
+  5. EAN columns are STRING(13) preserving leading zeros; `Invoice.invoice_number` UNIQUE index enforces idempotency at DB layer
+**Plans**: TBD
+
+### Phase 2: Pure Parsers, DTOs, Exceptions, EAN Matcher
+**Goal**: Convert any real `.HTM` distributor file into a typed `ParsedInvoice` DTO and resolve every line's EAN to an offer (or null) deterministically, with zero side effects outside DB reads
+**Depends on**: Phase 1
+**Requirements**: PARSE-01, PARSE-02, PARSE-03, PARSE-04, PARSE-05, PARSE-06, PARSE-07, MATCH-01, MATCH-02, QA-01, QA-02
+**Success Criteria** (what must be TRUE):
+  1. `HtmInvoiceParser->parse(string)` correctly extracts every `<TR class="R20|R21">` row from all 3 hermetic fixtures in `tests/fixtures/invoices/` (handles UTF-8 BOM, CRLF, unquoted `CLASS=R20`, malformed input)
+  2. `InvoiceNumberResolver` resolves invoice number from HTM body first; falls back to filename pattern `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM`; throws `InvoiceNumberMissingException` when neither yields a number
+  3. `QuantityNormalizer::parseQuantity('5,12')` throws `InvalidQuantityException` (decimal qty rejected BEFORE Eloquent's silent int-clamp); `PreservesLeadingZeroEanTest` confirms EAN string preservation
+  4. `EanMatcherService::matchBatch($arEans)` issues exactly TWO DB queries (offer.code WHERE IN; product.code WHERE IN with single-offer guard) regardless of input size; returns `array<ean, MatchResult>`
+  5. Unmatched EANs yield `match_strategy='none'` rows queryable via `WHERE matched_offer_id IS NULL`; partial-match invoices never throw
+  6. All parser/matcher tests are hermetic (no reads outside `tests/`) and run green under PHPStan level 10
+
+**Plans**: TBD
+
+### Phase 3: Apply Layer + Orchestrators
+**Goal**: Apply parsed invoices to live stock idempotently inside a single DB transaction with provenance-aware active-flag reconcile, batched cache flush, and one-shot baseline reset; ALL Settings reads go through `SettingsAccessor`
+**Depends on**: Phase 2
+**Requirements**: APPLY-01, APPLY-02, APPLY-03, APPLY-04, APPLY-05, APPLY-06, APPLY-07, APPLY-08, APPLY-09, APPLY-10, QA-03, QA-04, QA-05, QA-06, QA-08, QA-09
+**Success Criteria** (what must be TRUE):
+  1. Applying a 200-line invoice triggers <= N batched cache flushes (NOT 1200+); asserted by `Apply200LinesTriggersBatchedFlushNotPerSaveTest` — proves `saveQuietly` + post-commit batched `OfferListStore` flush works
+  2. Applying the same invoice twice succeeds the first time and throws `ApplyAlreadyDoneException` the second time with prior result returned; concurrent Apply clicks serialized via `Invoice::lockForUpdate()` (asserted by `LockForUpdateSerializesConcurrentApplyTest`)
+  3. ActiveFlagService 4-cell matrix (deactivate-on-zero on/off x activate-on-stock on/off) plus `SkipsManuallyDeactivatedOfferTest` (operator-set offers untouched via `active_managed_by='operator'`) all green
+  4. `InitialResetService` requires `allow_initial_reset=true` AND no prior reset; snapshots ALL offers + products to `goods_received_initial_reset_snapshot` BEFORE writing; runs chunked (`Offer::chunk(500)` + `saveQuietly`); restorable to exact prior state
+  5. Override-and-reimport (D12) creates new `Invoice` row with `override_of_invoice_id` pointer and applies new lines ADDITIVELY on top of prior apply (asserted by `OverrideReimportAddsOnTopTest`)
+  6. CI grep gate (`make lint:settings-accessor`) confirms `Settings::get(` appears ONLY in `classes/support/SettingsAccessor.php` — DRY enforced by `SettingsAccessorIsSoleConsumerOfSettingsGetTest`
+  7. Partial failure inside ApplyOrchestrator transaction rolls back EVERYTHING (stock writes + line.applied flags + invoice.status); asserted by `PartialFailureRollsBackEverythingTest` and `ActiveFlagInsideSameTransactionAsStockApplyTest`
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 4: Backend Controller, Upload/Preview/Apply UI, Console
+**Goal**: Backend operators can upload one-or-many `.HTM` files, preview matched/unmatched lines, optionally override per-line qty, click Apply with confirmation modal, view audit history with original-file archive, and run the reconcile console command
+**Depends on**: Phase 3
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10, UI-11, UI-12, QA-10
+**Success Criteria** (what must be TRUE):
+  1. Operator with `apply_invoices` permission uploads N `.HTM` files in a single submission and lands on a preview screen showing matched/unmatched lines, `match_strategy` column, and editable `override_qty` / `override_reason` per line
+  2. Apply button triggers October backend AJAX (`data-request="onApply"`), shows confirmation modal with total units + offer count + unmatched count, and is debounced via `Cache::lock('apply-invoice-{id}', 60)` against double-click double-apply
+  3. Re-upload of an already-applied invoice number is detected BEFORE parse cost is incurred and shows reject screen with prior-apply timestamp, applying user, units added per offer, and an Override checkbox requiring typed `OVERRIDE` confirmation
+  4. Initial-reset checkbox is visible only when `Settings.allow_initial_reset=true` and requires the operator to type literal `RESET` plus see pre-mutation snapshot count before Apply enables
+  5. Audit history list view (Settings menu, NOT main nav) lists invoices ordered by `applied_at DESC` with status / counts / applied_by; per-invoice detail view shows lines + unmatched queue + per-import metric panel + downloadable original `.HTM`
+  6. `php artisan goodsreceived:recompute_active_from_stock` reconciles all offers chunked (500), honors `active_managed_by='operator'` skip, prints progress bar, exits 0 on success
+  7. All 4 permissions enforced at controller boundary (`RequiresApplyPermissionTest`, `RequiresUploadPermissionTest`, `RequiresOverridePermissionTest`, `RequiresInitialResetPermissionTest` all green)
+  8. Plugin boot logs a warning if PHP `max_file_uploads<20` or `upload_max_filesize<10M`
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 5: Ops, Lang, Polish, Public Release
+**Goal**: Plugin is installable from a public GitHub repo, fully translated, documented with operator runbook, verified working on .no/.lv/.lt, and passes the full QA gate (`make all`) with PHPStan level 10 zero errors and Pest coverage >=85%
+**Depends on**: Phase 4
+**Requirements**: OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, OPS-06
+**Success Criteria** (what must be TRUE):
+  1. `composer require logingrupa/oc-goodsreceived-plugin` succeeds against a clean OctoberCMS 4 + Lovata Shopaholic install pulling from PUBLIC GitHub repo `logingrupa/oc-goodsreceived-plugin`
+  2. README documents installation, the 4 settings, the 4 permissions, override semantics (D12), the GRN-canonical-quantity dependency on disabling 1C XML quantity import (D13), the InitialReset runbook, and `Log::*` troubleshooting key map
+  3. `lang/{en,lv,no,ru}/lang.php` is fully populated for every user-facing string (no hardcoded English in YAMLs, controllers, partials); RainLab.Translate compatible
+  4. `make all` green: `pint-test` clean, `phpstan analyse --level=10` 0 errors (no new baseline entries), `phpmd` 0 violations on classes/components/models/Plugin.php, `pest --coverage --min=85` all green
+  5. Manual smoke on .no, .lv, .lt staging (or dev parity) confirms multi-site Settings isolation: changing a toggle on .no does NOT change it on .lv or .lt (per-server DB)
+  6. PROJECT.md Key Decisions table reflects D11-D15 outcomes resolved 2026-04-29
+
+**Plans**: TBD
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Schema, Scaffold, Settings, Permissions | 0/TBD | Not started | - |
+| 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 0/TBD | Not started | - |
+| 3. Apply Layer + Orchestrators | 0/TBD | Not started | - |
+| 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
+| 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |
