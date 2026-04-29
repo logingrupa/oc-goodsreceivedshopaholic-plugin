@@ -84,7 +84,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 03-01-PLAN.md - SettingsAccessor + DRY grep gate (APPLY-09 + QA-09); hooks SettingsAccessor::flush into TestCase teardown *(closed 2026-04-29 — APPLY-09 + QA-09 closed; dual-gate enforcement (Makefile + Pest mirror); flushPluginSingletons() first body line populated)*
   - [x] 03-02-PLAN.md - ImportAuditService (~50-80 LoC vendor-inlined; APPLY-10 / D-14); 4 log methods (apply/parse/reject/initial_reset) *(closed 2026-04-29 — APPLY-10 closed; final class with 4 public log methods + 3 private helpers; uuid v7 correlation_id; 96 raw / 65 code lines within ≤100 LoC ceiling per D-04; 6 tests / 130 assertions; PHPStan L10 clean)*
   - [x] 03-03-PLAN.md - StockApplyService (saveQuietly + post-commit batched cache flush; APPLY-01 + APPLY-02 + QA-04 200-line cache-flush counter test) *(closed 2026-04-29 — APPLY-01 + APPLY-02 + QA-04 closed; final class StockApplyService with group-by-offer pre-pass + batched whereIn fetch + saveQuietly per UNIQUE offer; flushAffectedCaches public API for orchestrator post-commit batched flush; StockApplyOutcome final readonly carrier (D-29 tuple decision); leaf-singleton dispatch + phpstan-stubs/Singleton.stub for L10 typing without inline @var; 200-line apply 401 queries / 4 list-store flushes; 12 tests / 56 assertions; make all green: 118/463)*
-  - [ ] 03-04-PLAN.md - ActiveFlagService (provenance-aware reconcile + reconcileAll chunked; APPLY-03 + APPLY-04 + QA-05 4-cell matrix + SkipsManuallyDeactivated)
+  - [x] 03-04-PLAN.md - ActiveFlagService (provenance-aware reconcile + reconcileAll chunked; APPLY-03 + APPLY-04 + QA-05 4-cell matrix + SkipsManuallyDeactivated) *(closed 2026-04-29 — APPLY-03 + APPLY-04 + QA-05 closed; final class ActiveFlagService with reconcile(list<int>) + reconcileAll(int $iChunkSize=500): int; provenance gate at TWO layers (per-row in reconcileSingleOffer + WHERE-clause in reconcileAll); pure 4-cell decideTargetState() helper; idempotent (second reconcile fires SELECT only); chunkById offset-shift safe; managedByOperator() is_scalar-narrowing helper for PHPStan L10 mixed→string conversion without inline @var; ApplyTestCase extended with system_settings table for downstream 03-05/03-07 reuse; 9 Pest cases / 48 assertions; make all green: 127/511 tests / 3.86s; phpstan-baseline.neon SHA unchanged)
   - [ ] 03-05-PLAN.md - InitialResetService (one-shot + snapshot-before-write + chunked; APPLY-05 + 5 QA-06 tests)
   - [ ] 03-06-PLAN.md - ParseAndPersistOrchestrator + runOverride (parse → dup-check → persist → match → write lines; APPLY-06 + APPLY-08 parse-side)
   - [ ] 03-07-PLAN.md - ApplyOrchestrator (lockForUpdate + 1 transaction + post-commit flush; APPLY-07 + APPLY-08 apply-side + 4 QA-03 tests + 2 QA-08 tests)
@@ -131,6 +131,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Schema, Scaffold, Settings, Permissions | 8/8 | Complete | 2026-04-29 |
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
-| 3. Apply Layer + Orchestrators | 1/8 | In progress | - |
+| 3. Apply Layer + Orchestrators | 4/8 | In progress | - |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 0/TBD | Not started | - |
 | 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |
