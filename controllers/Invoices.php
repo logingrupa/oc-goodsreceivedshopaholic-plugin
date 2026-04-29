@@ -153,6 +153,77 @@ class Invoices extends Controller
     }
 
     /**
+     * AJAX handler: update `override_qty` / `override_reason` on a single
+     * `InvoiceLine` row — UI-03 / D-09. Triggered by data-track-input
+     * bindings on the preview line table inputs. Returns the updated line as
+     * a small JSON payload so operator edits are reflected without a full
+     * preview re-render.
+     *
+     * Validation (fail-fast):
+     *   - `line_id` required, must resolve to an existing InvoiceLine.
+     *   - `override_qty`, when present, must be a non-negative integer.
+     *   - `override_reason`, when present, is trimmed; empty string ⇒ NULL
+     *     (treated as "clear the override reason").
+     *
+     * D-09 rationale (custom AJAX handler over RelationController inline-edit):
+     * the latter requires the relation panel to render the edit row plus two
+     * extra partials + JS scaffold; a single onUpdateLine handler is one
+     * method + a few input bindings in `_preview_lines.htm`.
+     *
+     * Override fields are audit-only metadata; consumed at apply time by
+     * StockApplyService reading `override_qty ?? qty` (T-04-04-08 acceptance:
+     * the lines table IS the audit trail, so no separate audit row is
+     * needed for override edits).
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onUpdateLine(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.upload_invoices');
+
+        $iLineId = $this->scalarToInt(Input::get('line_id'));
+        if ($iLineId <= 0) {
+            throw new AjaxException(['message' => 'line_id is required.']);
+        }
+
+        $obLine = InvoiceLine::find($iLineId);
+        if (! $obLine instanceof InvoiceLine) {
+            throw new AjaxException(['message' => sprintf('InvoiceLine #%d not found.', $iLineId)]);
+        }
+
+        $bDirty = false;
+        if (Input::has('override_qty')) {
+            $iOverrideQty = $this->scalarToInt(Input::get('override_qty'));
+            if ($iOverrideQty < 0) {
+                throw new AjaxException(['message' => 'override_qty must be non-negative.']);
+            }
+            $obLine->override_qty = $iOverrideQty;
+            $bDirty = true;
+        }
+
+        if (Input::has('override_reason')) {
+            $mReason = Input::get('override_reason');
+            $sReason = is_scalar($mReason) ? trim(strval($mReason)) : '';
+            $obLine->override_reason = $sReason !== '' ? $sReason : null;
+            $bDirty = true;
+        }
+
+        if (! $bDirty) {
+            return ['line_id' => $iLineId, 'noop' => true];
+        }
+
+        $obLine->saveQuietly();
+
+        return [
+            'line_id'         => $iLineId,
+            'override_qty'    => $obLine->override_qty,
+            'override_reason' => $obLine->override_reason,
+        ];
+    }
+
+    /**
      * Per-file processing: validate, dup-gate, parse-+-persist or boundary-catch.
      * Results aggregate into the three caller arrays passed by reference so the
      * single-pass foreach in `onUpload` stays at <70 lines / max-1 nesting.
