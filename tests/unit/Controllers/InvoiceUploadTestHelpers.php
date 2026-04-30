@@ -67,6 +67,18 @@ if (! class_exists(TestableInvoices::class, false)) {
 
         public bool $bHasPermission = true;
 
+        /**
+         * Per-permission allow set. Plan 04-07 / D-37 / QA-10 introduces
+         * fine-grained per-key gate testing — when this array is NON-NULL
+         * the shim's `assertPermission()` uses it INSTEAD of the binary
+         * `bHasPermission` flag (the boolean stays for plan 04-04..04-06
+         * back-compat). Null = boolean fallback. Empty array = deny all.
+         * Non-empty = allow ONLY the listed keys.
+         *
+         * @var list<string>|null
+         */
+        public ?array $arAllowedPermissions = null;
+
         public int $iBackendUserId = 7;
 
         /** @var list<string> */
@@ -107,6 +119,20 @@ if (! class_exists(TestableInvoices::class, false)) {
         protected function assertPermission(string $sPermissionKey): void
         {
             $this->arPermissionsChecked[] = $sPermissionKey;
+
+            // Per-key allow set (plan 04-07 / D-37 / QA-10) takes precedence
+            // when configured; otherwise fall back to the binary boolean
+            // flag established in plan 04-04.
+            if ($this->arAllowedPermissions !== null) {
+                if (! in_array($sPermissionKey, $this->arAllowedPermissions, true)) {
+                    throw new \October\Rain\Exception\AjaxException([
+                        'message' => 'Forbidden (test stub: key not in allow set).',
+                    ]);
+                }
+
+                return;
+            }
+
             if (! $this->bHasPermission) {
                 throw new \October\Rain\Exception\AjaxException([
                     'message' => 'Forbidden (test stub).',
