@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Logingrupa\GoodsReceivedShopaholic\Controllers;
 
+use Backend;
 use Backend\Classes\Controller;
 use BackendAuth;
 use BackendMenu;
@@ -381,8 +382,15 @@ class Invoices extends Controller
      *
      * Response shape:
      *   - lock-not-acquired: ['#applyResult' => makePartial('_partials/apply_in_progress')]
-     *   - already-applied:   ['#applyResult' => makePartial('_partials/apply_already_done', [...])]
-     *   - success:           ['#applyResult' => makePartial('_partials/apply_success', [...])]
+     *   - already-applied:   ['#applyResult' => makePartial('_partials/apply_already_done', [...]),
+     *                         'redirect' => Backend::url('.../invoices/update/{id}')]
+     *   - success:           ['#applyResult' => makePartial('_partials/apply_success', [...]),
+     *                         'redirect' => Backend::url('.../invoices/update/{id}')]
+     *
+     * UX redesign 2026-04-30 — success + already-applied branches add the
+     * `redirect` key so Larajax navigates to the invoice detail page after
+     * apply. Operator lands on the audit panel + applied lines + Flash
+     * banner instead of reloading the list and hunting for the row.
      *
      * @return array<string, mixed>
      *
@@ -893,6 +901,7 @@ class Invoices extends Controller
                     'invoice_id' => $iInvoiceId,
                     'result'     => $obResult,
                 ]),
+                'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId),
             ];
         } catch (ApplyAlreadyDoneException $obException) {
             Flash::info((string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.flash.apply_already_done'));
@@ -901,6 +910,7 @@ class Invoices extends Controller
                 '#applyResult' => $this->makePartial('_partials/apply_already_done', [
                     'context' => $obException->arContext,
                 ]),
+                'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId),
             ];
         }
     }

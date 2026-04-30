@@ -33,7 +33,7 @@
  */
 $arInvoices = $invoices ?? [];
 ?>
-<div class="modal-header">
+<div class="modal-header" data-popup-size="huge">
     <h4 class="modal-title">
         <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.confirm_title')) ?>
     </h4>
@@ -133,13 +133,13 @@ $arInvoices = $invoices ?? [];
                             data-request="onApply"
                             data-request-form="#<?= e($sFormId) ?>"
                             data-request-loading=".applying-spinner-<?= $iInvoiceId ?>"
-                            data-request-success="$(this).closest('.control-popup').popup('hide'); window.location.reload();"
                             data-popup-load-indicator>
                         <i class="icon-check"></i>
                         <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
                     </button>
-                    <span class="applying-spinner-<?= $iInvoiceId ?>" style="display:none; margin-left: 1rem;">
-                        <i class="icon-spinner icon-spin"></i> <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?>
+                    <span class="applying-spinner-<?= $iInvoiceId ?> loading-indicator-container" style="display:none; margin-left: 1rem;">
+                        <span class="loading-indicator size-small indicator-center"></span>
+                        <span class="indicator-label"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?></span>
                     </span>
                 </div>
             </form>
