@@ -3,7 +3,26 @@ use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 
 $obSettings = Settings::instance();
 ?>
-<?= $this->renderInvoicesTabs('settings') ?>
+<ul class="nav nav-tabs" style="margin-bottom: 1rem;">
+    <li>
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices') ?>">
+            <i class="icon-list"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices')) ?>
+        </a>
+    </li>
+    <li>
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload') ?>">
+            <i class="icon-upload"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.upload')) ?>
+        </a>
+    </li>
+    <li class="active">
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/settings') ?>">
+            <i class="icon-cog"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings')) ?>
+        </a>
+    </li>
+</ul>
 
 <div class="alert alert-info">
     <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_intro_title')) ?></strong>
