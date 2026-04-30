@@ -128,7 +128,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Manual smoke on .no, .lv, .lt staging (or dev parity) confirms multi-site Settings isolation: changing a toggle on .no does NOT change it on .lv or .lt (per-server DB)
   6. PROJECT.md Key Decisions table reflects D11-D15 outcomes resolved 2026-04-29
 
-**Plans**: TBD
+**Plans**: 6 plans
+  - [ ] 05-01-PLAN.md - Lang populate {lv,no,ru} + LangCompletenessTest (OPS-04)
+  - [ ] 05-02-PLAN.md - README operator runbook sections 1-11 (OPS-01)
+  - [ ] 05-03-PLAN.md - PROJECT.md update D11-D15 + 56 reqs Validated (OPS-02)
+  - [ ] 05-04-PLAN.md - Coverage gate Makefile + phpunit.xml <source> (OPS-05)
+  - [ ] 05-05-PLAN.md - README ## Publishing + ## Verification + UAT-CHECKLIST.md (OPS-03 + OPS-06)
+  - [ ] 05-06-PLAN.md - Final QA gate + milestone v1.0 closure
 
 ## Progress
 
@@ -141,4 +147,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 8/8 | Complete | 2026-04-30 |
-| 5. Ops, Lang, Polish, Public Release | 0/TBD | Not started | - |
+| 5. Ops, Lang, Polish, Public Release | 0/6 | Not started | - |
