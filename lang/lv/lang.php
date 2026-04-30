@@ -85,6 +85,8 @@ return [
     ],
     'flash' => [
         'apply_in_progress' => 'Piemērošana jau notiek šim rēķinam; lūdzu, uzgaidiet.',
+        'apply_success'     => 'Rēķins #:id piemērots — pievienotas :units vienības :offers piedāvājumiem.',
+        'apply_already_done' => 'Rēķins jau ir piemērots; nekas nav jādara.',
         'forbidden'         => 'Jums nav atļaujas veikt šo darbību.',
     ],
     'upload' => [

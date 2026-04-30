@@ -8,6 +8,7 @@ use Backend\Classes\Controller;
 use BackendAuth;
 use BackendMenu;
 use Cache;
+use Flash;
 use Illuminate\Support\Facades\DB;
 use Input;
 use Lang;
@@ -416,6 +417,8 @@ class Invoices extends Controller
 
         $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
         if (! $obLock->get()) {
+            Flash::warning((string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.flash.apply_in_progress'));
+
             return [
                 '#applyResult' => $this->makePartial('_partials/apply_in_progress'),
             ];
@@ -833,6 +836,15 @@ class Invoices extends Controller
         $obApply = $this->resolveApplyOrchestrator();
         $obResult = $obApply->apply((int) $obInvoice->id, $iUserId);
 
+        Flash::success((string) Lang::get(
+            'logingrupa.goodsreceivedshopaholic::lang.flash.apply_success',
+            [
+                'id'     => (int) $obInvoice->id,
+                'units'  => (int) $obResult->units_added,
+                'offers' => (int) $obResult->offers_touched,
+            ],
+        ));
+
         return [
             '#applyResult' => $this->makePartial('_partials/apply_success', [
                 'invoice_id' => (int) $obInvoice->id,
@@ -867,6 +879,15 @@ class Invoices extends Controller
         try {
             $obResult = $obOrchestrator->apply($iInvoiceId, $iUserId);
 
+            Flash::success((string) Lang::get(
+                'logingrupa.goodsreceivedshopaholic::lang.flash.apply_success',
+                [
+                    'id'     => $iInvoiceId,
+                    'units'  => (int) $obResult->units_added,
+                    'offers' => (int) $obResult->offers_touched,
+                ],
+            ));
+
             return [
                 '#applyResult' => $this->makePartial('_partials/apply_success', [
                     'invoice_id' => $iInvoiceId,
@@ -874,6 +895,8 @@ class Invoices extends Controller
                 ]),
             ];
         } catch (ApplyAlreadyDoneException $obException) {
+            Flash::info((string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.flash.apply_already_done'));
+
             return [
                 '#applyResult' => $this->makePartial('_partials/apply_already_done', [
                     'context' => $obException->arContext,

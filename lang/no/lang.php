@@ -85,6 +85,8 @@ return [
     ],
     'flash' => [
         'apply_in_progress' => 'En anvendelse pågår allerede for denne fakturaen; vennligst vent.',
+        'apply_success'     => 'Faktura #:id anvendt — :units enheter lagt til på :offers tilbud.',
+        'apply_already_done' => 'Fakturaen er allerede anvendt; ingenting å gjøre.',
         'forbidden'         => 'Du har ikke tillatelse til å utføre denne handlingen.',
     ],
     'upload' => [

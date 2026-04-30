@@ -85,6 +85,8 @@ return [
     ],
     'flash' => [
         'apply_in_progress' => 'Apply already in progress for this invoice; please wait.',
+        'apply_success'     => 'Invoice #:id applied — :units units added across :offers offers.',
+        'apply_already_done' => 'Invoice already applied; nothing to do.',
         'forbidden'         => 'You do not have permission to perform this action.',
     ],
     'upload' => [
