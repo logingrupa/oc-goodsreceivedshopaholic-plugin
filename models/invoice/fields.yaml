@@ -72,6 +72,5 @@ tabs:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
             label: 'logingrupa.goodsreceivedshopaholic::lang.column.notes'
             type: textarea
-            disabled: true
             size: tiny
             span: full
