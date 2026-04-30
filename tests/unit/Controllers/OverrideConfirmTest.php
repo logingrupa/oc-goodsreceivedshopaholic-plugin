@@ -58,11 +58,11 @@ it('onOverrideShowConfirm renders modal partial keyed at #overrideConfirm (D-18)
 
     expect($arResponse)->toBeArray();
     expect($arResponse)->toHaveKey('#overrideConfirm');
-    expect((string) $arResponse['#overrideConfirm'])->toContain('_partials/_override_confirm');
+    expect((string) $arResponse['#overrideConfirm'])->toContain('_partials/override_confirm');
 
     $arPartialCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_override_confirm') {
+        if ($arCall['name'] === '_partials/override_confirm') {
             $arPartialCall = $arCall;
             break;
         }
@@ -218,7 +218,7 @@ it('onOverrideConfirm with literal OVERRIDE proceeds to runOverride (UI-10 happy
         expect((string) $obSpy->arRecorded['html'])->not->toBe('');
 
         expect($arResponse)->toHaveKey('#invoicePreviewWrap');
-        expect((string) $arResponse['#invoicePreviewWrap'])->toContain('_partials/_preview_lines');
+        expect((string) $arResponse['#invoicePreviewWrap'])->toContain('_partials/preview_lines');
     } finally {
         app()->forgetInstance(ParseAndPersistOrchestrator::class);
         @unlink($arStaged['path']);

@@ -110,7 +110,7 @@ it('short-circuits parse when prior applied invoice exists (UI-09 happy path)', 
     expect($arResponse)->toHaveKey('#invoiceRejectWrap');
     $arRejectCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_reject') {
+        if ($arCall['name'] === '_partials/reject') {
             $arRejectCall = $arCall;
             break;
         }
@@ -158,7 +158,7 @@ it('does NOT short-circuit when prior status is parsed (gate is applied-only)', 
     // Reject partial received an EMPTY rejects list (gate did not fire).
     $arRejectCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_reject') {
+        if ($arCall['name'] === '_partials/reject') {
             $arRejectCall = $arCall;
             break;
         }

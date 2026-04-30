@@ -147,11 +147,11 @@ it('onInitialResetShowConfirm renders modal with snapshot counts (D-23)', functi
 
     expect($arResponse)->toBeArray();
     expect($arResponse)->toHaveKey('#initialResetConfirm');
-    expect((string) $arResponse['#initialResetConfirm'])->toContain('_partials/_initial_reset_confirm');
+    expect((string) $arResponse['#initialResetConfirm'])->toContain('_partials/initial_reset_confirm');
 
     $arPartialCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_initial_reset_confirm') {
+        if ($arCall['name'] === '_partials/initial_reset_confirm') {
             $arPartialCall = $arCall;
             break;
         }
@@ -213,7 +213,7 @@ it('onInitialResetConfirm with literal RESET runs reset BEFORE apply, returns su
 
         expect($arResponse)->toBeArray();
         expect($arResponse)->toHaveKey('#applyResult');
-        expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_success');
+        expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_success');
 
         // Reset ran BEFORE apply: reset zeroed everything, then apply added
         // the fixture's qty for the matched offer. The offer's final quantity

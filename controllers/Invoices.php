@@ -195,9 +195,9 @@ HTML;
      *
      * Response shape:
      *   [
-     *     '#invoicePreviewWrap'  => makePartial('_partials/_preview_lines', [...]),
-     *     '#invoiceRejectWrap'   => makePartial('_partials/_reject', [...]),
-     *     '#invoiceUploadErrors' => makePartial('_partials/_upload_errors', [...]),
+     *     '#invoicePreviewWrap'  => makePartial('_partials/preview_lines', [...]),
+     *     '#invoiceRejectWrap'   => makePartial('_partials/reject', [...]),
+     *     '#invoiceUploadErrors' => makePartial('_partials/upload_errors', [...]),
      *   ]
      *
      * Return type is `array<string, mixed>` because `makePartial()` is
@@ -235,9 +235,9 @@ HTML;
         }
 
         return [
-            '#invoicePreviewWrap'  => $this->makePartial('_partials/_preview_lines', ['invoices' => $arPreviews]),
-            '#invoiceRejectWrap'   => $this->makePartial('_partials/_reject', ['rejects' => $arRejects]),
-            '#invoiceUploadErrors' => $this->makePartial('_partials/_upload_errors', ['errors' => $arErrors]),
+            '#invoicePreviewWrap'  => $this->makePartial('_partials/preview_lines', ['invoices' => $arPreviews]),
+            '#invoiceRejectWrap'   => $this->makePartial('_partials/reject', ['rejects' => $arRejects]),
+            '#invoiceUploadErrors' => $this->makePartial('_partials/upload_errors', ['errors' => $arErrors]),
         ];
     }
 
@@ -323,7 +323,7 @@ HTML;
      * Collection iteration.
      *
      * Response shape:
-     *   ['#applyConfirm' => makePartial('_partials/_apply_confirm', [...])]
+     *   ['#applyConfirm' => makePartial('_partials/apply_confirm', [...])]
      *
      * @return array<string, mixed>
      *
@@ -349,7 +349,7 @@ HTML;
             ->sum(DB::raw('COALESCE(override_qty, qty)'));
 
         return [
-            '#applyConfirm' => $this->makePartial('_partials/_apply_confirm', [
+            '#applyConfirm' => $this->makePartial('_partials/apply_confirm', [
                 'invoice'         => $obInvoice,
                 'total_units'     => $iTotalUnits,
                 'offer_count'     => (int) $obInvoice->matched_lines,
@@ -373,9 +373,9 @@ HTML;
      * propagates with the lock still released by the outer finally.
      *
      * Response shape:
-     *   - lock-not-acquired: ['#applyResult' => makePartial('_partials/_apply_in_progress')]
-     *   - already-applied:   ['#applyResult' => makePartial('_partials/_apply_already_done', [...])]
-     *   - success:           ['#applyResult' => makePartial('_partials/_apply_success', [...])]
+     *   - lock-not-acquired: ['#applyResult' => makePartial('_partials/apply_in_progress')]
+     *   - already-applied:   ['#applyResult' => makePartial('_partials/apply_already_done', [...])]
+     *   - success:           ['#applyResult' => makePartial('_partials/apply_success', [...])]
      *
      * @return array<string, mixed>
      *
@@ -397,7 +397,7 @@ HTML;
         $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
         if (! $obLock->get()) {
             return [
-                '#applyResult' => $this->makePartial('_partials/_apply_in_progress'),
+                '#applyResult' => $this->makePartial('_partials/apply_in_progress'),
             ];
         }
 
@@ -419,7 +419,7 @@ HTML;
      * with the right linkage.
      *
      * Response shape:
-     *   ['#overrideConfirm' => makePartial('_partials/_override_confirm', [...])]
+     *   ['#overrideConfirm' => makePartial('_partials/override_confirm', [...])]
      *
      * @return array<string, mixed>
      *
@@ -435,7 +435,7 @@ HTML;
         }
 
         return [
-            '#overrideConfirm' => $this->makePartial('_partials/_override_confirm', [
+            '#overrideConfirm' => $this->makePartial('_partials/override_confirm', [
                 'prior_invoice_id' => $iPriorInvoiceId,
             ]),
         ];
@@ -457,7 +457,7 @@ HTML;
      * check is UX only).
      *
      * Response shape on happy path:
-     *   ['#invoicePreviewWrap' => makePartial('_partials/_preview_lines', [...]),
+     *   ['#invoicePreviewWrap' => makePartial('_partials/preview_lines', [...]),
      *    '#invoiceRejectWrap'  => '']
      *
      * @return array<string, mixed>
@@ -496,7 +496,7 @@ HTML;
         $obInvoice = $obOrchestrator->runOverride($sHtml, $sFilename, $iPriorInvoiceId, $iUserId);
 
         return [
-            '#invoicePreviewWrap' => $this->makePartial('_partials/_preview_lines', [
+            '#invoicePreviewWrap' => $this->makePartial('_partials/preview_lines', [
                 'invoices' => [$this->buildPreviewPayload($obInvoice)],
             ]),
             '#invoiceRejectWrap' => '',
@@ -520,7 +520,7 @@ HTML;
      * RESET.
      *
      * Response shape:
-     *   ['#initialResetConfirm' => makePartial('_partials/_initial_reset_confirm', [...])]
+     *   ['#initialResetConfirm' => makePartial('_partials/initial_reset_confirm', [...])]
      *
      * @return array<string, mixed>
      *
@@ -536,7 +536,7 @@ HTML;
         $iProductCount = (int) Product::count();
 
         return [
-            '#initialResetConfirm' => $this->makePartial('_partials/_initial_reset_confirm', [
+            '#initialResetConfirm' => $this->makePartial('_partials/initial_reset_confirm', [
                 'offer_count'   => $iOfferCount,
                 'product_count' => $iProductCount,
             ]),
@@ -563,7 +563,7 @@ HTML;
      * service still refuses to run.
      *
      * Response shape on happy path:
-     *   ['#applyResult' => makePartial('_partials/_apply_success', [...])]
+     *   ['#applyResult' => makePartial('_partials/apply_success', [...])]
      *
      * @return array<string, mixed>
      *
@@ -689,7 +689,7 @@ HTML;
         $obResult = $obApply->apply((int) $obInvoice->id, $iUserId);
 
         return [
-            '#applyResult' => $this->makePartial('_partials/_apply_success', [
+            '#applyResult' => $this->makePartial('_partials/apply_success', [
                 'invoice_id' => (int) $obInvoice->id,
                 'result'     => $obResult,
             ]),
@@ -723,14 +723,14 @@ HTML;
             $obResult = $obOrchestrator->apply($iInvoiceId, $iUserId);
 
             return [
-                '#applyResult' => $this->makePartial('_partials/_apply_success', [
+                '#applyResult' => $this->makePartial('_partials/apply_success', [
                     'invoice_id' => $iInvoiceId,
                     'result'     => $obResult,
                 ]),
             ];
         } catch (ApplyAlreadyDoneException $obException) {
             return [
-                '#applyResult' => $this->makePartial('_partials/_apply_already_done', [
+                '#applyResult' => $this->makePartial('_partials/apply_already_done', [
                     'context' => $obException->arContext,
                 ]),
             ];

@@ -58,7 +58,7 @@ it('parses + persists a valid HTM file and renders preview partial (UI-02 happy 
     expect($arResponse)->toHaveKey('#invoicePreviewWrap');
     expect($arResponse)->toHaveKey('#invoiceRejectWrap');
     expect($arResponse)->toHaveKey('#invoiceUploadErrors');
-    expect((string) $arResponse['#invoicePreviewWrap'])->toContain('_partials/_preview_lines');
+    expect((string) $arResponse['#invoicePreviewWrap'])->toContain('_partials/preview_lines');
 
     // Real Invoice was persisted via ParseAndPersistOrchestrator.
     expect(Invoice::count())->toBe(1);
@@ -68,7 +68,7 @@ it('parses + persists a valid HTM file and renders preview partial (UI-02 happy 
     // Preview partial received a non-empty `invoices` array.
     $arPreviewCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_preview_lines') {
+        if ($arCall['name'] === '_partials/preview_lines') {
             $arPreviewCall = $arCall;
             break;
         }
@@ -95,7 +95,7 @@ it('iterates over multiple files and aggregates results (UI-02 multi-file)', fun
 
     $arPreviewCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_preview_lines') {
+        if ($arCall['name'] === '_partials/preview_lines') {
             $arPreviewCall = $arCall;
             break;
         }
@@ -117,7 +117,7 @@ it('rejects non-HTM extension server-side and reports per-file error (D-06)', fu
     expect($arResponse)->toHaveKey('#invoiceUploadErrors');
     $arErrorCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_upload_errors') {
+        if ($arCall['name'] === '_partials/upload_errors') {
             $arErrorCall = $arCall;
             break;
         }
@@ -150,7 +150,7 @@ it('rejects file > 10 MB and reports per-file size error (D-07)', function (): v
     expect($arResponse)->toHaveKey('#invoiceUploadErrors');
     $arErrorCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_upload_errors') {
+        if ($arCall['name'] === '_partials/upload_errors') {
             $arErrorCall = $arCall;
             break;
         }
@@ -212,7 +212,7 @@ it('routes non-fatal orchestrator failures into per-file error array (boundary c
     expect($arResponse)->toHaveKey('#invoiceUploadErrors');
     $arErrorCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_upload_errors') {
+        if ($arCall['name'] === '_partials/upload_errors') {
             $arErrorCall = $arCall;
             break;
         }

@@ -107,7 +107,7 @@ it('runtime: second concurrent onApply call returns apply_in_progress partial WI
         $arResponse = $obController->onApply();
 
         expect($arResponse)->toHaveKey('#applyResult');
-        expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_in_progress');
+        expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_in_progress');
 
         // Counter-pin: orchestrator resolver was NEVER invoked under the
         // lock-not-acquired branch (D-13 fail-fast contract).
@@ -152,7 +152,7 @@ it('runtime: orchestrator IS called when no concurrent lock exists (control case
     $arResponse = $obController->onApply();
 
     expect($arResponse)->toHaveKey('#applyResult');
-    expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_success');
+    expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_success');
 
     // Counter-pin: orchestrator resolver WAS invoked under the
     // happy-path branch (control proves the lock isn't trivially blocking).

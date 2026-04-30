@@ -7,7 +7,7 @@
 {% if invoices|length > 0 %}
     {% for preview in invoices %}
         <div class="invoice-preview" data-invoice-id="{{ preview.invoice.id }}">
-            {{ this.makePartial('_partials/_summary_panel', preview) }}
+            {{ this.makePartial('_partials/summary_panel', preview) }}
             <table class="data-table">
                 <thead>
                     <tr>

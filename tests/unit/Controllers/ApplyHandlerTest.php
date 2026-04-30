@@ -134,11 +134,11 @@ it('onApplyShowConfirm renders modal partial with summary numbers (UI-04 / D-12)
 
     expect($arResponse)->toBeArray();
     expect($arResponse)->toHaveKey('#applyConfirm');
-    expect((string) $arResponse['#applyConfirm'])->toContain('_partials/_apply_confirm');
+    expect((string) $arResponse['#applyConfirm'])->toContain('_partials/apply_confirm');
 
     $arConfirmCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_apply_confirm') {
+        if ($arCall['name'] === '_partials/apply_confirm') {
             $arConfirmCall = $arCall;
             break;
         }
@@ -180,7 +180,7 @@ it('onApply happy path applies stock + flips status + returns success partial (U
 
     expect($arResponse)->toBeArray();
     expect($arResponse)->toHaveKey('#applyResult');
-    expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_success');
+    expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_success');
 
     // Stock additively incremented: 10 + 5 = 15.
     $obOffer->refresh();
@@ -200,7 +200,7 @@ it('onApply happy path applies stock + flips status + returns success partial (U
     // Success partial received the ApplyResult DTO.
     $arSuccessCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_apply_success') {
+        if ($arCall['name'] === '_partials/apply_success') {
             $arSuccessCall = $arCall;
             break;
         }
@@ -248,7 +248,7 @@ it('onApply renders apply_in_progress partial when Cache::lock cannot be acquire
         $arResponse = $obController->onApply();
 
         expect($arResponse)->toHaveKey('#applyResult');
-        expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_in_progress');
+        expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_in_progress');
 
         // Invoice status NOT flipped — orchestrator was never called.
         $obRefreshed = Invoice::find($obInvoice->id);
@@ -315,11 +315,11 @@ it('onApply renders apply_already_done partial when invoice status=applied (T-04
     $arResponse = $obController->onApply();
 
     expect($arResponse)->toHaveKey('#applyResult');
-    expect((string) $arResponse['#applyResult'])->toContain('_partials/_apply_already_done');
+    expect((string) $arResponse['#applyResult'])->toContain('_partials/apply_already_done');
 
     $arDoneCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
-        if ($arCall['name'] === '_partials/_apply_already_done') {
+        if ($arCall['name'] === '_partials/apply_already_done') {
             $arDoneCall = $arCall;
             break;
         }
