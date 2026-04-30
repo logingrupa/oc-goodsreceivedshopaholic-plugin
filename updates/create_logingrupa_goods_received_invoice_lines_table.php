@@ -31,7 +31,7 @@ class CreateLogingrupaGoodsReceivedInvoiceLinesTable extends Migration
 
         Schema::create('logingrupa_goods_received_invoice_lines', function (Blueprint $obTable) {
             $obTable->engine = 'InnoDB';
-            $obTable->increments('id')->unsigned();
+            $obTable->bigIncrements('id');
             $obTable->unsignedBigInteger('invoice_id');
             $obTable->unsignedInteger('row_index');
             $obTable->string('ean', 13);

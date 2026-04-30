@@ -30,7 +30,7 @@ class CreateLogingrupaGoodsReceivedInvoicesTable extends Migration
 
         Schema::create('logingrupa_goods_received_invoices', function (Blueprint $obTable) {
             $obTable->engine = 'InnoDB';
-            $obTable->increments('id')->unsigned();
+            $obTable->bigIncrements('id');
             $obTable->string('invoice_number', 64)->unique();
             $obTable->date('invoice_date')->nullable();
             $obTable->string('country_code', 2)->nullable();
@@ -54,7 +54,7 @@ class CreateLogingrupaGoodsReceivedInvoicesTable extends Migration
             $obTable->index('applied_at');
             $obTable->index('initial_reset_applied');
 
-            $obTable->foreign('override_of_invoice_id')
+            $obTable->foreign('override_of_invoice_id', 'goodsreceived_invoices_override_fk')
                 ->references('id')->on('logingrupa_goods_received_invoices')
                 ->nullOnDelete();
         });

@@ -30,7 +30,7 @@ class CreateLogingrupaGoodsReceivedInitialResetSnapshotTable extends Migration
 
         Schema::create('logingrupa_goods_received_initial_reset_snapshot', function (Blueprint $obTable) {
             $obTable->engine = 'InnoDB';
-            $obTable->increments('id')->unsigned();
+            $obTable->bigIncrements('id');
             $obTable->unsignedBigInteger('invoice_id');
             $obTable->unsignedInteger('offer_id');
             $obTable->unsignedInteger('prior_quantity')->default(0);
@@ -39,11 +39,11 @@ class CreateLogingrupaGoodsReceivedInitialResetSnapshotTable extends Migration
             $obTable->boolean('prior_product_active')->default(false);
             $obTable->timestamp('created_at')->nullable();
 
-            $obTable->index('invoice_id');
-            $obTable->index('offer_id');
-            $obTable->index('prior_product_id');
+            $obTable->index('invoice_id', 'gr_reset_snap_invoice_id_idx');
+            $obTable->index('offer_id', 'gr_reset_snap_offer_id_idx');
+            $obTable->index('prior_product_id', 'gr_reset_snap_prior_product_id_idx');
 
-            $obTable->foreign('invoice_id')
+            $obTable->foreign('invoice_id', 'gr_reset_snap_invoice_id_fk')
                 ->references('id')->on('logingrupa_goods_received_invoices')
                 ->cascadeOnDelete();
         });
