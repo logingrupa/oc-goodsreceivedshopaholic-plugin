@@ -1,8 +1,5 @@
-{# UI-04 / D-13 / T-04-05-01: rendered by onApply when Cache::lock cannot be
-   acquired (concurrent click holding the lock). First line of defense before
-   ApplyOrchestrator's body-side lockForUpdate kicks in. The operator gets a
-   user-visible "wait" message instead of a server error. #}
+<?php /* UI-04 / D-13 / T-04-05-01: rendered when Cache::lock fails. */ ?>
 <div class="alert alert-warning">
-    <p>{{ 'logingrupa.goodsreceivedshopaholic::lang.flash.apply_in_progress'|trans }}</p>
-    <p class="help-block">{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.in_progress_help'|trans }}</p>
+    <p><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.flash.apply_in_progress')) ?></p>
+    <p class="help-block"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.in_progress_help')) ?></p>
 </div>

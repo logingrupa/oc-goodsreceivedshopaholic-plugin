@@ -1,11 +1,14 @@
-{# UI-02 (D-06 / D-07): per-file extension / size / parse errors. Renders one alert per failing file; the rest of the batch's preview/reject panels render in parallel above this block. #}
-{% if errors|length > 0 %}
+<?php
+/* UI-02 (D-06 / D-07): per-file errors. */
+$arErrors = $errors ?? [];
+?>
+<?php if (count($arErrors) > 0): ?>
     <div class="alert alert-danger" id="invoiceUploadErrorsAlert">
         <h4>Upload errors</h4>
         <ul>
-            {% for err in errors %}
-                <li><strong>{{ err.filename }}</strong>: {{ err.message }}</li>
-            {% endfor %}
+            <?php foreach ($arErrors as $arErr): ?>
+                <li><strong><?= e((string) ($arErr['filename'] ?? '')) ?></strong>: <?= e((string) ($arErr['message'] ?? '')) ?></li>
+            <?php endforeach; ?>
         </ul>
     </div>
-{% endif %}
+<?php endif; ?>

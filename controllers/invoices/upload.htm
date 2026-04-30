@@ -26,7 +26,9 @@
 <div class="layout-row" id="invoiceUploadErrors"></div>
 <div class="layout-row" id="invoicePreviewWrap"></div>
 <div class="layout-row" id="invoiceRejectWrap"></div>
-<div class="layout-row" id="applyConfirm"></div>
 <div class="layout-row" id="applyResult"></div>
-<div class="layout-row" id="overrideConfirm"></div>
-<div class="layout-row" id="initialResetConfirm"></div>
+<?php
+/* NOTE: #overrideConfirm / #initialResetConfirm / #applyConfirm anchors
+ * intentionally REMOVED — popup-targeted handlers render directly into
+ * October's popup widget; inline anchors caused double-render. */
+?>

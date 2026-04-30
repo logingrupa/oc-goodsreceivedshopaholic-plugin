@@ -348,13 +348,17 @@ HTML;
             ->whereNotNull('matched_offer_id')
             ->sum(DB::raw('COALESCE(override_qty, qty)'));
 
+        $mPartial = $this->makePartial('_partials/apply_confirm', [
+            'invoice'         => $obInvoice,
+            'total_units'     => $iTotalUnits,
+            'offer_count'     => (int) $obInvoice->matched_lines,
+            'unmatched_count' => (int) $obInvoice->unmatched_lines,
+        ]);
+
         return [
-            '#applyConfirm' => $this->makePartial('_partials/apply_confirm', [
-                'invoice'         => $obInvoice,
-                'total_units'     => $iTotalUnits,
-                'offer_count'     => (int) $obInvoice->matched_lines,
-                'unmatched_count' => (int) $obInvoice->unmatched_lines,
-            ]),
+            '#applyConfirm' => is_string($mPartial) ? $mPartial : "",
+            'partial'       => is_string($mPartial) ? $mPartial : "",
+            'result'        => is_string($mPartial) ? $mPartial : "",
         ];
     }
 
@@ -434,10 +438,14 @@ HTML;
             throw new AjaxException(['message' => 'prior_invoice_id is required.']);
         }
 
+        $mPartial = $this->makePartial('_partials/override_confirm', [
+            'prior_invoice_id' => $iPriorInvoiceId,
+        ]);
+
         return [
-            '#overrideConfirm' => $this->makePartial('_partials/override_confirm', [
-                'prior_invoice_id' => $iPriorInvoiceId,
-            ]),
+            '#overrideConfirm' => is_string($mPartial) ? $mPartial : "",
+            'partial'          => is_string($mPartial) ? $mPartial : "",
+            'result'           => is_string($mPartial) ? $mPartial : "",
         ];
     }
 
@@ -535,11 +543,15 @@ HTML;
         $iOfferCount = (int) Offer::count();
         $iProductCount = (int) Product::count();
 
+        $mPartial = $this->makePartial('_partials/initial_reset_confirm', [
+            'offer_count'   => $iOfferCount,
+            'product_count' => $iProductCount,
+        ]);
+
         return [
-            '#initialResetConfirm' => $this->makePartial('_partials/initial_reset_confirm', [
-                'offer_count'   => $iOfferCount,
-                'product_count' => $iProductCount,
-            ]),
+            '#initialResetConfirm' => is_string($mPartial) ? $mPartial : "",
+            'partial'              => is_string($mPartial) ? $mPartial : "",
+            'result'               => is_string($mPartial) ? $mPartial : "",
         ];
     }
 

@@ -1,13 +1,19 @@
-{# UI-04: rendered by onApply when ApplyOrchestrator::apply returns an
-   ApplyResult successfully. The 4 counters come from Phase 3
-   StockApplyService → StockApplyOutcome → ApplyResult (plan 03-03 / 03-07). #}
+<?php
+/* UI-04: rendered by onApply on success. */
+$iInvoiceId = (int) ($invoice_id ?? 0);
+$obResult = $result ?? null;
+$iUnitsAdded = (int) ($obResult?->units_added ?? 0);
+$iOffersTouched = (int) ($obResult?->offers_touched ?? 0);
+$iLinesApplied = (int) ($obResult?->lines_applied ?? 0);
+$iLinesSkipped = (int) ($obResult?->lines_skipped ?? 0);
+?>
 <div class="alert alert-success">
-    <h4>{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.success_title'|trans }}</h4>
-    <p>Invoice <strong>#{{ invoice_id }}</strong> committed:</p>
+    <h4><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.success_title')) ?></h4>
+    <p>Invoice <strong>#<?= $iInvoiceId ?></strong> committed:</p>
     <ul>
-        <li>Stock added (units): <strong>{{ result.units_added }}</strong></li>
-        <li>Offers touched: <strong>{{ result.offers_touched }}</strong></li>
-        <li>Lines applied: <strong>{{ result.lines_applied }}</strong></li>
-        <li>Lines skipped: <strong>{{ result.lines_skipped }}</strong></li>
+        <li>Stock added (units): <strong><?= $iUnitsAdded ?></strong></li>
+        <li>Offers touched: <strong><?= $iOffersTouched ?></strong></li>
+        <li>Lines applied: <strong><?= $iLinesApplied ?></strong></li>
+        <li>Lines skipped: <strong><?= $iLinesSkipped ?></strong></li>
     </ul>
 </div>

@@ -1,18 +1,7 @@
-{# UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal for the
-   override-and-reimport flow.
-
-   The literal English copy on the warning lines (`ADDITIVELY on top of the
-   prior apply.` / `NOT a delta calculation.`) is intentional per UI-10 spec —
-   a translation drift would weaken the legal/operational protection for an
-   operator about to rerun stock writes. Lang keys exist for translation
-   overlays (lang/en/lang.php override.*) but the warning content is verified
-   by `OverrideConfirmTest` substring assertions.
-
-   The operator MUST also re-upload the original .HTM file: the upload-side
-   pre-parse duplicate gate (UI-09 / D-16) discards the bytes BEFORE the
-   parser runs, so the override flow re-ingests them here. The handler reads
-   files via `Input::file('files')` (the same widget contract as onUpload),
-   so the file input keeps the `name="files[]"` shape. #}
+<?php
+/* UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal. */
+$iPriorInvoiceId = (int) ($prior_invoice_id ?? 0);
+?>
 <div class="modal-dialog">
     <div class="modal-content">
         <header class="modal-header">
@@ -26,7 +15,7 @@
             </div>
             <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
             <?= Form::open(['files' => true]) ?>
-                <input type="hidden" name="prior_invoice_id" value="{{ prior_invoice_id }}">
+                <input type="hidden" name="prior_invoice_id" value="<?= $iPriorInvoiceId ?>">
                 <div class="form-group">
                     <input type="text"
                            name="confirm_typed"

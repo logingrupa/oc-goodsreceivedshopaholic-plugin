@@ -1,14 +1,19 @@
-{# UI-07 / D-10: per-import summary metric panel. Renders inline above each
-   preview's line table. The 5 metrics map directly to the orchestrator's
-   persisted Invoice header (source_filename / parsed_at / total_units /
-   matched_count / unmatched_count). #}
+<?php
+/* UI-07 / D-10: per-import summary metric panel. */
+$obInvoice = $invoice ?? null;
+$sFilename = (string) ($obInvoice?->source_filename ?? '');
+$obParsedAt = $obInvoice?->parsed_at;
+$iTotalUnits = (int) ($total_units ?? 0);
+$iMatched = (int) ($matched_count ?? 0);
+$iUnmatched = (int) ($unmatched_count ?? 0);
+?>
 <div class="summary-panel">
     <h4>Summary</h4>
     <dl>
-        <dt>Source filename</dt><dd>{{ invoice.source_filename }}</dd>
-        <dt>Parsed at</dt><dd>{{ invoice.parsed_at ? invoice.parsed_at|date('Y-m-d H:i:s') : '—' }}</dd>
-        <dt>Total units to add</dt><dd>{{ total_units }}</dd>
-        <dt>Matched lines</dt><dd>{{ matched_count }}</dd>
-        <dt>Unmatched lines</dt><dd>{{ unmatched_count }}</dd>
+        <dt>Source filename</dt><dd><?= e($sFilename) ?></dd>
+        <dt>Parsed at</dt><dd><?= $obParsedAt ? e($obParsedAt->format('Y-m-d H:i:s')) : '—' ?></dd>
+        <dt>Total units to add</dt><dd><?= $iTotalUnits ?></dd>
+        <dt>Matched lines</dt><dd><?= $iMatched ?></dd>
+        <dt>Unmatched lines</dt><dd><?= $iUnmatched ?></dd>
     </dl>
 </div>

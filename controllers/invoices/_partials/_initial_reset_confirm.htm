@@ -1,18 +1,8 @@
-{# UI-08 / D-23 / D-24: Initial-reset confirmation modal with pre-mutation
-   snapshot counts.
-
-   The literal English copy on the warning lines is intentional per UI-08
-   spec — translation drift would weaken the operator-facing protection
-   for a destructive op. Lang keys exist for translation overlays
-   (lang/en/lang.php initial_reset.*) but the warning content is
-   verified by `InitialResetConfirmTest` substring assertions on
-   offer_count + product_count.
-
-   The .HTM upload here is the FIRST invoice to be applied AFTER the
-   reset zeroes everything. The handler order is parse → reset → apply
-   (D-24): reset zeros all offers + deactivates all products + flips
-   invoice.initial_reset_applied=true; THEN apply increments stock from
-   the new invoice's matched lines. #}
+<?php
+/* UI-08 / D-23 / D-24: Initial-reset confirmation modal. */
+$iOfferCount = (int) ($offer_count ?? 0);
+$iProductCount = (int) ($product_count ?? 0);
+?>
 <div class="modal-dialog">
     <div class="modal-content">
         <header class="modal-header">
@@ -20,7 +10,7 @@
         </header>
         <div class="modal-body">
             <div class="alert alert-danger">
-                <p><strong>This will zero out {{ offer_count }} offers and deactivate {{ product_count }} products.</strong></p>
+                <p><strong>This will zero out <?= $iOfferCount ?> offers and deactivate <?= $iProductCount ?> products.</strong></p>
                 <p>The current state is snapshotted to <code>logingrupa_goods_received_initial_reset_snapshot</code> for rollback. This is one-shot.</p>
             </div>
             <p>Type <code>RESET</code> exactly (uppercase) to confirm:</p>

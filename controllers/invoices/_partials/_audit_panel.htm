@@ -1,19 +1,26 @@
-{#
-  UI-07: Per-import summary metric panel.
-  Renders inline on Invoice update.htm. The form itself is the source of truth for status/counters; this partial is for at-a-glance metrics.
-  Plans 04-05 / 04-06 may extend with override-of pointer + correlation_id.
-#}
+<?php
+/* UI-07: per-import summary metric panel rendered on Invoice update.htm. */
+$obModel = $formModel ?? null;
+$sStatus = $obModel?->status ?? '—';
+$iTotalLines = (int) ($obModel?->total_lines ?? 0);
+$iMatched = (int) ($obModel?->matched_lines ?? 0);
+$iUnmatched = (int) ($obModel?->unmatched_lines ?? 0);
+$iStockAdded = (int) ($obModel?->stock_added_units ?? 0);
+$mAppliedBy = $obModel?->applied_by_user_id;
+$obAppliedAt = $obModel?->applied_at;
+$mOverrideOf = $obModel?->override_of_invoice_id;
+?>
 <div class="audit-panel">
     <h4>Audit</h4>
     <ul class="metrics">
-        <li>Status: <strong>{{ formModel.status }}</strong></li>
-        <li>Total lines: <strong>{{ formModel.total_lines }}</strong></li>
-        <li>Matched: <strong>{{ formModel.matched_lines }}</strong> / Unmatched: <strong>{{ formModel.unmatched_lines }}</strong></li>
-        <li>Stock added (units): <strong>{{ formModel.stock_added_units }}</strong></li>
-        <li>Applied by user: <strong>{{ formModel.applied_by_user_id ?: '—' }}</strong></li>
-        <li>Applied at: <strong>{{ formModel.applied_at ? formModel.applied_at|date('Y-m-d H:i:s') : '—' }}</strong></li>
-        {% if formModel.override_of_invoice_id %}
-            <li>Override of invoice: <strong>#{{ formModel.override_of_invoice_id }}</strong></li>
-        {% endif %}
+        <li>Status: <strong><?= e($sStatus) ?></strong></li>
+        <li>Total lines: <strong><?= $iTotalLines ?></strong></li>
+        <li>Matched: <strong><?= $iMatched ?></strong> / Unmatched: <strong><?= $iUnmatched ?></strong></li>
+        <li>Stock added (units): <strong><?= $iStockAdded ?></strong></li>
+        <li>Applied by user: <strong><?= $mAppliedBy !== null ? (int) $mAppliedBy : '—' ?></strong></li>
+        <li>Applied at: <strong><?= $obAppliedAt ? e($obAppliedAt->format('Y-m-d H:i:s')) : '—' ?></strong></li>
+        <?php if ($mOverrideOf !== null): ?>
+            <li>Override of invoice: <strong>#<?= (int) $mOverrideOf ?></strong></li>
+        <?php endif; ?>
     </ul>
 </div>

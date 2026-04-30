@@ -1,17 +1,17 @@
-{# UI-02 (D-05 / D-06 / D-07): multi-file .HTM upload widget.
-   The native <input type="file" multiple> + October's data-request="onUpload"
-   data-request-files attribute together drive the AJAX submit; backend's
-   FileUpload widget is reserved for the Settings sidebar use-case. The three
-   AJAX-target containers (#invoiceUploadErrors / #invoiceRejectWrap /
-   #invoicePreviewWrap) update independently per the response selectors
-   returned by onUpload.
-
-   UI-08 / UI-10 (D-22 / D-18): the override + initial-reset modals render
-   server-side into the #overrideConfirm + #initialResetConfirm anchors.
-   The initial-reset section itself is rendered inline (gated by
-   Invoices::shouldShowInitialReset() per D-22) — the section is
-   presentational only; its button data-handler triggers
-   onInitialResetShowConfirm which materializes the modal partial. #}
+<?php
+/*
+ * UI-02 (D-05 / D-06 / D-07): multi-file .HTM upload widget.
+ * The native <input type="file" multiple> + October's data-request="onUpload"
+ * data-request-files attribute together drive the AJAX submit. The three
+ * AJAX-target containers (#invoiceUploadErrors / #invoiceRejectWrap /
+ * #invoicePreviewWrap) update independently per the response selectors
+ * returned by onUpload. UI-08 / UI-10 (D-22 / D-18): override + initial-reset
+ * modals render server-side into the #overrideConfirm + #initialResetConfirm
+ * anchors. The initial-reset section itself is rendered inline (gated by
+ * Invoices::shouldShowInitialReset() per D-22).
+ */
+$bShowInitialReset = $this->shouldShowInitialReset();
+?>
 <?= Form::open(['files' => true]) ?>
     <div class="form-group">
         <label>Upload .HTM delivery receipts</label>
@@ -26,13 +26,15 @@
     <div class="upload-progress" style="display:none;">Uploading…</div>
 <?= Form::close() ?>
 
-<?php $bShowInitialReset = $this->shouldShowInitialReset(); ?>
 <?= $this->makePartial('_partials/initial_reset_section', ['show_initial_reset' => $bShowInitialReset]) ?>
 
 <div id="invoiceUploadErrors"></div>
 <div id="invoiceRejectWrap"></div>
 <div id="invoicePreviewWrap"></div>
-<div id="overrideConfirm"></div>
-<div id="initialResetConfirm"></div>
-<div id="applyConfirm"></div>
 <div id="applyResult"></div>
+<?php
+/* NOTE: #overrideConfirm / #initialResetConfirm / #applyConfirm anchors
+ * intentionally REMOVED — those handlers use data-control="popup" which
+ * renders the partial directly into October's popup widget. Keeping inline
+ * anchors caused double-render (popup body + inline selector update). */
+?>

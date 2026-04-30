@@ -1,17 +1,19 @@
-{# UI-04 / T-04-05-04: rendered by onApply when ApplyAlreadyDoneException is
-   raised inside ApplyOrchestrator (status='applied' idempotency gate). The
-   handler catches the typed exception and presents its prior-result context
-   in this structured surface so the operator understands why their click
-   did nothing. Override-and-reimport (plan 04-06) is the documented path
-   for intentional re-application. #}
+<?php
+/* UI-04 / T-04-05-04: rendered when ApplyAlreadyDoneException raised. */
+$arContext = $context ?? [];
+$sInvoiceNumber = (string) ($arContext['invoice_number'] ?? '—');
+$sPriorAppliedAt = (string) ($arContext['prior_applied_at'] ?? '—');
+$sPriorAppliedBy = (string) ($arContext['prior_applied_by'] ?? '—');
+$iPriorStockAdded = (int) ($arContext['prior_stock_added_units'] ?? 0);
+?>
 <div class="alert alert-info">
-    <h4>{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.already_done_title'|trans }}</h4>
+    <h4><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.already_done_title')) ?></h4>
     <p>This invoice was previously applied:</p>
     <ul>
-        <li>Invoice number: <strong>{{ context.invoice_number }}</strong></li>
-        <li>Applied at: <strong>{{ context.prior_applied_at|default('—') }}</strong></li>
-        <li>Applied by user: <strong>{{ context.prior_applied_by|default('—') }}</strong></li>
-        <li>Prior stock added (units): <strong>{{ context.prior_stock_added_units }}</strong></li>
+        <li>Invoice number: <strong><?= e($sInvoiceNumber) ?></strong></li>
+        <li>Applied at: <strong><?= e($sPriorAppliedAt) ?></strong></li>
+        <li>Applied by user: <strong><?= e($sPriorAppliedBy) ?></strong></li>
+        <li>Prior stock added (units): <strong><?= $iPriorStockAdded ?></strong></li>
     </ul>
-    <p class="help-block">{{ 'logingrupa.goodsreceivedshopaholic::lang.apply.already_done_help'|trans }}</p>
+    <p class="help-block"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.already_done_help')) ?></p>
 </div>

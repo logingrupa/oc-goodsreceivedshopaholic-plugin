@@ -1,13 +1,15 @@
-{# UI-03 / UI-07 (D-08, D-09, D-10): preview screen line-by-line table for each
-   uploaded invoice. Shows row_index / EAN / product_name / qty / match_strategy /
-   matched offer; per-line override_qty + override_reason inputs trigger the
-   onUpdateLine AJAX handler via October's data-track-input. The Apply button at
-   the bottom invokes the onApply handler shipped in plan 04-05 (popup
-   confirmation modal). #}
-{% if invoices|length > 0 %}
-    {% for preview in invoices %}
-        <div class="invoice-preview" data-invoice-id="{{ preview.invoice.id }}">
-            {{ this.makePartial('_partials/summary_panel', preview) }}
+<?php
+/* UI-03 / UI-07 (D-08, D-09, D-10): preview screen line-by-line table. */
+$arInvoices = $invoices ?? [];
+?>
+<?php if (count($arInvoices) > 0): ?>
+    <?php foreach ($arInvoices as $arPreview):
+        $obInvoice = $arPreview['invoice'] ?? null;
+        $iInvoiceId = (int) ($obInvoice?->id ?? 0);
+        $arLines = $arPreview['lines'] ?? [];
+    ?>
+        <div class="invoice-preview" data-invoice-id="<?= $iInvoiceId ?>">
+            <?= $this->makePartial('_partials/summary_panel', $arPreview) ?>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -22,42 +24,45 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for line in preview.lines %}
-                        <tr class="{{ line.matched_offer_id ? 'matched' : 'unmatched' }}" data-line-id="{{ line.id }}">
-                            <td>{{ line.row_index }}</td>
-                            <td>{{ line.ean }}</td>
-                            <td>{{ line.product_name_raw }}</td>
-                            <td>{{ line.qty }}</td>
+                    <?php foreach ($arLines as $obLine):
+                        $iLineId = (int) ($obLine->id ?? 0);
+                        $sRowClass = $obLine->matched_offer_id !== null ? 'matched' : 'unmatched';
+                    ?>
+                        <tr class="<?= $sRowClass ?>" data-line-id="<?= $iLineId ?>">
+                            <td><?= (int) ($obLine->row_index ?? 0) ?></td>
+                            <td><?= e((string) ($obLine->ean ?? '')) ?></td>
+                            <td><?= e((string) ($obLine->product_name_raw ?? '')) ?></td>
+                            <td><?= (int) ($obLine->qty ?? 0) ?></td>
                             <td>
                                 <input type="number"
                                        min="0"
-                                       value="{{ line.override_qty|default('') }}"
+                                       value="<?= e((string) ($obLine->override_qty ?? '')) ?>"
                                        data-request="onUpdateLine"
-                                       data-request-data="line_id: {{ line.id }}"
+                                       data-request-data="line_id: <?= $iLineId ?>"
                                        data-track-input
                                        name="override_qty">
                             </td>
                             <td>
                                 <input type="text"
-                                       value="{{ line.override_reason|default('') }}"
+                                       value="<?= e((string) ($obLine->override_reason ?? '')) ?>"
                                        data-request="onUpdateLine"
-                                       data-request-data="line_id: {{ line.id }}"
+                                       data-request-data="line_id: <?= $iLineId ?>"
                                        data-track-input
                                        name="override_reason">
                             </td>
-                            <td>{{ line.match_strategy }}</td>
-                            <td>{{ line.matched_offer_id|default('—') }}</td>
+                            <td><?= e((string) ($obLine->match_strategy ?? '')) ?></td>
+                            <td><?= $obLine->matched_offer_id !== null ? (int) $obLine->matched_offer_id : '—' ?></td>
                         </tr>
-                    {% endfor %}
+                    <?php endforeach; ?>
                 </tbody>
             </table>
             <button type="button"
                     class="btn btn-primary"
                     data-control="popup"
                     data-handler="onApplyShowConfirm"
-                    data-request-data="invoice_id: {{ preview.invoice.id }}">
+                    data-request-data="invoice_id: <?= $iInvoiceId ?>">
                 Apply to stock
             </button>
         </div>
-    {% endfor %}
-{% endif %}
+    <?php endforeach; ?>
+<?php endif; ?>
