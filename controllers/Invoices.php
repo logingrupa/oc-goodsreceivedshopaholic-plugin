@@ -430,6 +430,20 @@ HTML;
 
         $iUserId = $this->resolveBackendUserId();
 
+        // UX redesign 2026-04-30 — persist modal-form edits BEFORE the
+        // ApplyOrchestrator runs. Two POST payloads land here from
+        // `_apply_modal.htm`:
+        //   - `override_qty[<lineId>]` — per-row number input. NULL value
+        //     (placeholder cleared by operator) means "use parsed qty";
+        //     non-empty integer overrides. StockApplyService reads
+        //     `override_qty ?? qty` so this just lands on the right column.
+        //   - `notes` — free-text textarea on the Invoice row.
+        // Both saves run BEFORE Cache::lock acquisition because the lock
+        // guards the orchestrator's idempotency contract, not the metadata
+        // edits. A partial-save scenario (override saved, lock not acquired)
+        // is fine — the next click re-issues the same edits + acquires.
+        $this->persistApplyModalEdits($iInvoiceId);
+
         $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
         if (! $obLock->get()) {
             return [
@@ -442,6 +456,121 @@ HTML;
         } finally {
             $obLock->release();
         }
+    }
+
+    /**
+     * Persist the `override_qty[]` POST array + `notes` field that arrive
+     * from `_apply_modal.htm`. Idempotent — safe to call again with the
+     * same payload (line saves use saveQuietly, notes save uses saveQuietly
+     * — neither emits side-effect events).
+     *
+     * `override_qty` shape after PHP form decoding: `array<int|string,
+     * scalar>` keyed by InvoiceLine id. Empty-string values map to NULL
+     * (operator cleared the override → fall back to parsed qty per the
+     * `override_qty ?? qty` contract in StockApplyService). Non-numeric
+     * scalars or negatives reject silently (clamped to NULL) — server-side
+     * defense against malformed POSTs without bubbling a UI error for what
+     * is operator-correctable noise.
+     *
+     * Visibility: protected so the Pest TestableInvoices shim could
+     * override the seam if a future test wants to swap the persistence
+     * path; production callers always reach this through `onApply`.
+     */
+    protected function persistApplyModalEdits(int $iInvoiceId): void
+    {
+        $this->persistOverrideQtyEdits($iInvoiceId);
+        $this->persistNotesEdit($iInvoiceId);
+    }
+
+    /**
+     * Per-line `override_qty[<lineId>]` POST array → InvoiceLine.override_qty
+     * column. Walks the array, validates each value, saves only the lines
+     * that actually changed (saveQuietly avoids touching `updated_at` on
+     * unchanged rows).
+     */
+    private function persistOverrideQtyEdits(int $iInvoiceId): void
+    {
+        $mPayload = Input::get('override_qty');
+        if (! is_array($mPayload)) {
+            return;
+        }
+
+        foreach ($mPayload as $mLineId => $mValue) {
+            $iLineId = (int) $mLineId;
+            if ($iLineId <= 0) {
+                continue;
+            }
+
+            $obLine = InvoiceLine::where('invoice_id', $iInvoiceId)
+                ->where('id', $iLineId)
+                ->first();
+            if (! $obLine instanceof InvoiceLine) {
+                continue;
+            }
+
+            $mNewOverride = $this->normalizeOverrideQtyValue($mValue);
+            if ($obLine->override_qty === $mNewOverride) {
+                continue;
+            }
+
+            $obLine->override_qty = $mNewOverride;
+            $obLine->saveQuietly();
+        }
+    }
+
+    /**
+     * Single `notes` POST field → Invoice.notes column. Trims + treats empty
+     * as NULL (DB column is nullable per Phase 1 schema).
+     */
+    private function persistNotesEdit(int $iInvoiceId): void
+    {
+        if (! Input::has('notes')) {
+            return;
+        }
+
+        $mNotes = Input::get('notes');
+        $sNotes = is_scalar($mNotes) ? trim((string) $mNotes) : '';
+        $mFinal = $sNotes !== '' ? $sNotes : null;
+
+        $obInvoice = Invoice::find($iInvoiceId);
+        if (! $obInvoice instanceof Invoice) {
+            return;
+        }
+
+        if ($obInvoice->notes === $mFinal) {
+            return;
+        }
+
+        $obInvoice->notes = $mFinal;
+        $obInvoice->saveQuietly();
+    }
+
+    /**
+     * Coerce the raw POST value to NULL or a non-negative integer.
+     * Rejects: non-numeric, negative, decimal with non-zero fraction,
+     * empty string, scientific notation. Empty string means "no override"
+     * (the modal's clear-input UX → fall back to parsed qty).
+     */
+    private function normalizeOverrideQtyValue(mixed $mValue): ?int
+    {
+        if ($mValue === null) {
+            return null;
+        }
+
+        if (! is_scalar($mValue)) {
+            return null;
+        }
+
+        $sValue = trim((string) $mValue);
+        if ($sValue === '') {
+            return null;
+        }
+
+        if (preg_match('/^\d+$/', $sValue) !== 1) {
+            return null;
+        }
+
+        return (int) $sValue;
     }
 
     /**

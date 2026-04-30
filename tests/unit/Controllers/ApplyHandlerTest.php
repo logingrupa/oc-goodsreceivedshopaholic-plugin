@@ -302,6 +302,149 @@ it('onApply releases lock in finally even when ApplyOrchestrator throws (T-04-05
     app()->forgetInstance(ApplyOrchestrator::class);
 });
 
+it('onApply persists override_qty[] POST array onto matching InvoiceLine rows (modal POST round-trip)', function (): void {
+    // UX redesign 2026-04-30 / Chunk F — `_apply_modal.htm` posts
+    // `override_qty[<lineId>]` for each line; `onApply` MUST persist those
+    // values BEFORE the ApplyOrchestrator runs so StockApplyService picks
+    // up `override_qty ?? qty` per D-12 / T-04-04-08. This test pins the
+    // round-trip from POST array → InvoiceLine.override_qty column.
+    $obProduct = seedApplyProduct('AHT-OVR-CODE', 'aht-ovr-product');
+    $obOffer = seedApplyOffer((int) $obProduct->id, '4752307000900', iQuantity: 10);
+
+    $obInvoice = seedApplyHandlerInvoice('AHT-OVR-001');
+    $obLine = seedApplyHandlerLine((int) $obInvoice->id, '4752307000900', 5, (int) $obOffer->id);
+
+    \Input::merge([
+        'invoice_id'   => (int) $obInvoice->id,
+        'override_qty' => [
+            (string) $obLine->id => '7',
+        ],
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null, iUserId: 99);
+    $obController->onApply();
+
+    // override_qty persisted before apply ran.
+    $obLine->refresh();
+    expect($obLine->override_qty)->toBe(7);
+
+    // StockApplyService used override_qty (7) instead of parsed qty (5):
+    // 10 + 7 = 17.
+    $obOffer->refresh();
+    expect((int) $obOffer->quantity)->toBe(17);
+
+    // Invoice header reflects the override total in stock_added_units.
+    $obRefreshed = Invoice::find($obInvoice->id);
+    expect($obRefreshed)->not->toBeNull();
+    expect((int) $obRefreshed->stock_added_units)->toBe(7);
+});
+
+it('onApply persists empty-string override_qty as NULL (clear-override UX)', function (): void {
+    // The modal's number input shows the prior override as the value; when
+    // an operator CLEARS it, the empty string is posted. The persist helper
+    // normalizes empty string to NULL so StockApplyService falls back to
+    // the parsed qty.
+    $obProduct = seedApplyProduct('AHT-CLR-CODE', 'aht-clr-product');
+    $obOffer = seedApplyOffer((int) $obProduct->id, '4752307000901', iQuantity: 10);
+
+    $obInvoice = seedApplyHandlerInvoice('AHT-CLR-001');
+    $obLine = seedApplyHandlerLine((int) $obInvoice->id, '4752307000901', 5, (int) $obOffer->id);
+    // Pre-seed an override that the operator will clear.
+    $obLine->override_qty = 9;
+    $obLine->saveQuietly();
+    expect($obLine->override_qty)->toBe(9);
+
+    \Input::merge([
+        'invoice_id'   => (int) $obInvoice->id,
+        'override_qty' => [
+            (string) $obLine->id => '',
+        ],
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null, iUserId: 99);
+    $obController->onApply();
+
+    $obLine->refresh();
+    expect($obLine->override_qty)->toBeNull();
+
+    // StockApplyService used parsed qty (5) since override is now NULL:
+    // 10 + 5 = 15.
+    $obOffer->refresh();
+    expect((int) $obOffer->quantity)->toBe(15);
+});
+
+it('onApply persists notes POST field onto Invoice.notes', function (): void {
+    // BUG 5 / Chunk F — notes round-trip from modal POST → Invoice.notes
+    // column. Persists BEFORE the ApplyOrchestrator runs.
+    $obProduct = seedApplyProduct('AHT-NOTES-CODE', 'aht-notes-product');
+    $obOffer = seedApplyOffer((int) $obProduct->id, '4752307000902', iQuantity: 10);
+
+    $obInvoice = seedApplyHandlerInvoice('AHT-NOTES-001');
+    seedApplyHandlerLine((int) $obInvoice->id, '4752307000902', 3, (int) $obOffer->id);
+
+    \Input::merge([
+        'invoice_id' => (int) $obInvoice->id,
+        'notes'      => '  Operator commentary about this invoice.  ',
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null, iUserId: 99);
+    $obController->onApply();
+
+    $obRefreshed = Invoice::find($obInvoice->id);
+    expect($obRefreshed)->not->toBeNull();
+    // Trimmed but otherwise verbatim.
+    expect((string) $obRefreshed->notes)->toBe('Operator commentary about this invoice.');
+});
+
+it('onApply normalizes empty notes string to NULL', function (): void {
+    $obInvoice = seedApplyHandlerInvoice('AHT-NOTES-EMPTY-001');
+    $obInvoice->notes = 'prior content';
+    $obInvoice->saveQuietly();
+
+    \Input::merge([
+        'invoice_id' => (int) $obInvoice->id,
+        'notes'      => '   ',
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null, iUserId: 99);
+    try {
+        $obController->onApply();
+    } catch (\Throwable $obException) {
+        // Apply may fail for an invoice without lines; we only care about
+        // the persist-edits side effect that runs BEFORE the orchestrator.
+    }
+
+    $obRefreshed = Invoice::find($obInvoice->id);
+    expect($obRefreshed)->not->toBeNull();
+    expect($obRefreshed->notes)->toBeNull();
+});
+
+it('onApply rejects non-integer override_qty values silently (clamps to NULL)', function (): void {
+    // Server-side defense — a malformed POST (negative, non-numeric,
+    // decimal) should NOT bubble a UI error; instead it clamps to NULL.
+    // Operator-correctable noise.
+    $obInvoice = seedApplyHandlerInvoice('AHT-MALFORMED-001');
+    $obLine = seedApplyHandlerLine((int) $obInvoice->id, '4752307000903', 5, null);
+
+    \Input::merge([
+        'invoice_id'   => (int) $obInvoice->id,
+        'override_qty' => [
+            (string) $obLine->id => 'banana',
+        ],
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null, iUserId: 99);
+    try {
+        $obController->onApply();
+    } catch (\Throwable $obException) {
+        // Apply path may fail since line is unmatched; we only care about
+        // the override_qty normalization, not orchestrator behavior.
+    }
+
+    $obLine->refresh();
+    expect($obLine->override_qty)->toBeNull();
+});
+
 it('onApply renders apply_already_done partial when invoice status=applied (T-04-05-04)', function (): void {
     // Pre-set the invoice as already applied so the orchestrator throws the
     // typed exception when we run apply.
