@@ -12,25 +12,80 @@ Backend operators upload distributor delivery receipts. Stock is added to matche
 
 ### Validated
 
-(None yet — ship to validate)
+50 of 56 v1 requirements closed across Phases 1-4 + Phase 5 plans 05-01 / 05-02 (2026-04-29 → 2026-04-30). Full traceability lives in `.planning/REQUIREMENTS.md ## Traceability`; this section is the navigable rollup. The 6 still-Pending v1 reqs (QA-07, QA-11, OPS-03, OPS-05, OPS-06 + OPS-02 itself which closes via this very plan) remain in **Active** below per the no-silent-flip rule (T-05-03-01 mitigation).
+
+**Schema, Scaffold, Settings, Permissions (Phase 1, closed 2026-04-29):**
+- [x] SCHEMA-01 — Migration `logingrupa_goods_received_invoices`
+- [x] SCHEMA-02 — Migration `logingrupa_goods_received_invoice_lines`
+- [x] SCHEMA-03 — Migration `logingrupa_goods_received_initial_reset_snapshot`
+- [x] SCHEMA-04 — Additive column on `lovata_shopaholic_offers.active_managed_by`
+- [x] SCHEMA-05 — Eloquent models with PHPStan-L10 @property blocks
+- [x] SCHEMA-06 — Settings model with Multisite (D15)
+- [x] SCHEMA-07 — 4 split backend permissions
+- [x] SCHEMA-08 — Lang scaffold (en/lv/no/ru); fully populated in OPS-04
+
+**Pure Parsers, DTOs, Exceptions, EAN Matcher (Phase 2, closed 2026-04-29):**
+- [x] PARSE-01 — Readonly DTOs (ParsedInvoice, ParsedLine, MatchedLine, ApplyResult)
+- [x] PARSE-02 — Typed exception hierarchy (8 subclasses + 1 abstract base)
+- [x] PARSE-03 — HtmInvoiceParser (DOMDocument + XPath + LIBXML_NONET)
+- [x] PARSE-04 — InvoiceNumberResolver (body → filename fallback → throw)
+- [x] PARSE-05 — QuantityNormalizer (rejects decimal-comma BEFORE Eloquent int-clamp)
+- [x] PARSE-06 — PriceNormalizer (audit-only)
+- [x] PARSE-07 — Hermetic test fixtures (3 real `.HTM` files in `tests/fixtures/invoices/`)
+- [x] MATCH-01 — EanMatcherService (two-query batch lookup)
+- [x] MATCH-02 — Unmatched lines persisted with `matched_offer_id=NULL`
+- [x] QA-01 — HTM parser real-fixture pin tests (BOM/CRLF/unquoted-attr/malformed)
+- [x] QA-02 — Stock-write guard tests (decimal-qty rejection + leading-zero EAN preservation)
+
+**Apply Layer + Orchestrators (Phase 3, closed 2026-04-29):**
+- [x] APPLY-01 — StockApplyService (saveQuietly per unique offer)
+- [x] APPLY-02 — Batched cache flush (≤ 5 leaf-singleton flushes for any apply size)
+- [x] APPLY-03 — ActiveFlagService provenance gate (skip `active_managed_by='operator'`)
+- [x] APPLY-04 — ActiveFlagService 4-cell matrix
+- [x] APPLY-05 — InitialResetService (one-shot + snapshot-before-write + chunked)
+- [x] APPLY-06 — ParseAndPersistOrchestrator
+- [x] APPLY-07 — ApplyOrchestrator (lockForUpdate + 1 transaction + post-commit flush)
+- [x] APPLY-08 — Override-reimport (D12) parse-side + apply-side
+- [x] APPLY-09 — SettingsAccessor (DRY accessor + grep gate)
+- [x] APPLY-10 — ImportAuditService (vendor-inlined, D14)
+- [x] QA-03 — Idempotency tests (4 dedicated)
+- [x] QA-04 — Cache-cascade smoke test (200-line batched-flush counter)
+- [x] QA-05 — ActiveFlag matrix + provenance skip
+- [x] QA-06 — InitialReset 5 dedicated tests
+- [x] QA-08 — Transaction safety (partial-failure rollback + ActiveFlag-inside-tx)
+- [x] QA-09 — Settings DRY grep gate (Makefile + Pest mirror)
+
+**Backend Controller, Upload/Preview/Apply UI, Console (Phase 4, closed 2026-04-30):**
+- [x] UI-01 — Backend controller `Invoices` (Settings menu, not main nav, per D6)
+- [x] UI-02 — Multi-file upload with per-file boundary catch
+- [x] UI-03 — Preview screen + per-line override_qty / override_reason editing
+- [x] UI-04 — Apply confirmation modal + Cache::lock debounce
+- [x] UI-05 — Audit history list (sorted by applied_at DESC)
+- [x] UI-06 — Original `.HTM` archived via attachOne + downloadable
+- [x] UI-07 — Per-import metric panel
+- [x] UI-08 — Initial-reset typed-RESET gate + pre-mutation snapshot count modal
+- [x] UI-09 — Pre-parse duplicate detection (filename regex short-circuit)
+- [x] UI-10 — Override-reimport typed-OVERRIDE gate + warning copy verbatim
+- [x] UI-11 — Console command `goodsreceived:recompute_active_from_stock`
+- [x] UI-12 — Plugin boot self-check (max_file_uploads / upload_max_filesize)
+- [x] QA-10 — 4 permission gate tests + ControllerTestCase base
+
+**Operations + QA + Polish (Phase 5, partial closure 2026-04-30):**
+- [x] OPS-01 — README operator runbook (11 sections per D-01) — closed plan 05-02
+- [x] OPS-04 — lang/{en,lv,no,ru}/lang.php fully populated; key parity test (629 assertions) — closed plan 05-01
 
 ### Active
 
-- [ ] Backend upload page accepts one or many `.HTM` files in a single submission
-- [ ] HTM parser extracts `[row#, EAN, name, unit, qty, unit_price, discount, line_price, total]` from data rows (`<TR class="R20|R21">`) ignoring header/footer rows
-- [ ] Invoice number resolved from HTM body, fallback to filename pattern `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM`; reject upload if neither yields a number
-- [ ] Re-upload of an already-applied invoice is rejected with prior-apply timestamp, applying user, and units added per offer, and allows to select overide and re import. 
-- [ ] EAN matching: `offers.code` first; fallback `products.code` only when product has a single offer
-- [ ] Two-step UI: parse → preview matched/unmatched lines → operator clicks Apply - we use OctoberCMS UI components and if needed custom, always use Larajax!
-- [ ] Apply increments `offer.quantity` by line qty (additive, never replace)
-- [ ] Unmatched lines persist in DB for manual resolution; never block partial apply
-- [ ] Per-site settings: `enabled`, `auto_deactivate_on_zero`, `auto_activate_on_stock`, `allow_initial_reset`
-- [ ] One-shot initial-reset checkbox on import preview: zero all `offer.quantity`, set all `product.active=false` and `offer.active=false` before applying first invoice; logged in audit row
-- [ ] Console command `goodsreceived:recompute_active_from_stock` reconciles active flags from current stock without import
-- [ ] Settings menu entry only — no top-nav clutter
-- [ ] Audit history page lists imports with status/lines/units/applied_by/timestamps; per-import detail view exposes lines + unmatched queue
-- [ ] Multi-site: works on .no/.lv/.lt with per-DB settings; no shared state assumed
-- [ ] Plugin installable via Composer from public GitHub repo
+The 6 v1 requirements still open as of plan 05-03 write-time. Each carries a precise reason it is NOT yet validated (no silent flips — T-05-03-01 mitigation). Cross-reference: `.planning/REQUIREMENTS.md ## Traceability`.
+
+- [ ] OPS-02 — PROJECT.md update with D11-D15 *(closing via THIS plan; flips to Validated upon plan 05-03 commit + verifier sign-off)*
+- [ ] OPS-03 — Composer publish to PUBLIC GitHub repo + `composer require` verified on clean install *(scheduled Phase 5 plan 05-05)*
+- [ ] OPS-05 — `make all` green: pint-test + phpstan L10 + phpmd + pest --coverage --min=N *(scheduled Phase 5 plan 05-04)*
+- [ ] OPS-06 — Multi-site UAT executed on .no / .lv / .lt staging *(scheduled Phase 5 plan 05-06)*
+- [ ] QA-07 — Multi-site Settings tests (`IsMultisiteAwareTest`, `MultisiteContextSwitchClearsCacheTest`) *(REQUIREMENTS.md traceability still shows Pending; needs Phase 1 plan 01-07 follow-up — out-of-scope for milestone v1.0 close, candidate for v1.0.1 patch)*
+- [ ] QA-11 — `GoodsReceivedTestCase::tearDown()` calls `flushModelEventListeners()` AND each plugin singleton's `flush()` *(REQUIREMENTS.md traceability still shows Pending; needs Phase 1 plan 01-07 follow-up — same v1.0.1 patch candidate)*
+
+Post-v1 work tracks under `.planning/REQUIREMENTS.md ## v2 Requirements (deferred)`.
 
 ### Out of Scope
 
@@ -197,6 +252,11 @@ Soft (deferred decision):
 | D8 | Pest 4 / PHPStan level 10 / PHPMD / Pint / Rector | Mirror `postnordshippingshopaholic` quality bar | Locked |
 | D9 | Functional style, no nested if/else, max 1 level deep | Engineering quality bar | Locked |
 | D10 | No mocking business logic in tests | Tiger-Style: real DB, deterministic | Locked |
+| D11 | GitHub repo: PUBLIC | OPS-03 — Composer require works against clean OctoberCMS 4 + Lovata Shopaholic install | Locked, validated 2026-04-29 |
+| D12 | Override-and-reimport = ADD-ON-TOP. Re-apply treats new lines as additive on top of prior apply. UX shows clear warning before override accepted. No `content_hash`, no diff preview, no decrement-then-reapply. | Operator-friendly semantics; simpler than delta calculation; UX warning + typed `OVERRIDE` confirmation prevents accidents | Locked, validated 2026-04-29; shipped Phase 3 plans 03-06 + 03-07 + Phase 4 plan 04-06 |
+| D13 | GRN owns `offer.quantity`. User manually disables quantity import in ExtendShopaholic 1C XML config (out-of-band). No cross-plugin migration in this plugin. Document dep in PROJECT.md. | Single canonical writer for stock; explicit out-of-band step keeps plugins decoupled; documented in README section 8 (D-01) | Locked, validated 2026-04-29; documented in README via plan 05-02 |
+| D14 | Vendor-inline `ImportAuditService` (~50-80 LoC). No soft-dep on `Logingrupa.ExtendShopaholic`. | Plugin should be installable on a fresh Shopaholic install without ExtendShopaholic; 50-80 LoC of audit logging is cheaper than a soft dependency contract | Locked, validated 2026-04-29; shipped Phase 3 plan 03-02 (96 raw / 65 code lines within ≤100 LoC ceiling) |
+| D15 | Settings extends `System\Models\SettingModel` directly + manually implements `MultisiteInterface` + `MultisiteHelperTrait`. | Avoids the `Lovata\Toolbox\Models\CommonSettings` base class which makes Multisite awkward; direct extension keeps the Settings model under our control | Locked, validated 2026-04-29; shipped Phase 1 plan 01-05 |
 
 ## Evolution
 
@@ -215,4 +275,6 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-29 — scaffold + project doc seeded from `/gsd-quick --full --research --discuss` capture (`<project_root>/.planning/captures/20260429-stockinvoiceimport-discuss.md`)*
+*Last updated: 2026-04-30 — milestone v1.0 close pass: D11-D15 locked + 50 v1 reqs moved Active → Validated (plan 05-03 / OPS-02). 6 reqs still Active pending plans 05-03..05-06 + Phase 1 plan 01-07 follow-up.*
+
+*Previously updated: 2026-04-29 — scaffold + project doc seeded from `/gsd-quick --full --research --discuss` capture (`<project_root>/.planning/captures/20260429-stockinvoiceimport-discuss.md`)*
