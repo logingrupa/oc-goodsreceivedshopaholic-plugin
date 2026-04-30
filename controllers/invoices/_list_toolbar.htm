@@ -1,4 +1,6 @@
-<?= $this->controller->renderInvoicesTabs('invoices') ?>
+<?= method_exists($this, 'renderInvoicesTabs')
+    ? $this->renderInvoicesTabs('invoices')
+    : (isset($this->controller) && $this->controller !== null ? $this->controller->renderInvoicesTabs('invoices') : '') ?>
 
 <div data-control="toolbar">
     <a
