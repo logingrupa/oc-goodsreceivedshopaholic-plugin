@@ -3,7 +3,7 @@ use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 
 $obSettings = Settings::instance();
 ?>
-<?= $this->makePartial('_tabs', ['active' => 'settings']) ?>
+<?= $this->makePartial('tabs', ['active' => 'settings']) ?>
 
 <div class="alert alert-info">
     <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_intro_title')) ?></strong>
