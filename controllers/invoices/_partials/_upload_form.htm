@@ -14,11 +14,13 @@ $bShowInitialReset = $this->shouldShowInitialReset();
                    class="form-control"
                    data-request="onUpload"
                    data-request-files
-                   data-request-loading=".upload-progress"
+                   data-request-loading="#grUploadProgress"
                    data-request-success="if (data.result) { $.popup({ content: data.result, size: 'huge' }); }">
             <p class="help-block">Files parse + persist on selection. The apply modal opens automatically — edit override quantities / notes there before applying to stock.</p>
         </div>
-        <div class="upload-progress" style="display:none;"><i class="icon-spinner icon-spin"></i> Uploading&hellip;</div>
+        <div id="grUploadProgress" class="loading-indicator-container m-t" style="display:none;">
+            <div class="loading-indicator indicator-center"><span></span></div>
+        </div>
     <?= Form::close() ?>
 </div>
 
