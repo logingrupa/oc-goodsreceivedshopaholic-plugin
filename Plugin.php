@@ -184,17 +184,18 @@ class Plugin extends PluginBase
     }
 
     /**
-     * Register backend Settings menu entries under the Shopaholic settings group.
+     * Register backend Settings menu entry — single canonical surface.
      *
-     * Two entries (per UI-05 / D-04 alternative):
-     *   1. `goodsreceived-settings`  -> Settings model form (per-site toggles).
-     *   2. `goodsreceived-invoices`  -> Invoices controller URL (audit history +
-     *      upload UI). Reachable from Settings menu — NOT main nav (D6).
+     * Operators reach the Goods Received feature via:
+     *   1. Settings → Goods Received  -> 4 per-site toggles (this entry).
+     *   2. Main nav → Shopaholic → Goods Received → Invoices  -> upload + audit
+     *      history (registered via `registerNavigation` below; Lovata.Shopaholic
+     *      group is already in main nav so we extend it instead of adding new
+     *      top-level clutter per D6).
      *
-     * The second entry uses `url` instead of `class` so October routes the
-     * Settings click through the standard backend controller dispatcher rather
-     * than the Settings model form widget (the controller itself implements
-     * ListController + FormController + RelationController per D-01).
+     * The Settings form view (partials/_settings_field_manage_invoices.htm)
+     * also surfaces a "Manage Invoices" link to the controller URL for
+     * operators who land on Settings first.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -210,12 +211,30 @@ class Plugin extends PluginBase
                 'class'       => Settings::class,
                 'order'       => 500,
             ],
-            'goodsreceived-invoices' => [
-                'label'       => 'logingrupa.goodsreceivedshopaholic::lang.controller.list_title',
-                'description' => 'logingrupa.goodsreceivedshopaholic::lang.controller.list_description',
-                'category'    => 'lovata.shopaholic::lang.tab.settings',
+        ];
+    }
+
+    /**
+     * Register backend main-nav extension under Lovata.Shopaholic group.
+     *
+     * Adds the Invoices controller as a side-menu item beneath Shopaholic so
+     * operators can upload, preview, and apply HTM delivery receipts without
+     * leaving the main backend navigation flow.
+     *
+     * Settings stays under Settings menu (registerSettings above) — the two
+     * surfaces are separate because:
+     *   - Invoices CRUD is a workflow tool (frequent operator action)
+     *   - Settings toggles are configuration (rare, admin-only)
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function registerNavigation(): array
+    {
+        return [
+            'goodsreceived' => [
+                'label'       => 'logingrupa.goodsreceivedshopaholic::lang.menu.goods_received',
                 'icon'        => 'icon-truck',
-                'url'         => 'logingrupa/goodsreceivedshopaholic/invoices',
+                'url'         => \Backend::url('logingrupa/goodsreceivedshopaholic/invoices'),
                 'permissions' => ['logingrupa.goodsreceived.upload_invoices'],
                 'order'       => 510,
             ],

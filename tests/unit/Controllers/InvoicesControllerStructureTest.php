@@ -95,10 +95,19 @@ it('view templates and partials exist', function (): void {
     }
 });
 
-it('Plugin::registerSettings returns the goodsreceived-invoices entry routing to the Invoices controller', function (): void {
+it('Plugin::registerNavigation returns goodsreceived entry routing to the Invoices controller', function (): void {
+    $obPlugin = new Plugin($this->app);
+    $arNav = $obPlugin->registerNavigation();
+    expect($arNav)->toHaveKey('goodsreceived');
+    expect($arNav['goodsreceived'])->toHaveKey('url');
+    expect($arNav['goodsreceived']['url'])->toContain('logingrupa/goodsreceivedshopaholic/invoices');
+    expect($arNav['goodsreceived'])->toHaveKey('permissions');
+    expect($arNav['goodsreceived']['permissions'])->toContain('logingrupa.goodsreceived.upload_invoices');
+});
+
+it('Plugin::registerSettings returns only the canonical goodsreceived-settings entry (single-surface fix)', function (): void {
     $obPlugin = new Plugin($this->app);
     $arSettings = $obPlugin->registerSettings();
-    expect($arSettings)->toHaveKey('goodsreceived-invoices');
-    expect($arSettings['goodsreceived-invoices'])->toHaveKey('url');
-    expect($arSettings['goodsreceived-invoices']['url'])->toBe('logingrupa/goodsreceivedshopaholic/invoices');
+    expect($arSettings)->toHaveKey('goodsreceived-settings');
+    expect($arSettings)->not->toHaveKey('goodsreceived-invoices');
 });
