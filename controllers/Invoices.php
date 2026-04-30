@@ -322,8 +322,19 @@ HTML;
      * (Phase 3 plan 03-03). DB::raw avoids the N+1 hydration cost of a
      * Collection iteration.
      *
-     * Response shape:
-     *   ['#applyConfirm' => makePartial('_partials/apply_confirm', [...])]
+     * Response shape (canonical popup widget contract — see
+     * modules/backend/assets/foundation/controls/popup/README.md):
+     *   ['result' => makePartial('_partials/apply_confirm', [...])]
+     *
+     * October popup.js (line 93) reads ONLY `data.result` via
+     * `self.setContent(data.result)`. Returning the assoc-array with `result`
+     * key is equivalent to returning the partial as a string (Larajax wraps
+     * strings to `['result' => $s]` — vendor/larajax/larajax/src/Classes/AjaxResponse.php:126-128)
+     * and keeps the typed array return contract intact. The prior multi-key
+     * shape (`#applyConfirm` + `partial` + `result`) routed `#applyConfirm`
+     * through dataWithUpdateSelectors as a patchDom op against a non-existent
+     * DOM anchor (anchor div removed in commit 3a945cd) — silent no-op but
+     * violates the canonical contract.
      *
      * @return array<string, mixed>
      *
@@ -356,9 +367,7 @@ HTML;
         ]);
 
         return [
-            '#applyConfirm' => is_string($mPartial) ? $mPartial : "",
-            'partial'       => is_string($mPartial) ? $mPartial : "",
-            'result'        => is_string($mPartial) ? $mPartial : "",
+            'result' => is_string($mPartial) ? $mPartial : '',
         ];
     }
 
@@ -422,8 +431,9 @@ HTML;
      * threaded through so the typed-confirm submit can route to runOverride
      * with the right linkage.
      *
-     * Response shape:
-     *   ['#overrideConfirm' => makePartial('_partials/override_confirm', [...])]
+     * Response shape (canonical popup widget contract — popup.js:93 reads
+     * `data.result`):
+     *   ['result' => makePartial('_partials/override_confirm', [...])]
      *
      * @return array<string, mixed>
      *
@@ -443,9 +453,7 @@ HTML;
         ]);
 
         return [
-            '#overrideConfirm' => is_string($mPartial) ? $mPartial : "",
-            'partial'          => is_string($mPartial) ? $mPartial : "",
-            'result'           => is_string($mPartial) ? $mPartial : "",
+            'result' => is_string($mPartial) ? $mPartial : '',
         ];
     }
 
@@ -527,8 +535,9 @@ HTML;
      * verbatim so the operator sees exact catalog scale before typing
      * RESET.
      *
-     * Response shape:
-     *   ['#initialResetConfirm' => makePartial('_partials/initial_reset_confirm', [...])]
+     * Response shape (canonical popup widget contract — popup.js:93 reads
+     * `data.result`):
+     *   ['result' => makePartial('_partials/initial_reset_confirm', [...])]
      *
      * @return array<string, mixed>
      *
@@ -549,9 +558,7 @@ HTML;
         ]);
 
         return [
-            '#initialResetConfirm' => is_string($mPartial) ? $mPartial : "",
-            'partial'              => is_string($mPartial) ? $mPartial : "",
-            'result'               => is_string($mPartial) ? $mPartial : "",
+            'result' => is_string($mPartial) ? $mPartial : '',
         ];
     }
 

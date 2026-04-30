@@ -1,43 +1,44 @@
 <?php
-/* UI-08 / D-23 / D-24: Initial-reset confirmation modal. */
+/* UI-08 / D-23 / D-24: Initial-reset confirmation modal — canonical popup
+ * widget contract (header + body + footer only; popup.js wraps externally).
+ */
 $iOfferCount = (int) ($offer_count ?? 0);
 $iProductCount = (int) ($product_count ?? 0);
 ?>
-<div class="modal-dialog">
-    <div class="modal-content">
-        <header class="modal-header">
-            <h4>Initial Reset — Confirm</h4>
-        </header>
-        <div class="modal-body">
-            <div class="alert alert-danger">
-                <p><strong>This will zero out <?= $iOfferCount ?> offers and deactivate <?= $iProductCount ?> products.</strong></p>
-                <p>The current state is snapshotted to <code>logingrupa_goods_received_initial_reset_snapshot</code> for rollback. This is one-shot.</p>
-            </div>
-            <p>Type <code>RESET</code> exactly (uppercase) to confirm:</p>
-            <?= Form::open(['files' => true]) ?>
-                <div class="form-group">
-                    <input type="text"
-                           name="confirm_typed"
-                           class="form-control"
-                           placeholder="Type RESET here"
-                           autocomplete="off"
-                           autocapitalize="off"
-                           spellcheck="false">
-                </div>
-                <div class="form-group">
-                    <label>Upload the FIRST .HTM invoice (will be applied after reset)</label>
-                    <input type="file" name="files[]" accept=".htm,.HTM">
-                </div>
-                <button type="button"
-                        class="btn btn-danger"
-                        data-request="onInitialResetConfirm"
-                        data-request-files
-                        data-request-loading=".reset-spinner">
-                    Run reset + apply
-                </button>
-                <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-                <span class="reset-spinner" style="display:none;">Resetting and applying…</span>
-            <?= Form::close() ?>
-        </div>
+<div class="modal-header">
+    <h4 class="modal-title">Initial Reset &mdash; Confirm</h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body">
+    <div class="alert alert-danger">
+        <p><strong>This will zero out <?= $iOfferCount ?> offers and deactivate <?= $iProductCount ?> products.</strong></p>
+        <p>The current state is snapshotted to <code>logingrupa_goods_received_initial_reset_snapshot</code> for rollback. This is one-shot.</p>
     </div>
+    <p>Type <code>RESET</code> exactly (uppercase) to confirm:</p>
+    <?= Form::open(['files' => true]) ?>
+        <div class="form-group">
+            <input type="text"
+                   name="confirm_typed"
+                   class="form-control"
+                   placeholder="Type RESET here"
+                   autocomplete="off"
+                   autocapitalize="off"
+                   spellcheck="false">
+        </div>
+        <div class="form-group">
+            <label>Upload the FIRST .HTM invoice (will be applied after reset)</label>
+            <input type="file" name="files[]" accept=".htm,.HTM">
+        </div>
+    <?= Form::close() ?>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-danger"
+            data-request="onInitialResetConfirm"
+            data-request-files
+            data-request-loading=".reset-spinner">
+        Run reset + apply
+    </button>
+    <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+    <span class="reset-spinner" style="display:none;">Resetting and applying&hellip;</span>
 </div>

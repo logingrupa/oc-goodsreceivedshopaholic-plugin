@@ -133,8 +133,17 @@ it('onApplyShowConfirm renders modal partial with summary numbers (UI-04 / D-12)
     $arResponse = $obController->onApplyShowConfirm();
 
     expect($arResponse)->toBeArray();
-    expect($arResponse)->toHaveKey('#applyConfirm');
-    expect((string) $arResponse['#applyConfirm'])->toContain('_partials/apply_confirm');
+    // Canonical popup widget contract: response carries `result` key with
+    // rendered partial markup. October popup.js (line 93) reads
+    // `data.result` via `setContent(data.result)`. Larajax wraps non-`#`
+    // keys into the response data field so `data.result` is consumable
+    // client-side. Prior shape (`#applyConfirm` selector key) routed
+    // through dataWithUpdateSelectors as a patchDom op against a
+    // non-existent DOM anchor — silent no-op but violates the canonical
+    // contract documented in
+    // modules/backend/assets/foundation/controls/popup/README.md.
+    expect($arResponse)->toHaveKey('result');
+    expect((string) $arResponse['result'])->toContain('_partials/apply_confirm');
 
     $arConfirmCall = null;
     foreach ($obController->arPartialCalls as $arCall) {

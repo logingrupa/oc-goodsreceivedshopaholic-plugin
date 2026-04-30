@@ -146,8 +146,11 @@ it('onInitialResetShowConfirm renders modal with snapshot counts (D-23)', functi
     $arResponse = $obController->onInitialResetShowConfirm();
 
     expect($arResponse)->toBeArray();
-    expect($arResponse)->toHaveKey('#initialResetConfirm');
-    expect((string) $arResponse['#initialResetConfirm'])->toContain('_partials/initial_reset_confirm');
+    // Canonical popup widget contract — see ApplyHandlerTest comment for
+    // rationale. Response shape returns `result` key with the rendered
+    // partial markup (popup.js:93 reads `data.result`).
+    expect($arResponse)->toHaveKey('result');
+    expect((string) $arResponse['result'])->toContain('_partials/initial_reset_confirm');
 
     $arPartialCall = null;
     foreach ($obController->arPartialCalls as $arCall) {

@@ -50,15 +50,18 @@ it('rejects onOverrideShowConfirm without override_invoices permission (D-04-06-
     expect($obController->arPermissionsChecked)->toBe(['logingrupa.goodsreceived.override_invoices']);
 });
 
-it('onOverrideShowConfirm renders modal partial keyed at #overrideConfirm (D-18)', function (): void {
+it('onOverrideShowConfirm renders modal partial via canonical result key (D-18)', function (): void {
     $obController = makeTestController(bHasPermission: true, arFiles: null);
     \Input::merge(['prior_invoice_id' => 99]);
 
     $arResponse = $obController->onOverrideShowConfirm();
 
     expect($arResponse)->toBeArray();
-    expect($arResponse)->toHaveKey('#overrideConfirm');
-    expect((string) $arResponse['#overrideConfirm'])->toContain('_partials/override_confirm');
+    // Canonical popup widget contract — see ApplyHandlerTest comment for
+    // rationale. Response shape returns `result` key with the rendered
+    // partial markup (popup.js:93 reads `data.result`).
+    expect($arResponse)->toHaveKey('result');
+    expect((string) $arResponse['result'])->toContain('_partials/override_confirm');
 
     $arPartialCall = null;
     foreach ($obController->arPartialCalls as $arCall) {

@@ -1,5 +1,13 @@
 <?php
-/* UI-04 / D-12: Apply confirmation modal. */
+/* UI-04 / D-12: Apply confirmation modal — canonical popup widget contract.
+ * Partial body MUST be header + body + footer ONLY (no outer modal-dialog
+ * / modal-content wrappers). October popup.js (line 206-229) creates its
+ * own .control-popup > .modal-dialog > .modal-content container and injects
+ * this partial INSIDE .modal-content via $content.html(...). Outer wrappers
+ * here would double-nest the modal markup, breaking centering + close-button
+ * bindings. See modules/backend/assets/foundation/controls/popup/README.md
+ * (line 99-128) for the canonical structure.
+ */
 $obInvoice = $invoice ?? null;
 $iInvoiceId = (int) ($obInvoice?->id ?? 0);
 $sInvoiceNumber = (string) ($obInvoice?->invoice_number ?? '');
@@ -8,35 +16,32 @@ $iTotalUnits = (int) ($total_units ?? 0);
 $iOfferCount = (int) ($offer_count ?? 0);
 $iUnmatchedCount = (int) ($unmatched_count ?? 0);
 ?>
-<div class="modal-dialog">
-    <div class="modal-content">
-        <header class="modal-header">
-            <h4><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.confirm_title')) ?></h4>
-        </header>
-        <div class="modal-body">
-            <p>You are about to apply invoice <strong>#<?= e($sInvoiceNumber) ?></strong> to live stock.</p>
-            <ul>
-                <li>Total units to add: <strong><?= $iTotalUnits ?></strong></li>
-                <li>Matched lines (offer count): <strong><?= $iOfferCount ?></strong></li>
-                <li>Unmatched lines: <strong><?= $iUnmatchedCount ?></strong></li>
-            </ul>
-            <?php if ($mOverrideOf !== null): ?>
-                <p class="alert alert-warning">
-                    <strong>Override mode:</strong> this re-applies the invoice ADDITIVELY on top of prior apply #<?= (int) $mOverrideOf ?>. Stock will be incremented again, NOT replaced.
-                </p>
-            <?php endif; ?>
-        </div>
-        <footer class="modal-footer">
-            <button type="button"
-                    class="btn btn-primary"
-                    data-request="onApply"
-                    data-request-data="invoice_id: <?= $iInvoiceId ?>"
-                    data-request-loading=".applying-spinner"
-                    data-popup-load-indicator>
-                <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
-            </button>
-            <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-        </footer>
-        <span class="applying-spinner" style="display:none;"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?></span>
-    </div>
+<div class="modal-header">
+    <h4 class="modal-title"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.confirm_title')) ?></h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body">
+    <p>You are about to apply invoice <strong>#<?= e($sInvoiceNumber) ?></strong> to live stock.</p>
+    <ul>
+        <li>Total units to add: <strong><?= $iTotalUnits ?></strong></li>
+        <li>Matched lines (offer count): <strong><?= $iOfferCount ?></strong></li>
+        <li>Unmatched lines: <strong><?= $iUnmatchedCount ?></strong></li>
+    </ul>
+    <?php if ($mOverrideOf !== null): ?>
+        <p class="alert alert-warning">
+            <strong>Override mode:</strong> this re-applies the invoice ADDITIVELY on top of prior apply #<?= (int) $mOverrideOf ?>. Stock will be incremented again, NOT replaced.
+        </p>
+    <?php endif; ?>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-primary"
+            data-request="onApply"
+            data-request-data="invoice_id: <?= $iInvoiceId ?>"
+            data-request-loading=".applying-spinner"
+            data-popup-load-indicator>
+        <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
+    </button>
+    <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+    <span class="applying-spinner" style="display:none;"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?></span>
 </div>

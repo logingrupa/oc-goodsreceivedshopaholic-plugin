@@ -1,44 +1,45 @@
 <?php
-/* UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal. */
+/* UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal — canonical popup
+ * widget contract (header + body + footer only; popup.js wraps externally).
+ */
 $iPriorInvoiceId = (int) ($prior_invoice_id ?? 0);
 ?>
-<div class="modal-dialog">
-    <div class="modal-content">
-        <header class="modal-header">
-            <h4>Override and re-import — Confirm</h4>
-        </header>
-        <div class="modal-body">
-            <div class="alert alert-warning">
-                <p><strong>This re-applies the invoice ADDITIVELY on top of the prior apply.</strong></p>
-                <p>Stock will be incremented by new line quantities.</p>
-                <p>This is NOT a delta calculation. Continue?</p>
-            </div>
-            <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
-            <?= Form::open(['files' => true]) ?>
-                <input type="hidden" name="prior_invoice_id" value="<?= $iPriorInvoiceId ?>">
-                <div class="form-group">
-                    <input type="text"
-                           name="confirm_typed"
-                           class="form-control"
-                           placeholder="Type OVERRIDE here"
-                           autocomplete="off"
-                           autocapitalize="off"
-                           spellcheck="false">
-                </div>
-                <div class="form-group">
-                    <label>Re-upload the .HTM file</label>
-                    <input type="file" name="files[]" accept=".htm,.HTM">
-                </div>
-                <button type="button"
-                        class="btn btn-warning"
-                        data-request="onOverrideConfirm"
-                        data-request-files
-                        data-request-loading=".override-spinner">
-                    Confirm override
-                </button>
-                <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-                <span class="override-spinner" style="display:none;">Re-importing…</span>
-            <?= Form::close() ?>
-        </div>
+<div class="modal-header">
+    <h4 class="modal-title">Override and re-import — Confirm</h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body">
+    <div class="alert alert-warning">
+        <p><strong>This re-applies the invoice ADDITIVELY on top of the prior apply.</strong></p>
+        <p>Stock will be incremented by new line quantities.</p>
+        <p>This is NOT a delta calculation. Continue?</p>
     </div>
+    <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
+    <?= Form::open(['files' => true]) ?>
+        <input type="hidden" name="prior_invoice_id" value="<?= $iPriorInvoiceId ?>">
+        <div class="form-group">
+            <input type="text"
+                   name="confirm_typed"
+                   class="form-control"
+                   placeholder="Type OVERRIDE here"
+                   autocomplete="off"
+                   autocapitalize="off"
+                   spellcheck="false">
+        </div>
+        <div class="form-group">
+            <label>Re-upload the .HTM file</label>
+            <input type="file" name="files[]" accept=".htm,.HTM">
+        </div>
+    <?= Form::close() ?>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-warning"
+            data-request="onOverrideConfirm"
+            data-request-files
+            data-request-loading=".override-spinner">
+        Confirm override
+    </button>
+    <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+    <span class="override-spinner" style="display:none;">Re-importing&hellip;</span>
 </div>
