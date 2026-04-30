@@ -17,4 +17,27 @@
         <env name="DB_CONNECTION" value="sqlite" force="true"/>
         <env name="DB_DATABASE" value=":memory:" force="true"/>
     </php>
+    <!--
+        OPS-05 (plan 05-04) — coverage scope.
+        Mirrors the production-code surface enumerated by the Makefile `phpmd` /
+        `lint-settings-accessor` targets and the `phpstan.neon` paths list, so that
+        every static-analysis + linting + coverage tool instruments the SAME files.
+        DTO + exception subdirectories are excluded: pure data shapes / typed throws
+        with constructor-only logic — instrumenting them inflates the denominator
+        without adding signal (D-05-04-01).
+    -->
+    <source>
+        <include>
+            <directory>classes</directory>
+            <directory>components</directory>
+            <directory>console</directory>
+            <directory>controllers</directory>
+            <directory>models</directory>
+            <file>Plugin.php</file>
+        </include>
+        <exclude>
+            <directory>classes/dto</directory>
+            <directory>classes/exception</directory>
+        </exclude>
+    </source>
 </phpunit>
