@@ -1,25 +1,24 @@
 <?php
-/*
- * UI-02 (D-05 / D-06 / D-07): multi-file .HTM upload widget.
- * AJAX-target anchor divs (#invoiceUploadErrors / #invoiceRejectWrap /
- * #invoicePreviewWrap / #applyResult) live in the OUTER view (upload.htm
- * or preview.htm) — NOT in this partial — to avoid duplicate-id rendering
- * when the partial is included on a page that also defines them.
- */
 $bShowInitialReset = $this->shouldShowInitialReset();
 ?>
-<?= Form::open(['files' => true]) ?>
-    <div class="form-group">
-        <label>Upload .HTM delivery receipts</label>
-        <input type="file"
-               name="files[]"
-               accept=".htm,.HTM"
-               multiple
-               data-request="onUpload"
-               data-request-files
-               data-request-loading=".upload-progress">
-    </div>
-    <div class="upload-progress" style="display:none;">Uploading…</div>
-<?= Form::close() ?>
+<div class="control-section">
+    <h3>Upload delivery receipts</h3>
+    <?= Form::open(['files' => true]) ?>
+        <div class="form-group">
+            <label class="form-label" for="grUploadFiles">Choose .HTM files (multiple)</label>
+            <input id="grUploadFiles"
+                   type="file"
+                   name="files[]"
+                   accept=".htm,.HTM"
+                   multiple
+                   class="form-control"
+                   data-request="onUpload"
+                   data-request-files
+                   data-request-loading=".upload-progress">
+            <p class="help-block">Files parse + persist on selection. Stock writes happen on Apply, not Upload.</p>
+        </div>
+        <div class="upload-progress" style="display:none;"><i class="icon-spinner icon-spin"></i> Uploading…</div>
+    <?= Form::close() ?>
+</div>
 
 <?= $this->makePartial('_partials/initial_reset_section', ['show_initial_reset' => $bShowInitialReset]) ?>

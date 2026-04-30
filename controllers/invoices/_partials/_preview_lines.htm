@@ -1,67 +1,28 @@
 <?php
-/* UI-03 / UI-07 (D-08, D-09, D-10): preview screen line-by-line table. */
 $arInvoices = $invoices ?? [];
 ?>
 <?php if (count($arInvoices) > 0): ?>
     <?php foreach ($arInvoices as $arPreview):
         $obInvoice = $arPreview['invoice'] ?? null;
         $iInvoiceId = (int) ($obInvoice?->id ?? 0);
-        $arLines = $arPreview['lines'] ?? [];
     ?>
-        <div class="invoice-preview" data-invoice-id="<?= $iInvoiceId ?>">
-            <?= $this->makePartial('_partials/summary_panel', $arPreview) ?>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Row #</th>
-                        <th>EAN</th>
-                        <th>Product name</th>
-                        <th>Qty</th>
-                        <th>Override qty</th>
-                        <th>Override reason</th>
-                        <th>Match strategy</th>
-                        <th>Matched offer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($arLines as $obLine):
-                        $iLineId = (int) ($obLine->id ?? 0);
-                        $sRowClass = $obLine->matched_offer_id !== null ? 'matched' : 'unmatched';
-                    ?>
-                        <tr class="<?= $sRowClass ?>" data-line-id="<?= $iLineId ?>">
-                            <td><?= (int) ($obLine->row_index ?? 0) ?></td>
-                            <td><?= e((string) ($obLine->ean ?? '')) ?></td>
-                            <td><?= e((string) ($obLine->product_name_raw ?? '')) ?></td>
-                            <td><?= (int) ($obLine->qty ?? 0) ?></td>
-                            <td>
-                                <input type="number"
-                                       min="0"
-                                       value="<?= e((string) ($obLine->override_qty ?? '')) ?>"
-                                       data-request="onUpdateLine"
-                                       data-request-data="line_id: <?= $iLineId ?>"
-                                       data-track-input
-                                       name="override_qty">
-                            </td>
-                            <td>
-                                <input type="text"
-                                       value="<?= e((string) ($obLine->override_reason ?? '')) ?>"
-                                       data-request="onUpdateLine"
-                                       data-request-data="line_id: <?= $iLineId ?>"
-                                       data-track-input
-                                       name="override_reason">
-                            </td>
-                            <td><?= e((string) ($obLine->match_strategy ?? '')) ?></td>
-                            <td><?= $obLine->matched_offer_id !== null ? (int) $obLine->matched_offer_id : '—' ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <div class="control-section invoice-preview" data-invoice-id="<?= $iInvoiceId ?>" style="margin-top: 1.5rem;">
+            <div class="alert alert-success">
+                <strong>Parsed: <?= e((string) ($obInvoice?->source_filename ?? '')) ?></strong>
+                — <?= (int) ($obInvoice?->total_lines ?? 0) ?> lines
+                (<?= (int) ($arPreview['matched_count'] ?? 0) ?> matched,
+                <?= (int) ($arPreview['unmatched_count'] ?? 0) ?> unmatched).
+                <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/' . $iInvoiceId) ?>"
+                   class="btn btn-default btn-sm" style="margin-left:1rem;">
+                    <i class="icon-eye"></i> View details
+                </a>
+            </div>
             <button type="button"
                     class="btn btn-primary"
                     data-control="popup"
                     data-handler="onApplyShowConfirm"
                     data-request-data="invoice_id: <?= $iInvoiceId ?>">
-                Apply to stock
+                <i class="icon-check"></i> Apply to stock
             </button>
         </div>
     <?php endforeach; ?>
