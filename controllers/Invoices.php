@@ -151,6 +151,36 @@ class Invoices extends Controller
     }
 
     /**
+     * Render the shared tab navigation for the Invoices controller. Used by
+     * `index.htm`, `upload.htm`, `settings.htm`, and `_list_toolbar.htm` —
+     * inline HTML helper avoids partial-resolution edge cases with widget
+     * contexts (the list-toolbar partial renders with `$this` bound to the
+     * list widget, not the controller, so nested makePartial calls fail).
+     */
+    public function renderInvoicesTabs(string $sActive): string
+    {
+        $sUrlList = (string) \Backend::url('logingrupa/goodsreceivedshopaholic/invoices');
+        $sUrlUpload = (string) \Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload');
+        $sUrlSettings = (string) \Backend::url('logingrupa/goodsreceivedshopaholic/invoices/settings');
+
+        $sLabelList = (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices');
+        $sLabelUpload = (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.tabs.upload');
+        $sLabelSettings = (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.tabs.settings');
+
+        $sClassList = $sActive === 'invoices' ? 'active' : '';
+        $sClassUpload = $sActive === 'upload' ? 'active' : '';
+        $sClassSettings = $sActive === 'settings' ? 'active' : '';
+
+        return <<<HTML
+<ul class="nav nav-tabs" style="margin-bottom: 1rem;">
+    <li class="{$sClassList}"><a href="{$sUrlList}"><i class="icon-list"></i> {$sLabelList}</a></li>
+    <li class="{$sClassUpload}"><a href="{$sUrlUpload}"><i class="icon-upload"></i> {$sLabelUpload}</a></li>
+    <li class="{$sClassSettings}"><a href="{$sUrlSettings}"><i class="icon-cog"></i> {$sLabelSettings}</a></li>
+</ul>
+HTML;
+    }
+
+    /**
      * AJAX handler: ingest an array of uploaded `.HTM` files. For each file:
      *   1) Validate extension + size whitelist (D-06 / D-07).
      *   2) Pre-parse duplicate detection on filename invoice_number (UI-09 / D-16).
