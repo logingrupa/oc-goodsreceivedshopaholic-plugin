@@ -81,6 +81,57 @@ it('parses + persists a valid HTM file and renders preview partial (UI-02 happy 
     @unlink($arStaged['path']);
 });
 
+it('attaches the uploaded HTM to Invoice.original_file (BUG 4 — UI-06 / D-28)', function (): void {
+    // BUG 4 fix: onUpload happy path MUST call attachOriginalFile so the
+    // detail page's File widget surfaces the source artefact for audit /
+    // re-parse. The production implementation calls
+    // `$obInvoice->original_file()->add(System\Models\File::fromPost($obFile))`
+    // — this test pins the seam invocation contract via the TestableInvoices
+    // shim's `arAttachOriginalFileCalls` recorder (the actual
+    // System.File / disk write is excluded from the hermetic schema slice).
+    $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
+    $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
+
+    expect($obController->arAttachOriginalFileCalls)->toBe([]);
+
+    $obController->onUpload();
+
+    expect($obController->arAttachOriginalFileCalls)->toBeArray();
+    expect(count($obController->arAttachOriginalFileCalls))->toBe(1);
+
+    $arCall = $obController->arAttachOriginalFileCalls[0];
+    expect($arCall['filename'])->toBe('Nr_PRO033328_no_13042026.HTM');
+    expect((int) $arCall['invoice_id'])->toBe((int) Invoice::query()->first()?->id);
+
+    @unlink($arStaged['path']);
+});
+
+it('skips attach when orchestrator parse fails (no Invoice row to attach to)', function (): void {
+    // BUG 4 fix: the attach call sits AFTER orchestrator->run() inside the
+    // try block, so a parse failure short-circuits before the attach runs.
+    // No Invoice exists; nothing to attach. This pin guards the ordering.
+    $sBrokenPath = (string) tempnam(sys_get_temp_dir(), 'gr-broken-');
+    rename($sBrokenPath, $sBrokenPath.'.htm');
+    $sBrokenPath .= '.htm';
+    file_put_contents($sBrokenPath, '<html><body>no rows here</body></html>');
+
+    $obFile = new UploadedFile(
+        $sBrokenPath,
+        'Nr_PRO000002_no_01012026.HTM',
+        'text/html',
+        null,
+        true,
+    );
+
+    $obController = makeTestController(bHasPermission: true, arFiles: [$obFile]);
+    $obController->onUpload();
+
+    expect($obController->arAttachOriginalFileCalls)->toBe([]);
+    expect(Invoice::count())->toBe(0);
+
+    @unlink($sBrokenPath);
+});
+
 it('iterates over multiple files and aggregates results (UI-02 multi-file)', function (): void {
     $arStaged1 = stageFixtureUpload('Nr_PRO026712_no_28112024.HTM', 'Nr_PRO026712_no_28112024.HTM');
     $arStaged2 = stageFixtureUpload('Nr_PRO029691_no_09072025.HTM', 'Nr_PRO029691_no_09072025.HTM');

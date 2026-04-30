@@ -104,6 +104,18 @@ if (! class_exists(TestableInvoices::class, false)) {
         public int $iApplyOrchestratorResolvedCount = 0;
 
         /**
+         * BUG 4 fix — seam over `attachOriginalFile()`. The production
+         * implementation calls `System\Models\File::fromPost()` which writes
+         * to disk + inserts into the `system_files` table; neither is set up
+         * in the `ApplyTestCase` hermetic schema slice. The shim records the
+         * call args so tests can assert "file attach was invoked with the
+         * right invoice + file" without needing a real System.File table.
+         *
+         * @var list<array{invoice_id: int, filename: string}>
+         */
+        public array $arAttachOriginalFileCalls = [];
+
+        /**
          * @param  array<string, mixed>  $vars
          * @param  bool  $throwException
          * @return false|string
@@ -172,6 +184,17 @@ if (! class_exists(TestableInvoices::class, false)) {
             }
 
             return parent::resolveApplyOrchestrator();
+        }
+
+        #[\Override]
+        protected function attachOriginalFile(
+            \Logingrupa\GoodsReceivedShopaholic\Models\Invoice $obInvoice,
+            UploadedFile $obFile,
+        ): void {
+            $this->arAttachOriginalFileCalls[] = [
+                'invoice_id' => (int) $obInvoice->id,
+                'filename'   => (string) $obFile->getClientOriginalName(),
+            ];
         }
     }
 }

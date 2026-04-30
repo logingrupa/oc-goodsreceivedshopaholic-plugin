@@ -49,6 +49,8 @@ use October\Rain\Database\Traits\Validation;
  * @property-read Invoice|null $overrideOf
  * @property-read \October\Rain\Database\Collection|Invoice[] $overrides
  * @property-read \System\Models\File|null $original_file
+ *
+ * @method \October\Rain\Database\Relations\AttachOne original_file()
  */
 class Invoice extends Model
 {

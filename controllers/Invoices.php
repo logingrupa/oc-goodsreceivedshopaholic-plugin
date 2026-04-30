@@ -511,6 +511,8 @@ HTML;
         $obOrchestrator = $this->resolveParseOrchestrator();
         $obInvoice = $obOrchestrator->runOverride($sHtml, $sFilename, $iPriorInvoiceId, $iUserId);
 
+        $this->attachOriginalFile($obInvoice, $obFile);
+
         return [
             '#invoicePreviewWrap' => $this->makePartial('_partials/preview_lines', [
                 'invoices' => [$this->buildPreviewPayload($obInvoice)],
@@ -611,7 +613,7 @@ HTML;
         $sHtml = $this->readFileContents($obFile);
         $sFilename = (string) $obFile->getClientOriginalName();
 
-        return $this->runInitialResetThenApply($sHtml, $sFilename, $iUserId);
+        return $this->runInitialResetThenApply($sHtml, $sFilename, $iUserId, $obFile);
     }
 
     /**
@@ -689,10 +691,12 @@ HTML;
      *
      * @throws AjaxException
      */
-    private function runInitialResetThenApply(string $sHtml, string $sFilename, int $iUserId): array
+    private function runInitialResetThenApply(string $sHtml, string $sFilename, int $iUserId, UploadedFile $obFile): array
     {
         $obParse = $this->resolveParseOrchestrator();
         $obInvoice = $obParse->run($sHtml, $sFilename, $iUserId);
+
+        $this->attachOriginalFile($obInvoice, $obFile);
 
         $obReset = $this->resolveInitialResetService();
         try {
@@ -811,12 +815,54 @@ HTML;
             $obOrchestrator = $this->resolveParseOrchestrator();
             $obInvoice = $obOrchestrator->run($sHtml, $sFilename, $iUserId);
 
+            $this->attachOriginalFile($obInvoice, $obFile);
+
             $arPreviews[] = $this->buildPreviewPayload($obInvoice);
         } catch (GoodsReceivedException $obException) {
             $arErrors[] = ['filename' => $sFilename, 'message' => $obException->getMessage()];
         } catch (Throwable $obException) {
             $arErrors[] = ['filename' => $sFilename, 'message' => $obException->getMessage()];
         }
+    }
+
+    /**
+     * BUG 4 fix — attach the uploaded `.HTM` file to `Invoice.original_file`
+     * (October's `attachOne` relation defined on the Invoice model) so the
+     * detail page's File widget surfaces the source artefact for audit /
+     * re-parse (UI-06 / D-28). October's `System\Models\File` resolves the
+     * UploadedFile via `fromPost()` (vendor/october/rain/src/Database/Attach/File.php:105)
+     * — copies the temp file to the configured disk, sets file_name /
+     * file_size / content_type / disk_name, then the `attachOne`
+     * relationship saves the row with the right attachment_type +
+     * attachment_id pointer.
+     *
+     * Idempotent: if a prior call already attached a file (e.g., during an
+     * earlier override-reimport that ran through the same handler), the
+     * second call is a no-op. October's `attachOne` allows only one file
+     * per relation; calling `add()` again would overwrite — we guard against
+     * that by checking the current relation value first.
+     *
+     * Boundary placement: attach happens AFTER ParseAndPersistOrchestrator's
+     * `DB::transaction` returns (orchestrator owns DB write atomicity for
+     * Invoice + InvoiceLine). The file save is a separate concern (system
+     * files table + disk write) and a failure here would NOT roll back the
+     * parsed Invoice — that's by design: an unattached file is a
+     * cosmetic-only audit gap, not a data-integrity violation.
+     *
+     * Visibility: protected so the Pest TestableInvoices shim can override
+     * to skip the real System\Models\File disk write under the hermetic
+     * SQLite-in-memory bootstrap (system_files table is not created in
+     * the ApplyTestCase schema slice). Production code path is unchanged.
+     */
+    protected function attachOriginalFile(Invoice $obInvoice, UploadedFile $obFile): void
+    {
+        if ($obInvoice->original_file !== null) {
+            return;
+        }
+
+        $obSystemFile = new \System\Models\File();
+        $obSystemFile->fromPost($obFile);
+        $obInvoice->original_file()->add($obSystemFile);
     }
 
     /**
