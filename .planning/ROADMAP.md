@@ -129,7 +129,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   6. PROJECT.md Key Decisions table reflects D11-D15 outcomes resolved 2026-04-29
 
 **Plans**: 6 plans
-  - [ ] 05-01-PLAN.md - Lang populate {lv,no,ru} + LangCompletenessTest (OPS-04)
+  - [x] 05-01-PLAN.md - Lang populate {lv,no,ru} + LangCompletenessTest (OPS-04) *(closed 2026-04-30 — lang/lv/lang.php + lang/no/lang.php + lang/ru/lang.php replaced wholesale (53-line EN-stubs → 123-line full natural-language translations matching EN structure exactly: 15 top-level keys × 4 locales, all nested keys present); domain glossary (D-08) realized in code with consistent vocabulary across LV (project-base) + NO (Bokmål, distributor industry vocabulary) + RU (1C-style e-commerce vocabulary common to LV/LT Russian operators); OVERRIDE/RESET typed-confirmation literals + `:placeholder` tokens (`:extension`, `:size`, `:id`, `:offer_count`, `:product_count`) preserved verbatim per D-19/D-22/T-04-06-01; new `tests/unit/Lang/LangCompletenessTest.php` (Pest 4, 242 LoC) ships 9 it() cases / 629 assertions pinning (a) key parity 3-way (EN/LV, EN/NO, EN/RU separate it() blocks so failures point at divergent locale), (b) non-empty-string leaves in lv/no/ru, (c) sample-based English-leftover smoke on field.enabled/permission.upload_invoices/apply.button_now (catches copy-paste-no-translate bug), (d) :placeholder token preservation, (e) OVERRIDE/RESET literal preservation in *.typed_hint; hermetic structural test — no DB, no boot, only reads lang/*.php; suite 232 → 241 (+9 tests, +629 assertions); `make all` green: pint-test + lint-settings-accessor + analyse 33/33 + phpmd + pest 241/241 / 1666 assertions; phpstan-baseline.neon SHA UNCHANGED at `4b3227fa…91530a`; commits `ced8a85` (test RED — LV/NO/RU stubs missing keys) → `518aaf0` (feat GREEN — populate to full EN parity); plan-level TDD enforced; OPS-04 fully closed; ZERO deviations.)*
   - [ ] 05-02-PLAN.md - README operator runbook sections 1-11 (OPS-01)
   - [ ] 05-03-PLAN.md - PROJECT.md update D11-D15 + 56 reqs Validated (OPS-02)
   - [ ] 05-04-PLAN.md - Coverage gate Makefile + phpunit.xml <source> (OPS-05)
@@ -147,4 +147,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Pure Parsers, DTOs, Exceptions, EAN Matcher | 7/7 | Complete | 2026-04-29 |
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 8/8 | Complete | 2026-04-30 |
-| 5. Ops, Lang, Polish, Public Release | 0/6 | Not started | - |
+| 5. Ops, Lang, Polish, Public Release | 1/6 | In progress | - |

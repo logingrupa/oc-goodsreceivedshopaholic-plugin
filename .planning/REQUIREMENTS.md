@@ -76,7 +76,7 @@
 - [ ] **OPS-01**: README documents installation, settings, override semantics (D12), GRN-canonical stock writer dependency on user disabling 1C XML quantity import (D13), 4 permissions, runbook for InitialReset, troubleshooting keyed to `Log::*` context arrays.
 - [ ] **OPS-02**: PROJECT.md Key Decisions table updated with D11-D15 outcomes (resolved 2026-04-29).
 - [ ] **OPS-03**: Composer package published to PUBLIC GitHub repo `logingrupa/oc-goodsreceived-plugin` (D11). `composer require` works on clean OctoberCMS 4 + Lovata Shopaholic install.
-- [ ] **OPS-04**: `lang/{en,lv,no,ru}/lang.php` fully populated for all user-facing strings. RainLab.Translate compatible.
+- [x] **OPS-04**: `lang/{en,lv,no,ru}/lang.php` fully populated for all user-facing strings. RainLab.Translate compatible. *(closed 2026-04-30 in plan 05-01 — lang/lv/lang.php + lang/no/lang.php + lang/ru/lang.php replaced wholesale (53-line EN-stubs → 123-line full natural-language translations). Domain glossary (CONTEXT D-08, locked vocabulary): invoice → LV "rēķins" / NO "faktura" / RU "счёт"; goods received → LV "preču saņemšana" / NO "vareinngang" / RU "приём товаров"; apply → LV "piemērot" / NO "anvend" / RU "применить"; override → LV "pārrakstīt" / NO "overstyr" / RU "переопределить"; reset → LV "atiestatīt" / NO "tilbakestill" / RU "сброс". Literal tokens preserved verbatim (do NOT translate — server-side strict-equality + industry standard): "OVERRIDE" / "RESET" in `*.typed_hint` (D-19 / D-22 / T-04-06-01 mitigation), "EAN", ".HTM", `:extension` / `:size` / `:id` / `:offer_count` / `:product_count` placeholders. New `tests/unit/Lang/LangCompletenessTest.php` (Pest 4) ships 9 it() cases / 629 assertions pinning: (1-3) array_keys_recursive(EN) === LV === NO === RU (3 separate it() blocks so failures point at the divergent locale); (4-6) every leaf is a non-empty string in lv/no/ru; (7) sample-based English-leftover smoke on `field.enabled` / `permission.upload_invoices` / `apply.button_now` (catches copy-paste-no-translate bug); (8) `:placeholder` token preservation across all locales (T-05-01-03 mitigation); (9) "OVERRIDE" / "RESET" literal preservation in `override.typed_hint` + `initial_reset.typed_hint` (T-05-01-04 mitigation). Hermetic structural test — no DB, no boot. Suite 232 → 241 (+9 tests, +629 assertions). `make all` green; phpstan-baseline.neon SHA UNCHANGED at 4b3227fa…91530a.)*
 - [ ] **OPS-05**: `make all` green: `pint-test` clean, `phpstan analyse` 0 errors at level 10, `phpmd` 0 violations, `pest` all green with `--coverage --min=85`.
 - [ ] **OPS-06**: Verified working on .no, .lv, .lt staging (or dev parity). Multi-site Settings isolation confirmed by manual test.
 
@@ -191,7 +191,7 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | OPS-01 | Phase 5 | Pending |
 | OPS-02 | Phase 5 | Pending |
 | OPS-03 | Phase 5 | Pending |
-| OPS-04 | Phase 5 | Pending |
+| OPS-04 | Phase 5 | Closed (2026-04-30) — plan 05-01 |
 | OPS-05 | Phase 5 | Pending |
 | OPS-06 | Phase 5 | Pending |
 | QA-01 | Phase 2 | Closed (2026-04-29) — plan 02-05 |
