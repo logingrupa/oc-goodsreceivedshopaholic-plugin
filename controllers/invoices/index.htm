@@ -1,1 +1,27 @@
+<style>
+    .gr-tabs { list-style: none; padding: 0; margin: 0 0 1.5rem 0; border-bottom: 2px solid #d4d8dd; display: flex; gap: 4px; }
+    .gr-tabs li { display: inline-block; }
+    .gr-tabs li a { display: inline-block; padding: 10px 20px; color: #5c7080; text-decoration: none; border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0; font-weight: 500; }
+    .gr-tabs li a:hover { background: #e8edf2; color: #1f4e79; }
+    .gr-tabs li.active a { background: #fff; border-color: #d4d8dd; color: #1f4e79; margin-bottom: -2px; padding-bottom: 12px; }
+    .gr-tabs li a i { margin-right: 6px; }
+</style>
+<ul class="gr-tabs">
+    <li class="active">
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices') ?>">
+            <i class="icon-list"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices')) ?>
+        </a>
+    </li>
+    <li>
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload') ?>">
+            <i class="icon-upload"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.upload')) ?>
+        </a>
+    </li>
+    <li>
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/settings') ?>">
+            <i class="icon-cog"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings')) ?>
+        </a>
+    </li>
+</ul>
+
 <?= $this->listRender() ?>

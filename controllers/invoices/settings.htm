@@ -3,23 +3,28 @@ use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 
 $obSettings = Settings::instance();
 ?>
-<ul class="nav nav-tabs" style="margin-bottom: 1rem;">
+<style>
+    .gr-tabs { list-style: none; padding: 0; margin: 0 0 1.5rem 0; border-bottom: 2px solid #d4d8dd; display: flex; gap: 4px; }
+    .gr-tabs li { display: inline-block; }
+    .gr-tabs li a { display: inline-block; padding: 10px 20px; color: #5c7080; text-decoration: none; border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0; font-weight: 500; }
+    .gr-tabs li a:hover { background: #e8edf2; color: #1f4e79; }
+    .gr-tabs li.active a { background: #fff; border-color: #d4d8dd; color: #1f4e79; margin-bottom: -2px; padding-bottom: 12px; }
+    .gr-tabs li a i { margin-right: 6px; }
+</style>
+<ul class="gr-tabs">
     <li>
         <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices') ?>">
-            <i class="icon-list"></i>
-            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices')) ?>
+            <i class="icon-list"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices')) ?>
         </a>
     </li>
     <li>
         <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload') ?>">
-            <i class="icon-upload"></i>
-            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.upload')) ?>
+            <i class="icon-upload"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.upload')) ?>
         </a>
     </li>
     <li class="active">
         <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/settings') ?>">
-            <i class="icon-cog"></i>
-            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings')) ?>
+            <i class="icon-cog"></i><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings')) ?>
         </a>
     </li>
 </ul>
@@ -46,19 +51,19 @@ $obSettings = Settings::instance();
     <tbody>
         <tr>
             <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.enabled')) ?></td>
-            <td><?= $obSettings->get('enabled') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+            <td><?= $obSettings->get('enabled') ? '<span style="color:#28a745;font-weight:bold;">on</span>' : '<span style="color:#999;">off</span>' ?></td>
         </tr>
         <tr>
             <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.auto_deactivate_on_zero')) ?></td>
-            <td><?= $obSettings->get('auto_deactivate_on_zero') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+            <td><?= $obSettings->get('auto_deactivate_on_zero') ? '<span style="color:#28a745;font-weight:bold;">on</span>' : '<span style="color:#999;">off</span>' ?></td>
         </tr>
         <tr>
             <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.auto_activate_on_stock')) ?></td>
-            <td><?= $obSettings->get('auto_activate_on_stock') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+            <td><?= $obSettings->get('auto_activate_on_stock') ? '<span style="color:#28a745;font-weight:bold;">on</span>' : '<span style="color:#999;">off</span>' ?></td>
         </tr>
         <tr>
             <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.allow_initial_reset')) ?></td>
-            <td><?= $obSettings->get('allow_initial_reset') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+            <td><?= $obSettings->get('allow_initial_reset') ? '<span style="color:#28a745;font-weight:bold;">on</span>' : '<span style="color:#999;">off</span>' ?></td>
         </tr>
     </tbody>
 </table>
