@@ -370,6 +370,80 @@ Multi-site isolation is verified manually per OPS-06 (UAT checklist documented s
 
 ---
 
+## Publishing — Making the plugin installable via Composer (D11 / OPS-03)
+
+The plugin's `composer.json` is publish-ready (verified at v1.0 close):
+
+| Field | Value |
+|-------|-------|
+| `name` | `logingrupa/oc-goodsreceived-plugin` |
+| `type` | `october-plugin` |
+| `license` | `MIT` |
+| `require` | `lovata/toolbox-plugin ^2.2`, `lovata/shopaholic-plugin ^1.32`, `php ^8.3`, `october/system ^4.0`, `october/rain ^4.0` |
+| `autoload` PSR-4 | `Logingrupa\GoodsReceivedShopaholic\` |
+| `extra.october.plugin` | `Logingrupa.GoodsReceivedShopaholic` |
+| `extra.october.installer-name` | `goodsreceivedshopaholic` |
+
+**Pre-publish secret-leak guard** — BEFORE making the GitHub repo public, grep the repo for credential-like strings. Public repos retain every commit forever; a leaked secret cannot be un-committed by a delete.
+
+```bash
+# Run from plugin root. CLEAN means safe to publish; non-empty output means audit before proceeding.
+git ls-files | xargs grep -l -iE '(password|secret|api_key|aws_|stripe_|sendgrid_|_token)' || echo CLEAN
+```
+
+To make the GitHub repo PUBLIC and tag v1.0.0:
+
+```bash
+# 1. Create the public repo + push (run from plugin root)
+gh repo create logingrupa/oc-goodsreceived-plugin --public --source=. --remote=origin --push
+
+# 2. Tag v1.0.0
+git tag v1.0.0
+git push --tags
+```
+
+Optional Packagist submission (gives versioned package discovery + download stats):
+
+1. Visit https://packagist.org
+2. Click "Submit"
+3. Paste the GitHub URL: `https://github.com/logingrupa/oc-goodsreceived-plugin`
+4. Click Check → Submit
+
+Without Packagist, Composer's native GitHub auto-discovery still works — consumers add a `repositories` block to their `composer.json`:
+
+```json
+"repositories": [
+    { "type": "vcs", "url": "https://github.com/logingrupa/oc-goodsreceived-plugin" }
+]
+```
+
+---
+
+## Verification — composer require on a clean install (OPS-03 + OPS-06)
+
+Pre-publish dry-run (recommended before tagging v1.0.0):
+
+```bash
+# On a clean OctoberCMS 4 sandbox (or scratch project), with Lovata Shopaholic + Toolbox already installed:
+composer require logingrupa/oc-goodsreceived-plugin:dev-master
+php artisan october:up
+```
+
+Expected outcome:
+- Composer pulls the plugin into `plugins/logingrupa/goodsreceivedshopaholic/`
+- `october:up` runs migrations: 3 plugin tables created + `lovata_shopaholic_offers.active_managed_by` column added
+- Backend → Settings → Goods Received page renders with the 4 toggles
+
+For the multi-site UAT (.no / .lv / .lt staging or dev parity), use the printable checklist at `.planning/UAT-CHECKLIST.md`. The checklist proves multi-site Settings isolation (toggle on .no does not propagate to .lv).
+
+Once UAT signs off and v1.0.0 tag is pushed, downstream installs use the canonical pin:
+
+```bash
+composer require logingrupa/oc-goodsreceived-plugin:^1.0
+```
+
+---
+
 ## License
 
 [MIT License](LICENSE) © Logingrupa.
