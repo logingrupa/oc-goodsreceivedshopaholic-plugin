@@ -120,4 +120,17 @@ return [
         'button'        => 'Run reset + apply',
         'spinner'       => 'Resetting and applying…',
     ],
+    'tabs' => [
+        'invoices'             => 'Invoices',
+        'upload'               => 'Upload',
+        'settings'             => 'Settings',
+        'settings_intro_title' => 'Per-site settings',
+        'settings_intro_body'  => 'These four toggles drive auto-deactivate / auto-activate / initial-reset behavior. Each setting is per-site (multisite-aware).',
+        'settings_open_form'   => 'Open Settings form',
+        'settings_field'       => 'Setting',
+        'settings_value'       => 'Value',
+    ],
+    'toolbar' => [
+        'upload_invoices' => 'Upload Invoices',
+    ],
 ];

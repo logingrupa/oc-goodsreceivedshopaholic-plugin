@@ -126,7 +126,28 @@ class Invoices extends Controller
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('October.System', 'system', 'settings');
+        BackendMenu::setContext('Lovata.Shopaholic', 'shopaholic-menu', 'goodsreceived');
+    }
+
+    /**
+     * Page action: render the multi-file upload tab. Mirrors the list action's
+     * tab navigation so operators can switch between Invoices / Upload /
+     * Settings without leaving the controller.
+     */
+    public function upload(): void
+    {
+        $this->pageTitle = (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.tabs.upload');
+    }
+
+    /**
+     * Page action: render the Settings tab. Resolves the current site's
+     * Settings model row and exposes it to the view (settings.htm) which
+     * renders the four-toggle form via October's FormController behavior
+     * stand-in pattern.
+     */
+    public function settings(): void
+    {
+        $this->pageTitle = (string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.tabs.settings');
     }
 
     /**

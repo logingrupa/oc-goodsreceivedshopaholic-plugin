@@ -1,0 +1,28 @@
+<?php
+/**
+ * Tab navigation shared across Invoices controller views (index, upload, settings).
+ *
+ * @var string $active  one of: 'invoices' | 'upload' | 'settings'
+ */
+$active = $active ?? 'invoices';
+?>
+<ul class="nav nav-tabs" style="margin-bottom: 1rem;">
+    <li class="<?= $active === 'invoices' ? 'active' : '' ?>">
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices') ?>">
+            <i class="icon-list"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.invoices')) ?>
+        </a>
+    </li>
+    <li class="<?= $active === 'upload' ? 'active' : '' ?>">
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload') ?>">
+            <i class="icon-upload"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.upload')) ?>
+        </a>
+    </li>
+    <li class="<?= $active === 'settings' ? 'active' : '' ?>">
+        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/settings') ?>">
+            <i class="icon-cog"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings')) ?>
+        </a>
+    </li>
+</ul>

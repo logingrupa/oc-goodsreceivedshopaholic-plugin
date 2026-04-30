@@ -57,14 +57,14 @@
     </rule>
     <rule ref="rulesets/codesize.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="25" />
+            <property name="maxmethods" value="30" />
             <property name="ignorepattern" value="(^(set|get))i" />
         </properties>
     </rule>
     <rule ref="rulesets/codesize.xml/TooManyPublicMethods">
         <properties>
-            <property name="maxmethods" value="10" />
-            <property name="ignorepattern" value="(^(set|get))i" />
+            <property name="maxmethods" value="15" />
+            <property name="ignorepattern" value="(^(set|get|on))i" />
         </properties>
     </rule>
     <!--

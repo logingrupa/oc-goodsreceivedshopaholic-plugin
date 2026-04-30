@@ -1,0 +1,45 @@
+<?php
+use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
+
+$obSettings = Settings::instance();
+?>
+<?= $this->makePartial('_tabs', ['active' => 'settings']) ?>
+
+<div class="alert alert-info">
+    <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_intro_title')) ?></strong>
+    <p style="margin-top: 0.5rem;"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_intro_body')) ?></p>
+    <p style="margin-top: 0.5rem;">
+        <a href="<?= Backend::url('system/settings/update/logingrupa/goodsreceivedshopaholic/goodsreceived-settings') ?>"
+           class="btn btn-default">
+            <i class="icon-cog"></i>
+            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_open_form')) ?>
+        </a>
+    </p>
+</div>
+
+<table class="table data">
+    <thead>
+        <tr>
+            <th><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_field')) ?></th>
+            <th><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.tabs.settings_value')) ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.enabled')) ?></td>
+            <td><?= $obSettings->get('enabled') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+        </tr>
+        <tr>
+            <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.auto_deactivate_on_zero')) ?></td>
+            <td><?= $obSettings->get('auto_deactivate_on_zero') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+        </tr>
+        <tr>
+            <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.auto_activate_on_stock')) ?></td>
+            <td><?= $obSettings->get('auto_activate_on_stock') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+        </tr>
+        <tr>
+            <td><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.allow_initial_reset')) ?></td>
+            <td><?= $obSettings->get('allow_initial_reset') ? '<span class="oc-icon-check text-success">on</span>' : '<span class="oc-icon-times text-muted">off</span>' ?></td>
+        </tr>
+    </tbody>
+</table>

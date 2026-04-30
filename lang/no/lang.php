@@ -120,4 +120,17 @@ return [
         'button'        => 'Kjør tilbakestilling + anvend',
         'spinner'       => 'Tilbakestiller og anvender…',
     ],
+    'tabs' => [
+        'invoices'             => 'Fakturaer',
+        'upload'               => 'Last opp',
+        'settings'             => 'Innstillinger',
+        'settings_intro_title' => 'Per-side innstillinger',
+        'settings_intro_body'  => 'Disse fire bryterne styrer auto-deaktivering / auto-aktivering / innledende tilbakestilling. Hver innstilling er per-side (multisite).',
+        'settings_open_form'   => 'Åpne innstillingsskjema',
+        'settings_field'       => 'Innstilling',
+        'settings_value'       => 'Verdi',
+    ],
+    'toolbar' => [
+        'upload_invoices' => 'Last opp fakturaer',
+    ],
 ];

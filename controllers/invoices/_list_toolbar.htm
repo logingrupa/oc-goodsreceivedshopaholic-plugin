@@ -1,0 +1,9 @@
+<?= $this->makePartial('_tabs', ['active' => 'invoices']) ?>
+
+<div data-control="toolbar">
+    <a
+        href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/upload') ?>"
+        class="btn btn-primary oc-icon-upload">
+        <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.toolbar.upload_invoices')) ?>
+    </a>
+</div>

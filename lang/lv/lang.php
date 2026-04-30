@@ -120,4 +120,17 @@ return [
         'button'        => 'Palaist atiestatīšanu + piemērot',
         'spinner'       => 'Atiestata un piemēro…',
     ],
+    'tabs' => [
+        'invoices'             => 'Rēķini',
+        'upload'               => 'Augšupielādēt',
+        'settings'             => 'Iestatījumi',
+        'settings_intro_title' => 'Iestatījumi katrai vietai',
+        'settings_intro_body'  => 'Šie četri pārslēgi vada automātiskās deaktivizēšanas / aktivizēšanas / sākotnējās atiestatīšanas uzvedību. Katrs iestatījums ir atkarīgs no vietas (multisite).',
+        'settings_open_form'   => 'Atvērt iestatījumu formu',
+        'settings_field'       => 'Iestatījums',
+        'settings_value'       => 'Vērtība',
+    ],
+    'toolbar' => [
+        'upload_invoices' => 'Augšupielādēt rēķinus',
+    ],
 ];
