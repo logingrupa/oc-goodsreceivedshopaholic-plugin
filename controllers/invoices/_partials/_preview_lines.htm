@@ -1,4 +1,17 @@
 <?php
+/* UX redesign 2026-04-30 — preview-lines now a passive summary banner.
+ *
+ * Apply UX moved to the popup modal opened by `onUpload`'s `result` key
+ * (Chunk E). The "View details" anchor and the `[Apply to stock]` popup
+ * trigger button are dropped — both became confusing dead-ends:
+ *   - View details led to the detail page where no Apply button existed
+ *   - Apply trigger button rendered the modal inline due to BUG 2 (fixed
+ *     in Chunk A) but was redundant once the modal opens automatically
+ *
+ * What remains: a brief per-invoice summary line so operators have a
+ * static record of what was parsed even after dismissing the modal. The
+ * apply form lives in `_apply_modal.htm` (Chunk D).
+ */
 $arInvoices = $invoices ?? [];
 ?>
 <?php if (count($arInvoices) > 0): ?>
@@ -6,24 +19,14 @@ $arInvoices = $invoices ?? [];
         $obInvoice = $arPreview['invoice'] ?? null;
         $iInvoiceId = (int) ($obInvoice?->id ?? 0);
     ?>
-        <div class="control-section invoice-preview" data-invoice-id="<?= $iInvoiceId ?>" style="margin-top: 1.5rem;">
+        <div class="control-section invoice-preview" data-invoice-id="<?= $iInvoiceId ?>" style="margin-top: 1rem;">
             <div class="alert alert-success">
                 <strong>Parsed: <?= e((string) ($obInvoice?->source_filename ?? '')) ?></strong>
-                — <?= (int) ($obInvoice?->total_lines ?? 0) ?> lines
+                &mdash; <?= (int) ($obInvoice?->total_lines ?? 0) ?> lines
                 (<?= (int) ($arPreview['matched_count'] ?? 0) ?> matched,
                 <?= (int) ($arPreview['unmatched_count'] ?? 0) ?> unmatched).
-                <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/' . $iInvoiceId) ?>"
-                   class="btn btn-default btn-sm" style="margin-left:1rem;">
-                    <i class="icon-eye"></i> View details
-                </a>
+                Apply via the popup modal (or refresh the page to re-open).
             </div>
-            <button type="button"
-                    class="btn btn-primary"
-                    data-control="popup"
-                    data-handler="onApplyShowConfirm"
-                    data-request-data="invoice_id: <?= $iInvoiceId ?>">
-                <i class="icon-check"></i> Apply to stock
-            </button>
         </div>
     <?php endforeach; ?>
 <?php endif; ?>

@@ -187,18 +187,36 @@ HTML;
      *   3) Route through ParseAndPersistOrchestrator::run — which itself does
      *      body-side duplicate detection + persists Invoice + lines in a
      *      single DB::transaction (plan 03-06).
-     *   4) Aggregate per-file outcomes into one of three AJAX-target panels:
-     *      preview / reject / errors. ONE failing file does NOT abort the
-     *      batch; the foreach catches typed plugin exceptions and Throwable
-     *      and pushes the per-file error into `$arErrors` so the operator
+     *   4) Attach the uploaded HTM to Invoice.original_file via attachOne
+     *      (BUG 4 / UI-06 / D-28 — Chunk B).
+     *   5) Aggregate per-file outcomes into preview / reject / errors panels
+     *      AND render the unified apply modal under the canonical `result`
+     *      key. ONE failing file does NOT abort the batch; the foreach
+     *      catches typed plugin exceptions and Throwable so the operator
      *      sees per-file results.
+     *
+     * UX redesign 2026-04-30 (response shape includes `result`):
+     *   When at least ONE invoice parses successfully, the response carries
+     *   a `result` key with the rendered `_apply_modal.htm` markup. The
+     *   upload form's file input has `data-request-success="$.popup({
+     *   content: data.result, size: 'huge' });"` so the popup widget opens
+     *   automatically client-side after successful upload. The legacy
+     *   `#invoicePreviewWrap` / `#invoiceRejectWrap` / `#invoiceUploadErrors`
+     *   selector keys are RETAINED for the rejects + errors panels — those
+     *   still render INLINE on the upload page (operator must see duplicate
+     *   rejects + per-file errors regardless of modal state).
      *
      * Response shape:
      *   [
      *     '#invoicePreviewWrap'  => makePartial('_partials/preview_lines', [...]),
      *     '#invoiceRejectWrap'   => makePartial('_partials/reject', [...]),
      *     '#invoiceUploadErrors' => makePartial('_partials/upload_errors', [...]),
+     *     'result'               => makePartial('_partials/apply_modal', [...]) | '',
      *   ]
+     *
+     * The `result` key is empty string when no parse succeeded (errors-only
+     * batch); the client-side `data-request-success` checks for non-empty
+     * before opening the popup.
      *
      * Return type is `array<string, mixed>` because `makePartial()` is
      * declared as returning `mixed` upstream (Backend\Classes\Controller
@@ -234,10 +252,15 @@ HTML;
             $this->processSingleUpload($obFile, $iUserId, $arPreviews, $arRejects, $arErrors);
         }
 
+        $mModal = count($arPreviews) > 0
+            ? $this->makePartial('_partials/apply_modal', ['invoices' => $arPreviews])
+            : '';
+
         return [
             '#invoicePreviewWrap'  => $this->makePartial('_partials/preview_lines', ['invoices' => $arPreviews]),
             '#invoiceRejectWrap'   => $this->makePartial('_partials/reject', ['rejects' => $arRejects]),
             '#invoiceUploadErrors' => $this->makePartial('_partials/upload_errors', ['errors' => $arErrors]),
+            'result'               => is_string($mModal) ? $mModal : '',
         ];
     }
 

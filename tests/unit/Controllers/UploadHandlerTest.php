@@ -58,6 +58,12 @@ it('parses + persists a valid HTM file and renders preview partial (UI-02 happy 
     expect($arResponse)->toHaveKey('#invoicePreviewWrap');
     expect($arResponse)->toHaveKey('#invoiceRejectWrap');
     expect($arResponse)->toHaveKey('#invoiceUploadErrors');
+    // UX redesign 2026-04-30: response carries `result` key with the
+    // rendered apply modal markup. Upload form's
+    // `data-request-success="$.popup({ content: data.result })"` opens the
+    // popup overlay automatically when this key is non-empty.
+    expect($arResponse)->toHaveKey('result');
+    expect((string) $arResponse['result'])->toContain('_partials/apply_modal');
     expect((string) $arResponse['#invoicePreviewWrap'])->toContain('_partials/preview_lines');
 
     // Real Invoice was persisted via ParseAndPersistOrchestrator.
@@ -156,6 +162,24 @@ it('iterates over multiple files and aggregates results (UI-02 multi-file)', fun
 
     @unlink($arStaged1['path']);
     @unlink($arStaged2['path']);
+});
+
+it('returns empty result key when no invoices parsed (errors-only batch — UX redesign)', function (): void {
+    // UX redesign 2026-04-30 — the `result` key carries the apply modal
+    // markup ONLY when at least one invoice parsed successfully. An
+    // errors-only batch returns `result => ''` so the upload form's
+    // `data-request-success` JS check (`if (data.result) {...}`) skips the
+    // popup open. This pins that contract.
+    $sTempPath = (string) tempnam(sys_get_temp_dir(), 'gr-evil-');
+    file_put_contents($sTempPath, 'not html');
+    $obFile = new UploadedFile($sTempPath, 'evil.exe', 'application/octet-stream', null, true);
+    $obController = makeTestController(bHasPermission: true, arFiles: [$obFile]);
+    $arResponse = $obController->onUpload();
+
+    expect($arResponse)->toHaveKey('result');
+    expect((string) $arResponse['result'])->toBe('');
+
+    @unlink($sTempPath);
 });
 
 it('rejects non-HTM extension server-side and reports per-file error (D-06)', function (): void {
