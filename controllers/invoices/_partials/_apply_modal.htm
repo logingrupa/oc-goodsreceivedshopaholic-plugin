@@ -1,0 +1,151 @@
+<?php
+/* UX redesign 2026-04-30 — single-page modal apply flow.
+ *
+ * Replaces the prior two-step _apply_confirm.htm flow with a single popup
+ * modal that operators trigger directly after upload (no intermediate
+ * "View details" detour). Modal carries:
+ *   - invoice header (filename, summary counts)
+ *   - editable lines table with per-row `override_qty` number input
+ *   - editable notes textarea
+ *   - Apply (commit) + Cancel buttons in footer
+ *
+ * Multi-file behavior: when onUpload parses N invoices, this partial is
+ * looped per invoice — each section gets its own header + lines + Apply
+ * button. Stack is vertical inside the SAME popup modal (matches existing
+ * `foreach $arInvoices` pattern in `_preview_lines.htm`).
+ *
+ * Canonical popup widget contract — header + body + footer ONLY (no outer
+ * modal-dialog/modal-content wrapper). October popup.js wraps externally
+ * via createPopupContainer (popup.js:206-229). See README.md line 99-128.
+ *
+ * Expected vars:
+ *   - $invoices: list<array{
+ *       invoice: Invoice,
+ *       lines: October Collection<InvoiceLine>,
+ *       total_units: int,
+ *       matched_count: int,
+ *       unmatched_count: int,
+ *     }>
+ *
+ * The `data-request="onApply"` button POSTs `invoice_id` + `override_qty[]`
+ * + `notes` to onApply. The form-files round-trip is NOT used here (file
+ * already attached during onUpload via attachOriginalFile — Chunk B).
+ */
+$arInvoices = $invoices ?? [];
+?>
+<div class="modal-header">
+    <h4 class="modal-title">
+        <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.confirm_title')) ?>
+    </h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body">
+    <?php if (count($arInvoices) === 0): ?>
+        <p class="alert alert-warning">No invoices to apply.</p>
+    <?php endif; ?>
+
+    <?php foreach ($arInvoices as $arPreview):
+        $obInvoice = $arPreview['invoice'] ?? null;
+        if (!($obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice)) {
+            continue;
+        }
+        $iInvoiceId = (int) $obInvoice->id;
+        $sFilename = (string) ($obInvoice->source_filename ?? '');
+        $iTotalLines = (int) ($obInvoice->total_lines ?? 0);
+        $iMatchedCount = (int) ($arPreview['matched_count'] ?? 0);
+        $iUnmatchedCount = (int) ($arPreview['unmatched_count'] ?? 0);
+        $iTotalUnits = (int) ($arPreview['total_units'] ?? 0);
+        $obLines = $arPreview['lines'] ?? [];
+        $sNotes = (string) ($obInvoice->notes ?? '');
+        $sFormId = 'gr-apply-form-'.$iInvoiceId;
+    ?>
+        <section class="control-section invoice-apply-section" data-invoice-id="<?= $iInvoiceId ?>" style="margin-bottom: 1.5rem;">
+            <h5>
+                <i class="icon-file"></i>
+                <strong><?= e($sFilename) ?></strong>
+                &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units total
+            </h5>
+
+            <form id="<?= e($sFormId) ?>" data-request="onApply" data-request-loading=".applying-spinner-<?= $iInvoiceId ?>">
+                <input type="hidden" name="invoice_id" value="<?= $iInvoiceId ?>">
+
+                <table class="table table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 4%;">#</th>
+                            <th style="width: 18%;">EAN</th>
+                            <th>Product</th>
+                            <th style="width: 8%; text-align: right;">Parsed qty</th>
+                            <th style="width: 14%; text-align: right;">Override qty</th>
+                            <th style="width: 10%;">Match</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($obLines as $obLine):
+                            $iLineId = (int) $obLine->id;
+                            $iRowIndex = (int) $obLine->row_index;
+                            $sEan = (string) ($obLine->ean ?? '');
+                            $sProductName = (string) ($obLine->product_name_raw ?? '');
+                            $iQty = (int) ($obLine->qty ?? 0);
+                            $mOverrideQty = $obLine->override_qty;
+                            $sOverrideValue = $mOverrideQty !== null ? (string) (int) $mOverrideQty : '';
+                            $sStrategy = (string) ($obLine->match_strategy ?? '');
+                            $bMatched = $sStrategy !== \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::MATCH_STRATEGY_NONE;
+                        ?>
+                            <tr class="<?= $bMatched ? '' : 'warning' ?>">
+                                <td><?= $iRowIndex ?></td>
+                                <td><code><?= e($sEan) ?></code></td>
+                                <td><?= e($sProductName) ?></td>
+                                <td style="text-align: right;"><strong><?= $iQty ?></strong></td>
+                                <td>
+                                    <input type="number"
+                                           name="override_qty[<?= $iLineId ?>]"
+                                           value="<?= e($sOverrideValue) ?>"
+                                           min="0"
+                                           class="form-control input-sm"
+                                           placeholder="<?= $iQty ?>"
+                                           style="text-align: right;">
+                                </td>
+                                <td>
+                                    <?php if ($bMatched): ?>
+                                        <span class="label label-success">matched</span>
+                                    <?php else: ?>
+                                        <span class="label label-warning">unmatched</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <div class="form-group">
+                    <label for="gr-apply-notes-<?= $iInvoiceId ?>"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.column.notes')) ?></label>
+                    <textarea id="gr-apply-notes-<?= $iInvoiceId ?>"
+                              name="notes"
+                              class="form-control"
+                              rows="2"
+                              placeholder="Optional notes (operator commentary)"><?= e($sNotes) ?></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-request="onApply"
+                            data-request-form="#<?= e($sFormId) ?>"
+                            data-request-loading=".applying-spinner-<?= $iInvoiceId ?>"
+                            data-request-success="$(this).closest('.control-popup').popup('hide'); window.location.reload();"
+                            data-popup-load-indicator>
+                        <i class="icon-check"></i>
+                        <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
+                    </button>
+                    <span class="applying-spinner-<?= $iInvoiceId ?>" style="display:none; margin-left: 1rem;">
+                        <i class="icon-spinner icon-spin"></i> <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?>
+                    </span>
+                </div>
+            </form>
+        </section>
+    <?php endforeach; ?>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+</div>
