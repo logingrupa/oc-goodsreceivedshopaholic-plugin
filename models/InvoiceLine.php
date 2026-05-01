@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Logingrupa\GoodsReceivedShopaholic\Models;
 
+use Lovata\Shopaholic\Models\Offer;
 use October\Rain\Database\Model;
 use October\Rain\Database\Traits\Validation;
 
@@ -15,11 +16,14 @@ use October\Rain\Database\Traits\Validation;
  * receipt, plus the match resolution outcome (`match_strategy`,
  * `matched_offer_id`, `matched_product_id`).
  *
- * Cross-plugin coupling is intentionally absent: `matched_offer_id` and
- * `matched_product_id` are bare integer FKs, NOT `belongsTo` relations to
- * `Lovata\Shopaholic\Models\{Offer,Product}`. Phase 3 services resolve via
- * `Offer::find($iId)` directly when needed; this preserves audit history
- * if upstream rows are deleted.
+ * Cross-plugin coupling stays soft: `matched_offer_id` and
+ * `matched_product_id` are bare integer FKs at the schema level (no FK
+ * constraint, no cascade — preserves audit history if upstream rows are
+ * deleted). A `matched_offer` belongsTo relation is exposed as a
+ * READ-ONLY view affordance so backend list columns can eager-load the
+ * current Offer.quantity via October's `relation:`/`select:` column type
+ * without N+1. Service layer (Phase 3) still resolves via
+ * `Offer::find($iId)` directly.
  *
  * @package Logingrupa\GoodsReceivedShopaholic\Models
  *
@@ -97,6 +101,7 @@ class InvoiceLine extends Model
 
     /** @var array<string, array<int|string, mixed>> */
     public $belongsTo = [
-        'invoice' => [Invoice::class, 'key' => 'invoice_id'],
+        'invoice'        => [Invoice::class, 'key' => 'invoice_id'],
+        'matched_offer'  => [Offer::class, 'key' => 'matched_offer_id'],
     ];
 }

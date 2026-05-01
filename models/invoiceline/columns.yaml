@@ -19,6 +19,12 @@ columns:
     matched_offer_id:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.matched_offer_id'
         type: number
+    stock_after:
+        label: 'logingrupa.goodsreceivedshopaholic::lang.column.stock_after'
+        type: number
+        relation: matched_offer
+        select: quantity
+        sortable: false
     match_strategy:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.match_strategy'
         type: text

@@ -69,6 +69,7 @@ return [
         'qty'               => 'Qty',
         'override_qty'      => 'Override qty',
         'matched_offer_id'  => 'Matched offer',
+        'stock_after'       => 'Stock after import',
         'match_strategy'    => 'Match strategy',
         'applied'           => 'Applied',
     ],

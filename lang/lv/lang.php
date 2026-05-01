@@ -69,6 +69,7 @@ return [
         'qty'               => 'Daudzums',
         'override_qty'      => 'Pārrakstīt daudz.',
         'matched_offer_id'  => 'Saskaņotais piedāvājums',
+        'stock_after'       => 'Krājums pēc importa',
         'match_strategy'    => 'Saskaņošanas stratēģija',
         'applied'           => 'Piemērots',
     ],

@@ -69,6 +69,7 @@ return [
         'qty'               => 'Antall',
         'override_qty'      => 'Overstyr antall',
         'matched_offer_id'  => 'Tilbud med treff',
+        'stock_after'       => 'Lager etter import',
         'match_strategy'    => 'Treffstrategi',
         'applied'           => 'Anvendt',
     ],
