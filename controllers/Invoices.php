@@ -1235,12 +1235,27 @@ class Invoices extends Controller
     {
         $iInvoiceId = (int) $obInvoice->id;
 
+        $obLines = InvoiceLine::where('invoice_id', $iInvoiceId)
+            ->orderBy('row_index')
+            ->get();
+
+        $arOfferIds = $obLines->pluck('matched_offer_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $arCurrentQtyMap = !empty($arOfferIds)
+            ? Offer::whereIn('id', $arOfferIds)->pluck('quantity', 'id')->all()
+            : [];
+
         return [
-            'invoice'         => $obInvoice,
-            'lines'           => InvoiceLine::where('invoice_id', $iInvoiceId)->orderBy('row_index')->get(),
-            'total_units'     => (int) InvoiceLine::where('invoice_id', $iInvoiceId)->sum('qty'),
-            'matched_count'   => (int) $obInvoice->matched_lines,
-            'unmatched_count' => (int) $obInvoice->unmatched_lines,
+            'invoice'           => $obInvoice,
+            'lines'             => $obLines,
+            'total_units'       => (int) InvoiceLine::where('invoice_id', $iInvoiceId)->sum('qty'),
+            'matched_count'     => (int) $obInvoice->matched_lines,
+            'unmatched_count'   => (int) $obInvoice->unmatched_lines,
+            'current_qty_map'   => $arCurrentQtyMap,
         ];
     }
 }
