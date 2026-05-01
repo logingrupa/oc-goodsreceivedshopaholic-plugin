@@ -1,53 +1,56 @@
 <?php
 /**
- * Partial column: product_name_raw rendered as deep-links to the
- * upstream Lovata Shopaholic backend pages.
+ * Partial column: product_name_raw rendered as deep-links into the
+ * upstream Lovata Shopaholic backend pages, with a 4-branch dispatch
+ * on $record->match_strategy.
  *
- *   - Cleaned product name → /back/lovata/shopaholic/products/update/{id}
- *   - "(<variation>)" → /back/lovata/shopaholic/offers/update/{id}
+ *   - 'offer_code' / 'product_code_single_offer' (matched):
+ *       black/normal product-update link + offer-update link in parens.
+ *   - 'variation' (Pass 3 matched, Phase 6):
+ *       ORANGE product link + asterisk + offer-update link in parens.
+ *       Visual signal that match resolved via the offer-name variation
+ *       token, not directly via offer.code or product.code.
+ *   - 'none' (unmatched):
+ *       plain text + asterisk after variation token (no anchor tags).
  *
- * Variation extraction is regex-based on product_name_raw, splitting on
- * the LAST ", " in the string:
+ * Variation extraction is delegated to VariationExtractor (DRY: the
+ * variation regex literal appears EXACTLY ONCE in the plugin — in
+ * classes/support/VariationExtractor.php, used here AND by the Pass 3
+ * chain stage VariationMatcher).
  *
- *     "Gel Polish UV/LED, 12ml, 1081"
- *      └─ product portion ─┘  └ var ┘
- *
- * Pattern: /^(.+),\s+([^,]+)$/u  — greedy first group eats everything
- * up to the last ", ", lazy second group captures the trailing token.
- *
- * Renders:
- *   - Matched line, regex hit:    "<a>X, Y</a> (<a>1081</a>)"
- *   - Matched line, no comma:     "<a>X</a>"      (no variation parens)
- *   - Unmatched line, regex hit:  "X, Y (1081*)"  (plain text, * flags
- *                                                  no offer to link to)
- *   - Unmatched line, no comma:   "X"             (plain text)
- *
- * Both links open in a new tab so the operator does not lose the
- * invoice-update context.
+ * The cleaned name is derived by string slice on the LAST ", " using
+ * `strrpos`, consistent with the regex semantics. NOT a regex
+ * re-implementation — pure substring math.
  *
  * October passes the row's model as $record. The matched_offer relation
- * is already eager-loaded by the stock_after column (relation:matched_offer
- * + select:quantity) — accessing $record->matched_offer here does NOT
+ * is eager-loaded by the stock_after column (relation:matched_offer +
+ * select:quantity) — accessing $record->matched_offer here does NOT
  * trigger an extra query.
  *
  * @var \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine $record
  */
+
+use Logingrupa\GoodsReceivedShopaholic\Classes\Support\VariationExtractor;
+
 $sName = (string) ($record->product_name_raw ?? '');
+$sStrategy = (string) ($record->match_strategy ?? 'none');
 $obOffer = $record->matched_offer ?? null;
 $bMatched = $obOffer !== null && (int) $obOffer->id > 0;
 
-// Split product_name_raw on the LAST ", " into [product, variation].
+// Derive (cleanName, variation) using the SOLE regex source (Plan 01).
+$sVariation = VariationExtractor::extract($sName);
 $sCleanName = $sName;
-$sVariation = '';
-if (preg_match('/^(.+),\s+([^,]+)$/u', $sName, $arMatch)) {
-    $sCleanName = trim($arMatch[1]);
-    $sVariation = trim($arMatch[2]);
+if ($sVariation !== null) {
+    $iLastCommaPos = strrpos($sName, ', ');
+    if ($iLastCommaPos !== false) {
+        $sCleanName = trim(substr($sName, 0, $iLastCommaPos));
+    }
 }
 
-if (!$bMatched) {
-    // Unmatched: plain text. Suffix variation with "*" when extracted.
+// Branch 1: unmatched ('none').
+if (! $bMatched) {
     echo e($sCleanName);
-    if ($sVariation !== '') {
+    if ($sVariation !== null && $sVariation !== '') {
         echo ' ('.e($sVariation).'*)';
     }
     return;
@@ -59,12 +62,30 @@ $sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.$iOfferId);
 $sProductUrl = $iProductId > 0
     ? Backend::url('lovata/shopaholic/products/update/'.$iProductId)
     : null;
+
+// Branch 2: matched via Pass 3 ('variation') — ORANGE + asterisk.
+if ($sStrategy === 'variation') {
+    ?>
+    <?php if ($sProductUrl !== null): ?>
+        <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener" style="color: orange"><?= e($sCleanName) ?>*</a>
+    <?php else: ?>
+        <span style="color: orange"><?= e($sCleanName) ?>*</span>
+    <?php endif; ?>
+    <?php if ($sVariation !== null && $sVariation !== ''): ?>
+        (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener" style="color: orange"><?= e($sVariation) ?></a>)
+    <?php endif; ?>
+    <?php
+    return;
+}
+
+// Branch 3 + 4: matched via 'offer_code' or 'product_code_single_offer'
+// — black/normal links (BYTE-FOR-BYTE preserved from pre-Plan-06).
 ?>
 <?php if ($sProductUrl !== null): ?>
     <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener"><?= e($sCleanName) ?></a>
 <?php else: ?>
     <?= e($sCleanName) ?>
 <?php endif; ?>
-<?php if ($sVariation !== ''): ?>
+<?php if ($sVariation !== null && $sVariation !== ''): ?>
     (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"><?= e($sVariation) ?></a>)
 <?php endif; ?>
