@@ -4,16 +4,20 @@
  * upstream Lovata Shopaholic backend pages.
  *
  *   - Cleaned product name → /back/lovata/shopaholic/products/update/{id}
- *   - "(<offer name>)" → /back/lovata/shopaholic/offers/update/{id}
+ *   - "(<variation>)" → /back/lovata/shopaholic/offers/update/{id}
  *
- * The XML feed encodes the offer label as a trailing ", <offer_name>"
- * suffix on product_name_raw (e.g. "Gel Polish UV/LED, 12ml, 1081"
- * where "1081" is the offer.name). When the trailing fragment matches
- * the matched offer's name we strip it so the visual hierarchy is
+ * Variation resolution (in order):
+ *   1. Extract "(...)" group from end of offer.name — preferred path.
+ *      Example: offer.name "Gel Polish UV/LED, 12ml (1081)" → "1081".
+ *   2. Fall back to offer.code, suffix with "*" to flag the fallback
+ *      (no parens-encoded variation present).
+ *   3. Last resort: full offer.name, suffix with "*".
  *
- *   <product link> (<offer link>)
+ * The XML feed sometimes encodes the variation as a trailing
+ * ", <variation>" suffix on product_name_raw — strip it so the
+ * variation appears only inside the parens, not duplicated in the
+ * product link text.
  *
- * instead of duplicating the offer label inside the product link text.
  * Both links open in a new tab so the operator does not lose the
  * invoice-update context. Unmatched lines fall back to plain text.
  *
@@ -35,18 +39,36 @@ if ($obOffer === null || (int) $obOffer->id === 0) {
 $iOfferId = (int) $obOffer->id;
 $iProductId = (int) ($obOffer->product_id ?? 0);
 $sOfferName = trim((string) ($obOffer->name ?? ''));
+$sOfferCode = trim((string) ($obOffer->code ?? ''));
 $sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.$iOfferId);
 $sProductUrl = $iProductId > 0
     ? Backend::url('lovata/shopaholic/products/update/'.$iProductId)
     : null;
 
-// Strip trailing ", <offer_name>" from the raw product name when the
-// suffix matches — case-sensitive exact compare keeps the strip
-// conservative (no unintended truncation when the offer name happens
-// to appear elsewhere in the string).
+// Resolve the variation label shown in parens.
+$sVariation = '';
+$bFallback = false;
+
+if ($sOfferName !== '' && preg_match('/\(([^)]+)\)\s*$/u', $sOfferName, $arMatch)) {
+    $sVariation = trim($arMatch[1]);
+}
+
+if ($sVariation === '' && $sOfferCode !== '') {
+    $sVariation = $sOfferCode;
+    $bFallback = true;
+}
+
+if ($sVariation === '' && $sOfferName !== '') {
+    $sVariation = $sOfferName;
+    $bFallback = true;
+}
+
+$sDisplayVariation = $sVariation.($bFallback ? '*' : '');
+
+// Strip trailing ", <variation>" from product_name_raw when it matches.
 $sCleanName = $sName;
-if ($sOfferName !== '') {
-    $sSuffix = ', '.$sOfferName;
+if ($sVariation !== '') {
+    $sSuffix = ', '.$sVariation;
     $iSuffixLen = strlen($sSuffix);
     if ($iSuffixLen > 0 && substr($sName, -$iSuffixLen) === $sSuffix) {
         $sCleanName = substr($sName, 0, -$iSuffixLen);
@@ -58,6 +80,6 @@ if ($sOfferName !== '') {
 <?php else: ?>
     <?= e($sCleanName) ?>
 <?php endif; ?>
-<?php if ($sOfferName !== ''): ?>
-    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"><?= e($sOfferName) ?></a>)
+<?php if ($sDisplayVariation !== ''): ?>
+    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"<?= $bFallback ? ' title="No variation in offer name — fallback to offer code/name"' : '' ?>><?= e($sDisplayVariation) ?></a>)
 <?php endif; ?>
