@@ -8,7 +8,8 @@ columns:
         type: text
     product_name_raw:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.product_name'
-        type: text
+        type: partial
+        path: $/logingrupa/goodsreceivedshopaholic/models/invoiceline/_column_product_name.htm
         searchable: true
     qty:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.qty'
