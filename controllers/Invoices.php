@@ -160,7 +160,7 @@ class Invoices extends Controller
     {
         $this->assertPermission('logingrupa.goodsreceived.upload_invoices');
 
-        $mPartial = $this->makePartial('_partials/upload_form');
+        $mPartial = $this->makePartial('_partials/upload_modal');
 
         return [
             'result' => is_string($mPartial) ? $mPartial : '',

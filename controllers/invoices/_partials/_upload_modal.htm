@@ -1,0 +1,18 @@
+<?php
+/* Modal wrapper for the upload form — canonical October popup contract
+ * (header + body + footer only; popup.js wraps externally). Returned by
+ * Invoices::onLoadUploadModal(). The body delegates to `_upload_form`
+ * partial so the same markup also renders inline on the legacy
+ * `upload.htm` page action (back-compat for bookmarks).
+ */
+?>
+<div class="modal-header">
+    <h4 class="modal-title">Upload delivery receipts</h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body">
+    <?= $this->makePartial('_partials/upload_form') ?>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="popup">Close</button>
+</div>
