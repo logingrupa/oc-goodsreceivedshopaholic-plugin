@@ -8,6 +8,23 @@ A Lovata Shopaholic ecosystem plugin (`Logingrupa\GoodsReceivedShopaholic`) that
 
 Backend operators upload distributor delivery receipts. Stock is added to matched offers idempotently. Per-site automation re-activates inbound products and deactivates zero-stock offers. Auditable history with unmatched-EAN queue for manual resolution.
 
+## Current Milestone: v1.1 Pass 3 Variation EAN Matcher
+
+**Goal:** Recover invoice lines whose EAN matches neither `offer.code` (Pass 1) nor `product.code` single-offer (Pass 2) by adding a deterministic third pass that matches on the offer-name `variation` token (last comma-segment of "Product, Variation"), with a single-offer guard for ambiguity safety.
+
+**Target features:**
+- `MatchStrategy` interface + 3 chain-stage matchers (`OfferCodeMatcher`, `ProductCodeSingleOfferMatcher`, `VariationMatcher`) extracted from monolithic `EanMatcherService`.
+- `VariationExtractor` shared regex helper (`/^(.+),\s+([^,]+)$/u` — last-comma greedy, multi-comma safe, whitespace-trimmed, no-comma → null).
+- D-25 query budget lifted 2 → 3 (one extra `Offer::whereIn('variation', …)` SELECT, no product-name lookup).
+- `MatchedLine.strategy` union extended with `'variation'`; `EanMatcherService::matchBatch` → `matchLines(list<ParsedLine>)`.
+- Backend lines list `_column_product_name.htm`: new orange + asterisk render branch for `'variation'` matches; existing `'offer_code'` / `'product_code_single_offer'` (black + product link) and `'none'` (plain + asterisk) branches preserved verbatim.
+- DB column `match_strategy varchar(32)` already fits — **no migration**.
+
+**Key context:**
+- All 5 v1 phases sealed 2026-04-30 (`MILESTONE-V1.0-CLOSURE.md`); phpstan-baseline.neon SHA `4b3227fa…91530a` must remain unchanged.
+- Single phase (Phase 6) — scope is matcher contract + 5 new files + 3 file updates + 4 test files.
+- Tiger-style determinism: ambiguous variation (≥2 offers) → `'none'`, never silent best-guess.
+
 ## Requirements
 
 ### Validated

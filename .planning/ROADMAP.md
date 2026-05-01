@@ -1,10 +1,10 @@
 # Roadmap: GoodsReceivedShopaholic
 
-**Milestone:** v1.0
-**Created:** 2026-04-29
-**Granularity:** coarse (5 phases)
-**Total v1 requirements:** 56 (8 SCHEMA + 7 PARSE + 2 MATCH + 10 APPLY + 12 UI + 6 OPS + 11 QA)
-**Coverage:** 56 / 56 mapped (100%)
+**Milestone:** v1.1 (active) — supersedes sealed v1.0 (2026-04-30)
+**Created:** 2026-04-29 (v1.0) / extended 2026-05-01 (v1.1)
+**Granularity:** coarse (6 phases — 5 v1.0 sealed + 1 v1.1 active)
+**Total requirements:** 69 (56 v1 closed + 13 v1.1 pending)
+**Coverage:** 69 / 69 mapped (100%)
 
 ## Overview
 
@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Apply Layer + Orchestrators** - StockApply, ActiveFlag, InitialReset, ParseAndPersist + Apply orchestrators in one transaction with batched cache flush
 - [x] **Phase 4: Backend Controller, Upload/Preview/Apply UI, Console** - Operator-facing multi-file upload, preview, override-and-reimport, audit history, recompute console
 - [x] **Phase 5: Ops, Lang, Polish, Public Release** - Full lang packs, README + runbook, multi-site verification (UAT-CHECKLIST docs; execution post-milestone per D-15), public Composer publish (docs; gh repo create operator-action per D-05), make all green incl coverage gate wiring
+- [ ] **Phase 6: Pass 3 Variation EAN Matcher** *(v1.1)* - Add deterministic third pass using offer-name `variation` token; refactor `EanMatcherService` to chain runner; D-25 budget 2 → 3 queries; new `'variation'` strategy literal + UI render branch (orange + asterisk)
 
 ## Phase Details
 
@@ -136,10 +137,24 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 05-05-PLAN.md - README ## Publishing + ## Verification + UAT-CHECKLIST.md (OPS-03 + OPS-06) *(closed 2026-04-30 — README.md gains ## Publishing section (composer.json field table + secret-leak pre-publish grep guard per T-05-05-01 + `gh repo create logingrupa/oc-goodsreceived-plugin --public` per D-05 + `git tag v1.0.0` + optional Packagist submission steps + VCS fallback `repositories` block) + ## Verification section (composer require dry-run + expected outcomes (3 plugin tables + offers extension column + Settings page) + cross-link to .planning/UAT-CHECKLIST.md + post-tag canonical pin syntax `^1.0`); 13 → 15 H2 sections (+74 lines); composer.json D-04 sanity check PASS verbatim — name=logingrupa/oc-goodsreceived-plugin / type=october-plugin / license=MIT / require has lovata/toolbox-plugin ^2.2 + lovata/shopaholic-plugin ^1.32 + php ^8.3 + october/system ^4.0 + october/rain ^4.0 / autoload PSR-4 maps Logingrupa\\GoodsReceivedShopaholic\\ → "" / extra.october.plugin = Logingrupa.GoodsReceivedShopaholic / extra.october.installer-name = goodsreceivedshopaholic — no edits required; `.planning/UAT-CHECKLIST.md` (NEW) ships operator-printable manual runbook with 46 checkbox items across A. single-site smoke (5 subsections: install / 4 split permissions / upload+apply happy path / override-and-reimport / destructive initial-reset) + B. multi-site verification (D-14's 7-step matrix split into deploy+migrate / settings isolation / stock-write isolation / permission isolation) + C. sign-off block with operator name + date + per-site pass/fail; `make all` still green (241/241 / 1666 assertions / 10.19s); phpstan-baseline.neon SHA UNCHANGED at `4b3227fa…91530a`; 2 commits b2daa7e (README sections) + a4f1e32 (UAT-CHECKLIST); ZERO deviations.)*
   - [x] 05-06-PLAN.md - Final QA gate + milestone v1.0 closure *(closed 2026-04-30 — `make all` exit 0 in 11.32s wallclock / 9.84s pest; 241/241 tests / 1666 assertions; PHPStan L10 33/33 clean; Pint clean; PHPMD clean; QA-09 grep gate green; phpstan-baseline.neon SHA UNCHANGED at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a` (5 phases / 38 plans / zero new baseline-suppressed errors). REQUIREMENTS.md ## Traceability flipped: OPS-02 → Closed (plan 05-03), OPS-03/05/06 → Closed-Documentation, QA-07/11 → Closed retroactive (Phase 1 plan 01-07 code closure flag-flip). ROADMAP.md Phase 5 row complete; Progress table 6/6 / Complete / 2026-04-30. STATE.md milestone v1.0 closure block + cumulative stats. `.planning/MILESTONE-V1.0-CLOSURE.md` produced with operator-action follow-ups (gh repo create / git tag v1.0.0 / pcov install + measure / multi-site UAT execution) and v2 backlog handoff.)*
 
+### Phase 6: Pass 3 Variation EAN Matcher *(v1.1)*
+**Goal**: Recover invoice lines whose EAN matches neither `offer.code` (Pass 1) nor `product.code` single-offer (Pass 2) by adding a deterministic third pass that matches on the offer-name `variation` token (last comma-segment of "Product, Variation"), with a single-offer guard for ambiguity safety. Refactor `EanMatcherService` into a chain runner backed by a `MatchStrategy` interface; lift D-25 query budget 2 → 3; widen `MatchedLine.strategy` union with `'variation'`; add orange + asterisk render branch in `_column_product_name.htm`.
+**Depends on**: Phase 2 (EanMatcherService, MatchedLine DTO), Phase 3 (ParseAndPersistOrchestrator caller fix), Phase 4 (`models/invoiceline/_column_product_name.htm`). All sealed v1.0.
+**Requirements**: MATCH-03, MATCH-04, MATCH-05, MATCH-06, MATCH-07, MATCH-08, MATCH-09, MATCH-10, UI-13, QA-12, QA-13, QA-14, QA-15
+**Success Criteria** (what must be TRUE):
+  1. `EanMatcherService::matchLines(list<ParsedLine>): list<MatchedLine>` runs Pass 1 → Pass 2 → Pass 3 chain with **exactly 3 DB queries** for any input size (counter-pinned by `EanMatcherServiceTest`); old `matchBatch(array)` signature is gone (no shim); `ParseAndPersistOrchestrator.php:319` consumes new signature.
+  2. `VariationMatcher` issues **exactly 1 query** (`Offer::whereIn('variation', $arUnique)->select('id','variation','product_id')`); single-offer hit → `match_strategy='variation'`; ≥2 offers → `'none'` (Tiger-Style deterministic ambiguity skip); empty / no-comma input → `'none'`; leading-zero EANs preserved end-to-end (counter-pinned by `VariationMatcherTest`).
+  3. `VariationExtractor::extract(string): ?string` is the **sole** regex source for variation extraction in the plugin — both `VariationMatcher` and `models/invoiceline/_column_product_name.htm` consume it (DRY enforced by grep — exactly one occurrence of the regex literal `/^(.+),\s+([^,]+)$/u` in classes/, and `_column_product_name.htm` calls `VariationExtractor::extract` rather than re-implementing the regex).
+  4. `MatchedLine.strategy` union widened to `'offer_code' | 'product_code_single_offer' | 'variation' | 'none'`; PHPStan L10 still 0 errors; `match_strategy varchar(32)` DB column **unchanged** — zero migrations shipped this phase.
+  5. `_column_product_name.htm` renders the new `'variation'` branch as orange + asterisk + resolved product name; existing branches (`'offer_code'` / `'product_code_single_offer'` matched → black/normal product link; `'none'` unmatched → plain text + asterisk) are byte-for-byte preserved (snapshot-pinned by render test).
+  6. `make all` exit 0; phpstan-baseline.neon SHA **UNCHANGED** at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a`; Pest suite delta = +tests for the 4 new test files (no removals); QA-09 grep gate still green.
+
+**Plans**: TBD (drafted by `/gsd-plan-phase 6 --auto`)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -148,3 +163,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 8/8 | Complete | 2026-04-30 |
 | 5. Ops, Lang, Polish, Public Release | 6/6 | Complete | 2026-04-30 |
+| 6. Pass 3 Variation EAN Matcher *(v1.1)* | 0/TBD | Pending plan | — |
