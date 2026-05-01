@@ -142,6 +142,32 @@ class Invoices extends Controller
     }
 
     /**
+     * AJAX handler: render the upload form inside an October popup. Triggered
+     * by the list toolbar button (data-control="popup" data-handler="…"). The
+     * upload form's file input keeps its existing onUpload AJAX wiring; once
+     * a file is parsed, the apply modal opens via $.popup() and this upload
+     * popup hides itself (handler chain stays in `_upload_form.htm`).
+     *
+     * Defense-in-depth: gated on the same upload_invoices permission as the
+     * onUpload handler that follows, so an operator without rights cannot
+     * even open the modal.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws \October\Rain\Exception\ApplicationException When permission missing.
+     */
+    public function onLoadUploadModal(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.upload_invoices');
+
+        $mPartial = $this->makePartial('_partials/upload_form');
+
+        return [
+            'result' => is_string($mPartial) ? $mPartial : '',
+        ];
+    }
+
+    /**
      * Page action: render the Settings tab. Resolves the current site's
      * Settings model row and exposes it to the view (settings.htm) which
      * renders the four-toggle form via October's FormController behavior

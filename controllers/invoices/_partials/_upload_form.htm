@@ -15,7 +15,7 @@ $bShowInitialReset = $this->shouldShowInitialReset();
                    data-request="onUpload"
                    data-request-files
                    data-request-loading="#grUploadProgress"
-                   data-request-success="if (data.result) { $.popup({ content: data.result, size: 'huge' }); }">
+                   data-request-success="var $p = $(this).closest('.control-popup'); if ($p.length) { $p.trigger('close.oc.popup'); } if (data.result) { $.popup({ content: data.result, size: 'huge' }); }">
             <p class="help-block">Files parse + persist on selection. The apply modal opens automatically — edit override quantities / notes there before applying to stock.</p>
         </div>
         <div id="grUploadProgress" class="loading-indicator-container m-t" style="display:none;">
