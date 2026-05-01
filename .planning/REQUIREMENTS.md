@@ -102,25 +102,25 @@ Pass 3 EAN variation matcher milestone (defined 2026-05-01). Chain runner refact
 
 ### Match Chain (extracted + new)
 
-- [ ] **MATCH-03**: `VariationExtractor::extract(string $sName): ?string` returns last comma-segment of an offer name using regex `/^(.+),\s+([^,]+)$/u` — last-comma greedy (multi-comma → split at LAST comma), whitespace trimmed, no-comma → `null`, empty input → `null`.
-- [ ] **MATCH-04**: `VariationMatcher` (Pass 3 chain stage) issues exactly ONE query — `Offer::whereIn('variation', $arUnique)->select('id','variation','product_id')->get()` — for unmatched lines whose extracted variation is non-null; groups by variation; single offer hit → `match_strategy='variation'`; ≥2 offer hits → `'none'` (deterministic ambiguity skip per Tiger-Style); empty / no-comma → `'none'`.
-- [ ] **MATCH-05**: `MatchStrategy` interface declares the chain-stage contract — `match(list<ParsedLine> $arUnmatched): list<MatchedLine>` (or equivalent signature locked at plan time); each stage receives only lines unmatched by prior stages and returns the stage's matches.
-- [ ] **MATCH-06**: `OfferCodeMatcher` (Pass 1, 1 query) implements `MatchStrategy`; extracted verbatim from existing `EanMatcherService` Pass 1 logic; `WHERE offer.code IN (...)` strategy literal `'offer_code'`.
-- [ ] **MATCH-07**: `ProductCodeSingleOfferMatcher` (Pass 2, 1 query) implements `MatchStrategy`; extracted verbatim from existing `EanMatcherService` Pass 2 logic; product.code WHERE-IN with single-offer guard; strategy literal `'product_code_single_offer'`.
-- [ ] **MATCH-08**: `EanMatcherService` refactored to chain runner; signature `matchBatch(array $arEans)` → `matchLines(list<ParsedLine> $arLines): list<MatchedLine>`; chain order Pass 1 → Pass 2 → Pass 3; **total query budget = 3** (one per stage, regardless of input size); D-25 lock updated 2 → 3.
-- [ ] **MATCH-09**: `MatchedLine.strategy` union widened to `'offer_code' | 'product_code_single_offer' | 'variation' | 'none'`; DB column `match_strategy varchar(32)` already fits — **no migration**.
-- [ ] **MATCH-10**: `ParseAndPersistOrchestrator.php:319` single-line caller fix to consume the new `matchLines(list<ParsedLine>)` signature; no other call sites change.
+- [x] **MATCH-03**: `VariationExtractor::extract(string $sName): ?string` returns last comma-segment of an offer name using regex `/^(.+),\s+([^,]+)$/u` — last-comma greedy (multi-comma → split at LAST comma), whitespace trimmed, no-comma → `null`, empty input → `null`.
+- [x] **MATCH-04**: `VariationMatcher` (Pass 3 chain stage) issues exactly ONE query — `Offer::whereIn('variation', $arUnique)->select('id','variation','product_id')->get()` — for unmatched lines whose extracted variation is non-null; groups by variation; single offer hit → `match_strategy='variation'`; ≥2 offer hits → `'none'` (deterministic ambiguity skip per Tiger-Style); empty / no-comma → `'none'`.
+- [x] **MATCH-05**: `MatchStrategy` interface declares the chain-stage contract — `match(list<ParsedLine> $arUnmatched): list<MatchedLine>` (or equivalent signature locked at plan time); each stage receives only lines unmatched by prior stages and returns the stage's matches.
+- [x] **MATCH-06**: `OfferCodeMatcher` (Pass 1, 1 query) implements `MatchStrategy`; extracted verbatim from existing `EanMatcherService` Pass 1 logic; `WHERE offer.code IN (...)` strategy literal `'offer_code'`.
+- [x] **MATCH-07**: `ProductCodeSingleOfferMatcher` (Pass 2, 1 query) implements `MatchStrategy`; extracted verbatim from existing `EanMatcherService` Pass 2 logic; product.code WHERE-IN with single-offer guard; strategy literal `'product_code_single_offer'`.
+- [x] **MATCH-08**: `EanMatcherService` refactored to chain runner; signature `matchBatch(array $arEans)` → `matchLines(list<ParsedLine> $arLines): list<MatchedLine>`; chain order Pass 1 → Pass 2 → Pass 3; **total query budget = 3** (one per stage, regardless of input size); D-25 lock updated 2 → 3.
+- [x] **MATCH-09**: `MatchedLine.strategy` union widened to `'offer_code' | 'product_code_single_offer' | 'variation' | 'none'`; DB column `match_strategy varchar(32)` already fits — **no migration**.
+- [x] **MATCH-10**: `ParseAndPersistOrchestrator.php:319` single-line caller fix to consume the new `matchLines(list<ParsedLine>)` signature; no other call sites change.
 
 ### UI
 
-- [ ] **UI-13**: `models/invoiceline/_column_product_name.htm` adds a new render branch for `match_strategy='variation'` — orange link + asterisk + resolved product name (BOTH HTM raw and resolved product name visible per discuss summary). Existing branches unchanged: `'offer_code'` / `'product_code_single_offer'` matched → black/normal product link; `'none'` unmatched → plain text + asterisk. Regex extraction inside the partial is DRY-replaced with `VariationExtractor::extract($sName)` so the partial and the matcher share one regex source.
+- [x] **UI-13**: `models/invoiceline/_column_product_name.htm` adds a new render branch for `match_strategy='variation'` — orange link + asterisk + resolved product name (BOTH HTM raw and resolved product name visible per discuss summary). Existing branches unchanged: `'offer_code'` / `'product_code_single_offer'` matched → black/normal product link; `'none'` unmatched → plain text + asterisk. Regex extraction inside the partial is DRY-replaced with `VariationExtractor::extract($sName)` so the partial and the matcher share one regex source.
 
 ### QA
 
-- [ ] **QA-12**: `VariationMatcherTest` pins single-hit match, ambiguous-skip (≥2 offers → `'none'`), empty-skip, leading-zero EAN passthrough, **query count = 1** (counter-pin via DB query log assertion).
-- [ ] **QA-13**: `VariationExtractorTest` pins last-comma greedy, no-comma → null, multi-comma split at LAST comma, whitespace trim, empty input → null.
-- [ ] **QA-14**: `EanMatcherServiceTest` chain integration — **≤3 queries per `matchLines()` call** (counter-pin), strategy literal preservation across all 4 outcomes, signature `matchLines(list<ParsedLine>): list<MatchedLine>`.
-- [ ] **QA-15**: `_column_product_name.htm` snapshot/render test for the new `'variation'` branch — orange + asterisk + product name (assert against rendered HTML fragment); existing branches' snapshots unchanged.
+- [x] **QA-12**: `VariationMatcherTest` pins single-hit match, ambiguous-skip (≥2 offers → `'none'`), empty-skip, leading-zero EAN passthrough, **query count = 1** (counter-pin via DB query log assertion).
+- [x] **QA-13**: `VariationExtractorTest` pins last-comma greedy, no-comma → null, multi-comma split at LAST comma, whitespace trim, empty input → null.
+- [x] **QA-14**: `EanMatcherServiceTest` chain integration — **≤3 queries per `matchLines()` call** (counter-pin), strategy literal preservation across all 4 outcomes, signature `matchLines(list<ParsedLine>): list<MatchedLine>`.
+- [x] **QA-15**: `_column_product_name.htm` snapshot/render test for the new `'variation'` branch — orange + asterisk + product name (assert against rendered HTML fragment); existing branches' snapshots unchanged.
 
 ---
 
@@ -233,19 +233,19 @@ Filled by roadmapper 2026-04-29. Every v1 REQ-ID maps to exactly one phase. 56/5
 | QA-09 | Phase 3 | Closed (2026-04-29) — plan 03-01 |
 | QA-10 | Phase 4 | Closed (2026-04-30, plan 04-07) |
 | QA-11 | Phase 1 | Closed (2026-04-30, retroactive — code closure plan 01-07; flag flipped plan 05-06) |
-| MATCH-03 | Phase 6 | Pending (v1.1) |
-| MATCH-04 | Phase 6 | Pending (v1.1) |
-| MATCH-05 | Phase 6 | Pending (v1.1) |
-| MATCH-06 | Phase 6 | Pending (v1.1) |
-| MATCH-07 | Phase 6 | Pending (v1.1) |
-| MATCH-08 | Phase 6 | Pending (v1.1) |
-| MATCH-09 | Phase 6 | Pending (v1.1) |
-| MATCH-10 | Phase 6 | Pending (v1.1) |
-| UI-13 | Phase 6 | Pending (v1.1) |
-| QA-12 | Phase 6 | Pending (v1.1) |
-| QA-13 | Phase 6 | Pending (v1.1) |
-| QA-14 | Phase 6 | Pending (v1.1) |
-| QA-15 | Phase 6 | Pending (v1.1) |
+| MATCH-03 | Phase 6 | Closed (2026-05-01) |
+| MATCH-04 | Phase 6 | Closed (2026-05-01) |
+| MATCH-05 | Phase 6 | Closed (2026-05-01) |
+| MATCH-06 | Phase 6 | Closed (2026-05-01) |
+| MATCH-07 | Phase 6 | Closed (2026-05-01) |
+| MATCH-08 | Phase 6 | Closed (2026-05-01) |
+| MATCH-09 | Phase 6 | Closed (2026-05-01) |
+| MATCH-10 | Phase 6 | Closed (2026-05-01) |
+| UI-13 | Phase 6 | Closed (2026-05-01) |
+| QA-12 | Phase 6 | Closed (2026-05-01) |
+| QA-13 | Phase 6 | Closed (2026-05-01) |
+| QA-14 | Phase 6 | Closed (2026-05-01) |
+| QA-15 | Phase 6 | Closed (2026-05-01) |
 
 **Coverage by phase:**
 
