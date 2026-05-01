@@ -6,20 +6,24 @@
  *   - Cleaned product name → /back/lovata/shopaholic/products/update/{id}
  *   - "(<variation>)" → /back/lovata/shopaholic/offers/update/{id}
  *
- * Variation resolution (in order):
- *   1. Extract "(...)" group from end of offer.name — preferred path.
- *      Example: offer.name "Gel Polish UV/LED, 12ml (1081)" → "1081".
- *   2. Fall back to offer.code, suffix with "*" to flag the fallback
- *      (no parens-encoded variation present).
- *   3. Last resort: full offer.name, suffix with "*".
+ * Variation extraction is regex-based on product_name_raw, splitting on
+ * the LAST ", " in the string:
  *
- * The XML feed sometimes encodes the variation as a trailing
- * ", <variation>" suffix on product_name_raw — strip it so the
- * variation appears only inside the parens, not duplicated in the
- * product link text.
+ *     "Gel Polish UV/LED, 12ml, 1081"
+ *      └─ product portion ─┘  └ var ┘
+ *
+ * Pattern: /^(.+),\s+([^,]+)$/u  — greedy first group eats everything
+ * up to the last ", ", lazy second group captures the trailing token.
+ *
+ * Renders:
+ *   - Matched line, regex hit:    "<a>X, Y</a> (<a>1081</a>)"
+ *   - Matched line, no comma:     "<a>X</a>"      (no variation parens)
+ *   - Unmatched line, regex hit:  "X, Y (1081*)"  (plain text, * flags
+ *                                                  no offer to link to)
+ *   - Unmatched line, no comma:   "X"             (plain text)
  *
  * Both links open in a new tab so the operator does not lose the
- * invoice-update context. Unmatched lines fall back to plain text.
+ * invoice-update context.
  *
  * October passes the row's model as $record. The matched_offer relation
  * is already eager-loaded by the stock_after column (relation:matched_offer
@@ -30,56 +34,37 @@
  */
 $sName = (string) ($record->product_name_raw ?? '');
 $obOffer = $record->matched_offer ?? null;
+$bMatched = $obOffer !== null && (int) $obOffer->id > 0;
 
-if ($obOffer === null || (int) $obOffer->id === 0) {
-    echo e($sName);
+// Split product_name_raw on the LAST ", " into [product, variation].
+$sCleanName = $sName;
+$sVariation = '';
+if (preg_match('/^(.+),\s+([^,]+)$/u', $sName, $arMatch)) {
+    $sCleanName = trim($arMatch[1]);
+    $sVariation = trim($arMatch[2]);
+}
+
+if (!$bMatched) {
+    // Unmatched: plain text. Suffix variation with "*" when extracted.
+    echo e($sCleanName);
+    if ($sVariation !== '') {
+        echo ' ('.e($sVariation).'*)';
+    }
     return;
 }
 
 $iOfferId = (int) $obOffer->id;
 $iProductId = (int) ($obOffer->product_id ?? 0);
-$sOfferName = trim((string) ($obOffer->name ?? ''));
-$sOfferCode = trim((string) ($obOffer->code ?? ''));
 $sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.$iOfferId);
 $sProductUrl = $iProductId > 0
     ? Backend::url('lovata/shopaholic/products/update/'.$iProductId)
     : null;
-
-// Resolve the variation label shown in parens.
-$sVariation = '';
-$bFallback = false;
-
-if ($sOfferName !== '' && preg_match('/\(([^)]+)\)\s*$/u', $sOfferName, $arMatch)) {
-    $sVariation = trim($arMatch[1]);
-}
-
-if ($sVariation === '' && $sOfferCode !== '') {
-    $sVariation = $sOfferCode;
-    $bFallback = true;
-}
-
-if ($sVariation === '' && $sOfferName !== '') {
-    $sVariation = $sOfferName;
-    $bFallback = true;
-}
-
-$sDisplayVariation = $sVariation.($bFallback ? '*' : '');
-
-// Strip trailing ", <variation>" from product_name_raw when it matches.
-$sCleanName = $sName;
-if ($sVariation !== '') {
-    $sSuffix = ', '.$sVariation;
-    $iSuffixLen = strlen($sSuffix);
-    if ($iSuffixLen > 0 && substr($sName, -$iSuffixLen) === $sSuffix) {
-        $sCleanName = substr($sName, 0, -$iSuffixLen);
-    }
-}
 ?>
 <?php if ($sProductUrl !== null): ?>
     <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener"><?= e($sCleanName) ?></a>
 <?php else: ?>
     <?= e($sCleanName) ?>
 <?php endif; ?>
-<?php if ($sDisplayVariation !== ''): ?>
-    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"<?= $bFallback ? ' title="No variation in offer name — fallback to offer code/name"' : '' ?>><?= e($sDisplayVariation) ?></a>)
+<?php if ($sVariation !== ''): ?>
+    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"><?= e($sVariation) ?></a>)
 <?php endif; ?>
