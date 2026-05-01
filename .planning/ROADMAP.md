@@ -149,7 +149,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. `_column_product_name.htm` renders the new `'variation'` branch as orange + asterisk + resolved product name; existing branches (`'offer_code'` / `'product_code_single_offer'` matched → black/normal product link; `'none'` unmatched → plain text + asterisk) are byte-for-byte preserved (snapshot-pinned by render test).
   6. `make all` exit 0; phpstan-baseline.neon SHA **UNCHANGED** at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a`; Pest suite delta = +tests for the 4 new test files (no removals); QA-09 grep gate still green.
 
-**Plans**: TBD (drafted by `/gsd-plan-phase 6 --auto`)
+**Plans**: 6 plans
+  - [ ] 06-01-PLAN.md - VariationExtractor sole-source regex helper + 5-case Pest tests (MATCH-03 + QA-13)
+  - [ ] 06-02-PLAN.md - MatchStrategy interface + MatchedLine.strategy union widening with 'variation' literal (MATCH-05 + MATCH-09)
+  - [ ] 06-03-PLAN.md - OfferCodeMatcher + ProductCodeSingleOfferMatcher extraction as MatchStrategy implementations (MATCH-06 + MATCH-07)
+  - [ ] 06-04-PLAN.md - VariationMatcher Pass 3 chain stage (1 query, single-offer guard) + 5-case Pest tests (MATCH-04 + QA-12)
+  - [ ] 06-05-PLAN.md - EanMatcherService refactor to chain runner (matchLines signature) + ParseAndPersistOrchestrator caller fix + EanMatcherServiceTest rewrite (MATCH-08 + MATCH-10 + QA-14)
+  - [ ] 06-06-PLAN.md - _column_product_name.htm 4-branch render dispatch with orange+asterisk for 'variation' + DRY VariationExtractor consumption + render tests (UI-13 + QA-15)
 
 ## Progress
 
@@ -163,4 +169,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Apply Layer + Orchestrators | 8/8 | Complete | 2026-04-29 |
 | 4. Backend Controller, Upload/Preview/Apply UI, Console | 8/8 | Complete | 2026-04-30 |
 | 5. Ops, Lang, Polish, Public Release | 6/6 | Complete | 2026-04-30 |
-| 6. Pass 3 Variation EAN Matcher *(v1.1)* | 0/TBD | Pending plan | — |
+| 6. Pass 3 Variation EAN Matcher *(v1.1)* | 0/6 | Pending execution | — |
