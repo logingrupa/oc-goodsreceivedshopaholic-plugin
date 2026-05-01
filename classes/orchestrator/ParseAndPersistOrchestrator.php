@@ -315,10 +315,7 @@ class ParseAndPersistOrchestrator
      */
     private function matchAllLines(ParsedInvoice $obParsed): array
     {
-        $arEans = array_map(static fn ($obLine) => $obLine->ean, $obParsed->lines);
-        $arMatchMap = $this->obMatcher->matchBatch($arEans);
-
-        return $this->obMatcher->buildMatchedLines($obParsed->lines, $arMatchMap);
+        return $this->obMatcher->matchLines($obParsed->lines);
     }
 
     /**

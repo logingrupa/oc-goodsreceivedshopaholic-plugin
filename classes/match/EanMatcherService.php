@@ -7,52 +7,47 @@ namespace Logingrupa\GoodsReceivedShopaholic\Classes\Match;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\MatchedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ParsedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InvalidEanException;
-use Lovata\Shopaholic\Models\Offer;
-use Lovata\Shopaholic\Models\Product;
 
 /**
- * EAN → Offer-id resolver for the goods-received import pipeline (Phase 2 plan
- * 02-06). Reads `lovata_shopaholic_offers.code` first; falls back to
- * `lovata_shopaholic_products.code` with a single-offer guard. Issues exactly
- * TWO queries per `matchBatch` call regardless of input size — proven by the
- * `DB::enableQueryLog` count assertion in `EanMatcherServiceTest`.
+ * EAN match chain runner — Phase 6 / D-25-update.
  *
- * Public surface (D-24..D-26):
- *   - `matchBatch(list<string> $arEans): array<string, MatchResult>` — input
- *     EAN list, output map keyed by EAN preserving leading-zero strings.
- *   - `buildMatchedLines(list<ParsedLine>, MatchMap): list<MatchedLine>` —
- *     convenience wrapper for the Phase 3 ParseAndPersistOrchestrator.
+ * Orchestrates 3 MatchStrategy stages over ParsedLine residue:
+ *   1. OfferCodeMatcher                — Offer.code direct match (1 query)
+ *   2. ProductCodeSingleOfferMatcher   — Product.code with single-offer guard (1 query)
+ *   3. VariationMatcher                — Offer.variation last-comma-segment with single-offer guard (1 query)
  *
- * MatchResult shape (D-26):
- *   `array{matched_offer_id: int|null, match_strategy: 'offer_code'|'product_code_single_offer'|'none'}`
+ * Total query budget = 3 (one per stage, regardless of input size).
+ * Counter-pinned by EanMatcherServiceTest "runs at most 3 queries" case.
  *
- * Strategy decision matrix:
- *   | Found in                                  | match_strategy               |
- *   |-------------------------------------------|------------------------------|
- *   | offers.code (Pass 1)                      | offer_code                   |
- *   | products.code with exactly 1 offer (P2)   | product_code_single_offer    |
- *   | products.code with 0 or >=2 offers (P2)   | none                         |
- *   | nowhere                                   | none                         |
+ * Public surface (post-refactor):
+ *   matchLines(list<ParsedLine>): list<MatchedLine>
  *
- * Threat-model coverage:
- *   - T-02-06-01 (SQL injection via attacker-controlled EAN): Eloquent
- *     `whereIn` parameterizes IN-clause via PDO bind variables — attacker
- *     strings never touch the SQL string. Defense-in-depth:
- *     `assertAllEansValid` regex-rejects anything not exactly 13 digits
- *     BEFORE the query is built, so even a malformed EAN that bypasses the
- *     parser cannot reach the DB. Tested explicitly via the
- *     "InvalidEan throws BEFORE any DB query" test.
- *   - T-02-06-04 (silent leading-zero strip): EAN strings flow through
- *     `whereIn` and the result map keys verbatim. PHP keeps `'0000000012345'`
- *     as a string array key (it's not a "decimal-int representable" string).
- *     Pinned by QA-02 PreservesLeadingZeroEanTest.
+ * The legacy 2-pass batch-and-build helpers (taking `list<string>` of EANs and
+ * returning a map keyed by EAN, then a separate wrap step) are GONE — Phase 6
+ * / D-25-update is a post-v1 internal refactor with a single caller
+ * (`ParseAndPersistOrchestrator`). No back-compat shim per the locked spec.
+ *
+ * Defense-in-depth: every input EAN is regex-validated against /^\d{13}$/
+ * BEFORE any DB query (T-02-06-01 mitigation; preserved verbatim from Phase 2
+ * plan 02-06; pinned by EanMatcherServiceTest "InvalidEanException BEFORE any
+ * DB query").
+ *
+ * Threat coverage (plan 06-05 register):
+ *   - T-06-05-01 Tampering — defense-in-depth EAN regex preserved at chain
+ *     runner boundary; assertAllEansValid runs BEFORE any chain stage SELECT.
+ *   - T-06-05-02 Information disclosure — output order matches input order
+ *     via reorderToInput; chain stages may match out of order but final
+ *     order is input-canonical.
+ *   - T-06-05-04 DoS via residue explosion — residue size monotonically
+ *     decreases (each stage either matches or omits); bounded by parser's
+ *     MAX_ROWS upstream guard.
  *
  * Hungarian notation throughout per Lovata Toolbox standard.
  */
 final class EanMatcherService
 {
     /**
-     * Strict 13-digit EAN regex. Defense-in-depth check at the matcher
+     * Strict 13-digit EAN regex. Defense-in-depth check at the chain runner
      * boundary — the parser already filters non-13-digit rows (D-16 lenient
      * skip). If a bug ever lets a malformed EAN through, this assertion
      * raises `InvalidEanException` BEFORE any DB query.
@@ -60,69 +55,91 @@ final class EanMatcherService
     private const string EAN_REGEX = '/^\d{13}$/';
 
     /**
-     * Resolve a batch of EAN strings to offer ids using exactly TWO queries
-     * (one query when all EANs are matched in Pass 1; zero queries when the
-     * input is empty).
+     * Chain stages in deterministic execution order. Stage[i] receives only
+     * the ParsedLine residue unmatched by stages [0..i-1]; stages return
+     * lists of MatchedLine for the lines they could match. Lines unmatched
+     * by ALL stages are wrapped as MatchedLine with match_strategy='none'.
      *
-     * @param  list<string>  $arEans
-     * @return array<string, array{matched_offer_id: int|null, match_strategy: 'offer_code'|'product_code_single_offer'|'none'}>
-     *
-     * @throws InvalidEanException  on any input that is not exactly 13 digits
+     * @var list<MatchStrategy>
      */
-    public function matchBatch(array $arEans): array
+    private readonly array $arStages;
+
+    public function __construct()
     {
-        $this->assertAllEansValid($arEans);
-
-        if ($arEans === []) {
-            return [];
-        }
-
-        $arUnique = array_values(array_unique($arEans));
-
-        // Pass 1 — Offer.code direct match (one query).
-        $arOfferMap = $this->lookupOffersByCode($arUnique);
-
-        $arUnmatched = array_values(array_diff($arUnique, array_keys($arOfferMap)));
-
-        // Pass 2 — Product.code with single-offer guard (one query, skipped
-        // when every EAN already matched in Pass 1).
-        $arProductMap = $this->lookupProductsWithSingleOffer($arUnmatched);
-
-        return $this->assembleResultMap($arUnique, $arOfferMap, $arProductMap);
+        $this->arStages = [
+            new OfferCodeMatcher(),
+            new ProductCodeSingleOfferMatcher(),
+            new VariationMatcher(),
+        ];
     }
 
     /**
-     * Convert a list of ParsedLine + match-map into a list of MatchedLine
-     * DTOs preserving input order. Defensive default: any line whose EAN is
-     * absent from the map lands as `match_strategy='none'`.
+     * Run the EAN match chain over a list of ParsedLines.
+     *
+     * Each stage receives only the residue unmatched by prior stages. Lines
+     * unmatched by ALL three stages emerge as MatchedLine with
+     * match_strategy='none'. Output order matches input order.
+     *
+     * Total query budget = 3 (one SELECT per stage, regardless of input size).
+     * Stages short-circuit when their residue is empty; an input where all
+     * lines match in Pass 1 issues exactly 1 query, never 3.
      *
      * @param  list<ParsedLine>  $arLines
-     * @param  array<string, array{matched_offer_id: int|null, match_strategy: string}>  $arMatchMap
      * @return list<MatchedLine>
+     *
+     * @throws InvalidEanException  on any input line whose EAN is not exactly 13 digits
      */
-    public function buildMatchedLines(array $arLines, array $arMatchMap): array
+    public function matchLines(array $arLines): array
     {
-        $arResult = [];
+        if ($arLines === []) {
+            return [];
+        }
 
-        foreach ($arLines as $obLine) {
-            $arEntry = $arMatchMap[$obLine->ean] ?? ['matched_offer_id' => null, 'match_strategy' => 'none'];
+        $arEans = array_map(static fn (ParsedLine $obLine): string => $obLine->ean, $arLines);
+        $this->assertAllEansValid($arEans);
 
-            /** @var 'offer_code'|'product_code_single_offer'|'none' $sStrategy */
-            $sStrategy = $arEntry['match_strategy'];
+        // Run the chain: each stage filters residue from prior stages.
+        $arMatched = [];
+        $arRemaining = $arLines;
 
-            $arResult[] = new MatchedLine(
+        foreach ($this->arStages as $obStage) {
+            if ($arRemaining === []) {
+                break;
+            }
+            $arStageMatches = $obStage->match($arRemaining);
+            if ($arStageMatches === []) {
+                continue;
+            }
+            $arMatched = array_merge($arMatched, $arStageMatches);
+
+            $arMatchedRowIndices = [];
+            foreach ($arStageMatches as $obStageMatched) {
+                $arMatchedRowIndices[$obStageMatched->line->row_index] = true;
+            }
+            $arRemaining = array_values(array_filter(
+                $arRemaining,
+                static fn (ParsedLine $obLine): bool => ! isset($arMatchedRowIndices[$obLine->row_index]),
+            ));
+        }
+
+        // Wrap residue (lines unmatched by all stages) as 'none'.
+        foreach ($arRemaining as $obLine) {
+            $arMatched[] = new MatchedLine(
                 line: $obLine,
-                matched_offer_id: $arEntry['matched_offer_id'],
-                match_strategy: $sStrategy,
+                matched_offer_id: null,
+                match_strategy: 'none',
             );
         }
 
-        return $arResult;
+        // Restore input order — chain stages may have produced matches out of
+        // order; the contract for downstream `persistLines` (orchestrator) is
+        // input-order preservation.
+        return $this->reorderToInput($arLines, $arMatched);
     }
 
     /**
      * Defense-in-depth EAN regex guard. Throws BEFORE any DB query so an
-     * invalid EAN cannot reach the IN-clause builder (T-02-06-01).
+     * invalid EAN cannot reach an IN-clause builder (T-02-06-01).
      *
      * @param  list<string>  $arEans
      *
@@ -143,123 +160,27 @@ final class EanMatcherService
     }
 
     /**
-     * Pass 1 — Offer.code direct match. Returns map<ean, offer_id>.
+     * Reorder MatchedLine results to match the order of input ParsedLines
+     * (keyed by row_index). Chain stages may match out of order; the
+     * orchestrator's `persistLines` requires input-order preservation so
+     * `invoice_lines.row_index` mirrors the upload's row sequence.
      *
-     * @param  list<string>  $arEans
-     * @return array<string, int>
+     * @param  list<ParsedLine>   $arInput
+     * @param  list<MatchedLine>  $arUnordered
+     * @return list<MatchedLine>
      */
-    private function lookupOffersByCode(array $arEans): array
+    private function reorderToInput(array $arInput, array $arUnordered): array
     {
-        $arOfferMap = [];
-
-        $obRows = Offer::whereIn('code', $arEans)->get(['id', 'code']);
-
-        foreach ($obRows as $obRow) {
-            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $sCode = (string) $obRow->code;
-            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $iOfferId = (int) $obRow->id;
-
-            $arOfferMap[$sCode] = $iOfferId;
+        $arByRowIndex = [];
+        foreach ($arUnordered as $obMatched) {
+            $arByRowIndex[$obMatched->line->row_index] = $obMatched;
         }
 
-        return $arOfferMap;
-    }
-
-    /**
-     * Pass 2 — Product.code match with `has('offer', '=', 1)` single-offer
-     * guard. Skipped when input is empty (Pass 1 caught everything). Returns
-     * map<ean, offer_id>.
-     *
-     * Single-query strategy (D-25 "exactly TWO queries" budget):
-     *   - `has('offer', '=', 1)` adds a correlated COUNT subquery to the
-     *     WHERE clause — same SQL statement, NOT a second round-trip.
-     *   - `addSelect(...subquery...)` inlines the sole offer's `id` via a
-     *     correlated SELECT subquery — same SQL statement.
-     * Net: one SELECT statement, no `->with()` eager-load round-trip.
-     *
-     * `->limit(1)` on the subquery is defense-in-depth: the WHERE guard
-     * already restricts to exactly-one-offer products, but the LIMIT keeps
-     * the subquery deterministic if the guard ever drifts.
-     *
-     * @param  list<string>  $arEans
-     * @return array<string, int>
-     */
-    private function lookupProductsWithSingleOffer(array $arEans): array
-    {
-        if ($arEans === []) {
-            return [];
-        }
-
-        $arProductMap = [];
-
-        $obRows = Product::whereIn('code', $arEans)
-            ->has('offer', '=', 1)
-            ->select(['id', 'code'])
-            ->addSelect([
-                'matched_offer_id' => Offer::select('id')
-                    ->whereColumn('product_id', 'lovata_shopaholic_products.id')
-                    ->limit(1),
-            ])
-            ->get();
-
-        foreach ($obRows as $obRow) {
-            /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc; correlated `addSelect` exposes `matched_offer_id` at runtime */
-            $mOfferId = $obRow->matched_offer_id;
-
-            if (! is_numeric($mOfferId)) {
-                // Safety net: has('offer', '=', 1) should guarantee a numeric
-                // id, but the correlated subquery may return null under
-                // driver edge cases (deleted_at race, broken FK). Treat any
-                // non-numeric (incl. null) as "skip this row".
-                continue;
-            }
-
-            /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $sCode = (string) $obRow->code;
-
-            $arProductMap[$sCode] = (int) $mOfferId;
-        }
-
-        return $arProductMap;
-    }
-
-    /**
-     * Assemble the final result map for every unique EAN, picking the first
-     * available strategy (offer_code → product_code_single_offer → none).
-     *
-     * @param  list<string>  $arUnique
-     * @param  array<string, int>  $arOfferMap
-     * @param  array<string, int>  $arProductMap
-     * @return array<string, array{matched_offer_id: int|null, match_strategy: 'offer_code'|'product_code_single_offer'|'none'}>
-     */
-    private function assembleResultMap(array $arUnique, array $arOfferMap, array $arProductMap): array
-    {
         $arResult = [];
-
-        foreach ($arUnique as $sEan) {
-            if (isset($arOfferMap[$sEan])) {
-                $arResult[$sEan] = [
-                    'matched_offer_id' => $arOfferMap[$sEan],
-                    'match_strategy' => 'offer_code',
-                ];
-
-                continue;
+        foreach ($arInput as $obLine) {
+            if (isset($arByRowIndex[$obLine->row_index])) {
+                $arResult[] = $arByRowIndex[$obLine->row_index];
             }
-
-            if (isset($arProductMap[$sEan])) {
-                $arResult[$sEan] = [
-                    'matched_offer_id' => $arProductMap[$sEan],
-                    'match_strategy' => 'product_code_single_offer',
-                ];
-
-                continue;
-            }
-
-            $arResult[$sEan] = [
-                'matched_offer_id' => null,
-                'match_strategy' => 'none',
-            ];
         }
 
         return $arResult;
