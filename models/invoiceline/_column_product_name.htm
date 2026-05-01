@@ -3,12 +3,19 @@
  * Partial column: product_name_raw rendered as deep-links to the
  * upstream Lovata Shopaholic backend pages.
  *
- *   - Whole product name → /back/lovata/shopaholic/products/update/{id}
- *   - Trailing offer label → /back/lovata/shopaholic/offers/update/{id}
+ *   - Cleaned product name → /back/lovata/shopaholic/products/update/{id}
+ *   - "(<offer name>)" → /back/lovata/shopaholic/offers/update/{id}
  *
+ * The XML feed encodes the offer label as a trailing ", <offer_name>"
+ * suffix on product_name_raw (e.g. "Gel Polish UV/LED, 12ml, 1081"
+ * where "1081" is the offer.name). When the trailing fragment matches
+ * the matched offer's name we strip it so the visual hierarchy is
+ *
+ *   <product link> (<offer link>)
+ *
+ * instead of duplicating the offer label inside the product link text.
  * Both links open in a new tab so the operator does not lose the
- * invoice-update context. Falls back to plain text when the line is
- * unmatched (no matched_offer relation row).
+ * invoice-update context. Unmatched lines fall back to plain text.
  *
  * October passes the row's model as $record. The matched_offer relation
  * is already eager-loaded by the stock_after column (relation:matched_offer
@@ -27,19 +34,30 @@ if ($obOffer === null || (int) $obOffer->id === 0) {
 
 $iOfferId = (int) $obOffer->id;
 $iProductId = (int) ($obOffer->product_id ?? 0);
-$sOfferName = (string) ($obOffer->name ?? '');
+$sOfferName = trim((string) ($obOffer->name ?? ''));
 $sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.$iOfferId);
 $sProductUrl = $iProductId > 0
     ? Backend::url('lovata/shopaholic/products/update/'.$iProductId)
     : null;
+
+// Strip trailing ", <offer_name>" from the raw product name when the
+// suffix matches — case-sensitive exact compare keeps the strip
+// conservative (no unintended truncation when the offer name happens
+// to appear elsewhere in the string).
+$sCleanName = $sName;
+if ($sOfferName !== '') {
+    $sSuffix = ', '.$sOfferName;
+    $iSuffixLen = strlen($sSuffix);
+    if ($iSuffixLen > 0 && substr($sName, -$iSuffixLen) === $sSuffix) {
+        $sCleanName = substr($sName, 0, -$iSuffixLen);
+    }
+}
 ?>
 <?php if ($sProductUrl !== null): ?>
-    <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener"><?= e($sName) ?></a>
+    <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener"><?= e($sCleanName) ?></a>
 <?php else: ?>
-    <?= e($sName) ?>
+    <?= e($sCleanName) ?>
 <?php endif; ?>
 <?php if ($sOfferName !== ''): ?>
-    <a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener" class="text-muted" style="margin-left: 0.5rem;">
-        &rarr; <?= e($sOfferName) ?>
-    </a>
+    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"><?= e($sOfferName) ?></a>)
 <?php endif; ?>
