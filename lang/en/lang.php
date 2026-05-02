@@ -94,9 +94,10 @@ return [
         'upload_failed'                  => 'Upload failed. See the error panel for details.',
     ],
     'upload' => [
-        'no_files'      => 'No files were uploaded.',
-        'bad_extension' => 'Only .HTM files are accepted; received extension: :extension.',
-        'too_large'     => 'File exceeds 10 MB; received: :size bytes.',
+        'no_files'         => 'No files were uploaded.',
+        'bad_extension'    => 'Only .HTM files are accepted; received extension: :extension.',
+        'too_large'        => 'File exceeds 10 MB; received: :size bytes.',
+        'unexpected_error' => 'Upload failed due to an unexpected error. The full error has been logged for review.',
     ],
     'apply' => [
         'confirm_title'        => 'Confirm Apply',

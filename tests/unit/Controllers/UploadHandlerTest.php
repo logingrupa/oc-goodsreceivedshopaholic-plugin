@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Log;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -304,4 +305,75 @@ it('routes non-fatal orchestrator failures into per-file error array (boundary c
     expect(\Logingrupa\GoodsReceivedShopaholic\Models\Invoice::count())->toBe(0);
 
     @unlink($sBrokenPath);
+});
+
+it('sanitizes Throwable getMessage and logs full exception (no SQL/connection leak in UI)', function (): void {
+    // Pre-fix: a non-plugin Throwable (e.g. PDOException / QueryException
+    // from the orchestrator's persist transaction) had its raw
+    // `getMessage()` content written verbatim into the per-file errors
+    // array and rendered into `_upload_errors.htm`, leaking SQL fragments,
+    // bound params, and connection-prefix details to the operator-visible
+    // flash. Post-fix: the Throwable arm of `processSingleUpload` emits
+    // a generic `lang.upload.unexpected_error` message to the UI and
+    // logs the full exception (including stack) via `Log::error()` to the
+    // `goodsreceived.upload.unexpected` channel for forensic follow-up.
+    Log::spy();
+
+    $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
+    $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
+
+    $sLeakyMessage = "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'PRO033328' for key 'invoice_number_unique' (Connection: mysql, SQL: insert into \"logingrupa_goods_received_invoices\" (\"invoice_number\") values (?))";
+    $obController->obOrchestratorResolver = static function () use ($sLeakyMessage): never {
+        throw new \RuntimeException($sLeakyMessage);
+    };
+
+    $arResponse = $obController->onUpload();
+
+    expect($arResponse)->toHaveKey('#invoiceUploadErrors');
+    $arErrorCall = null;
+    foreach ($obController->arPartialCalls as $arCall) {
+        if ($arCall['name'] === '_partials/upload_errors') {
+            $arErrorCall = $arCall;
+            break;
+        }
+    }
+    expect($arErrorCall)->not->toBeNull();
+    $arErrors = $arErrorCall['data']['errors'];
+    expect(count($arErrors))->toBe(1);
+
+    // The rendered message must NOT carry any of the SQL/driver fragments
+    // from the original Throwable. Pin each leak vector individually so a
+    // future regression that swaps in a different sanitizer (e.g.,
+    // truncated raw message) trips the gate explicitly.
+    $sRenderedMessage = (string) $arErrors[0]['message'];
+    expect($sRenderedMessage)->not->toContain('SQLSTATE');
+    expect($sRenderedMessage)->not->toContain('insert into');
+    expect($sRenderedMessage)->not->toContain('invoice_number_unique');
+    expect($sRenderedMessage)->not->toContain('Connection:');
+    expect($sRenderedMessage)->not->toContain('Integrity constraint violation');
+    expect($sRenderedMessage)->not->toBe($sLeakyMessage);
+    expect($sRenderedMessage)->not->toBe('');
+
+    // The full exception must reach Log::error with the
+    // `goodsreceived.upload.unexpected` channel and a context payload
+    // carrying both the filename and the (string)-cast exception so the
+    // operator can correlate the UI failure with the server log without
+    // exposing driver text to the UI.
+    Log::shouldHaveReceived('error')
+        ->withArgs(function (mixed $sChannel, mixed $arContext) use ($sLeakyMessage): bool {
+            if ($sChannel !== 'goodsreceived.upload.unexpected') {
+                return false;
+            }
+            if (! is_array($arContext)) {
+                return false;
+            }
+            $sExceptionDump = (string) ($arContext['exception'] ?? '');
+            $sFilenameInLog = (string) ($arContext['filename'] ?? '');
+
+            return str_contains($sExceptionDump, $sLeakyMessage)
+                && $sFilenameInLog === 'Nr_PRO033328_no_13042026.HTM';
+        })
+        ->once();
+
+    @unlink($arStaged['path']);
 });

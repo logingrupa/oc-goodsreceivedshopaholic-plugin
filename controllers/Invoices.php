@@ -11,6 +11,7 @@ use BackendMenu;
 use Cache;
 use Flash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Input;
 use Lang;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\InitialResetService;
@@ -1132,9 +1133,28 @@ class Invoices extends Controller
 
             $arPreviews[] = $this->buildPreviewPayload($obInvoice);
         } catch (GoodsReceivedException $obException) {
+            // GoodsReceivedException carries operator-safe lang.exception.*
+            // messages by contract — render as-is.
             $arErrors[] = ['filename' => $sFilename, 'message' => $obException->getMessage()];
         } catch (Throwable $obException) {
-            $arErrors[] = ['filename' => $sFilename, 'message' => $obException->getMessage()];
+            // Any non-plugin Throwable (QueryException / PDOException /
+            // connection errors / framework bugs) may carry SQL fragments,
+            // bound params, or driver/connection details inside
+            // `getMessage()`. Boundary sanitizer per project CLAUDE.md:
+            // surface a generic operator-facing message and emit the full
+            // exception (including stack) to the server-side log channel
+            // for forensic follow-up. Never let raw driver text reach the
+            // upload errors panel.
+            Log::error('goodsreceived.upload.unexpected', [
+                'filename'  => $sFilename,
+                'exception' => (string) $obException,
+            ]);
+            $arErrors[] = [
+                'filename' => $sFilename,
+                'message'  => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.upload.unexpected_error',
+                ),
+            ];
         }
     }
 

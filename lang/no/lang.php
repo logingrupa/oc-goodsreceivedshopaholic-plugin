@@ -94,9 +94,10 @@ return [
         'upload_failed'                  => 'Opplasting feilet. Se feilpanelet nedenfor for detaljer.',
     ],
     'upload' => [
-        'no_files'      => 'Ingen filer ble lastet opp.',
-        'bad_extension' => 'Bare .HTM-filer godtas; mottatt filendelse: :extension.',
-        'too_large'     => 'Filen overskrider 10 MB; mottatt: :size byte.',
+        'no_files'         => 'Ingen filer ble lastet opp.',
+        'bad_extension'    => 'Bare .HTM-filer godtas; mottatt filendelse: :extension.',
+        'too_large'        => 'Filen overskrider 10 MB; mottatt: :size byte.',
+        'unexpected_error' => 'Opplasting feilet på grunn av en uventet feil. Hele feilmeldingen er logget for gjennomgang.',
     ],
     'apply' => [
         'confirm_title'       => 'Bekreft anvend',

@@ -94,9 +94,10 @@ return [
         'upload_failed'                  => 'Augšupielāde neizdevās. Sk. kļūdu paneli zemāk.',
     ],
     'upload' => [
-        'no_files'      => 'Faili netika augšupielādēti.',
-        'bad_extension' => 'Tiek pieņemti tikai .HTM faili; saņemtais paplašinājums: :extension.',
-        'too_large'     => 'Fails pārsniedz 10 MB; saņemts: :size baiti.',
+        'no_files'         => 'Faili netika augšupielādēti.',
+        'bad_extension'    => 'Tiek pieņemti tikai .HTM faili; saņemtais paplašinājums: :extension.',
+        'too_large'        => 'Fails pārsniedz 10 MB; saņemts: :size baiti.',
+        'unexpected_error' => 'Augšupielāde neizdevās negaidītas kļūdas dēļ. Pilna kļūdas informācija ir reģistrēta žurnālā pārbaudei.',
     ],
     'apply' => [
         'confirm_title'       => 'Apstiprināt piemērošanu',
