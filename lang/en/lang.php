@@ -89,6 +89,8 @@ return [
         'apply_success'     => 'Invoice #:id applied — :units units added across :offers offers.',
         'apply_already_done' => 'Invoice already applied; nothing to do.',
         'forbidden'         => 'You do not have permission to perform this action.',
+        'upload_rejected_duplicate' => 'Duplicate invoice rejected. Use Override and re-import below if reapply is intended.',
+        'upload_failed'             => 'Upload failed. See the error panel for details.',
     ],
     'upload' => [
         'no_files'      => 'No files were uploaded.',

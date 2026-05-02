@@ -304,12 +304,47 @@ class Invoices extends Controller
             ? $this->makePartial('_partials/apply_modal', ['invoices' => $arPreviews])
             : '';
 
+        $this->flashFailOnlyOutcome($arPreviews, $arRejects, $arErrors);
+
         return [
             '#invoicePreviewWrap'  => $this->makePartial('_partials/preview_lines', ['invoices' => $arPreviews]),
             '#invoiceRejectWrap'   => $this->makePartial('_partials/reject', ['rejects' => $arRejects]),
             '#invoiceUploadErrors' => $this->makePartial('_partials/upload_errors', ['errors' => $arErrors]),
             'result'               => is_string($mModal) ? $mModal : '',
         ];
+    }
+
+    /**
+     * Operator-visible flash for fail-only upload batches — without it the
+     * upload popup would dismiss silently while only the in-popup reject /
+     * errors panel patched into #invoiceRejectWrap / #invoiceUploadErrors
+     * renders, which the operator can miss entirely if the popup
+     * auto-closes (UAT feedback 2026-05-02). No flash when at least one
+     * file parsed — the apply popup itself is the success surface.
+     *
+     * @param  list<mixed> $arPreviews
+     * @param  list<mixed> $arRejects
+     * @param  list<mixed> $arErrors
+     */
+    private function flashFailOnlyOutcome(array $arPreviews, array $arRejects, array $arErrors): void
+    {
+        if (count($arPreviews) > 0) {
+            return;
+        }
+
+        if (count($arRejects) > 0) {
+            Flash::warning((string) Lang::get(
+                'logingrupa.goodsreceivedshopaholic::lang.flash.upload_rejected_duplicate',
+            ));
+
+            return;
+        }
+
+        if (count($arErrors) > 0) {
+            Flash::error((string) Lang::get(
+                'logingrupa.goodsreceivedshopaholic::lang.flash.upload_failed',
+            ));
+        }
     }
 
     /**

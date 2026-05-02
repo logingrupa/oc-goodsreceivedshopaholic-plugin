@@ -89,6 +89,8 @@ return [
         'apply_success'     => 'Faktura #:id anvendt — :units enheter lagt til på :offers tilbud.',
         'apply_already_done' => 'Fakturaen er allerede anvendt; ingenting å gjøre.',
         'forbidden'         => 'Du har ikke tillatelse til å utføre denne handlingen.',
+        'upload_rejected_duplicate' => 'Duplikatfaktura avvist. Bruk «Override and re-import» nedenfor hvis ny anvendelse er ønsket.',
+        'upload_failed'             => 'Opplasting feilet. Se feilpanelet nedenfor for detaljer.',
     ],
     'upload' => [
         'no_files'      => 'Ingen filer ble lastet opp.',
