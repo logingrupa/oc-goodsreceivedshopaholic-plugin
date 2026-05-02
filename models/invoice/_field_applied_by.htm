@@ -1,0 +1,33 @@
+<?php
+/* Backend form partial — render Applied-by user as username + link to
+ * `/back/backend/users/update/{id}` instead of raw integer FK.
+ *
+ * Falls back to '—' when applied_by_user_id is null (invoice not yet
+ * applied) or the user row has been deleted.
+ */
+$obInvoice = $formModel ?? null;
+$mUserId = $obInvoice?->applied_by_user_id;
+?>
+<div class="form-group span-left">
+    <label><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.column.applied_by')) ?></label>
+    <p class="form-control-static">
+        <?php
+        if ($mUserId === null) {
+            echo '<span class="text-muted">&mdash;</span>';
+        } else {
+            $obUser = \Backend\Models\User::find((int) $mUserId);
+            if ($obUser === null) {
+                echo '<span class="text-muted">#'.(int) $mUserId.' (deleted)</span>';
+            } else {
+                $sLogin = (string) ($obUser->login ?? $obUser->email ?? ('#'.(int) $mUserId));
+                $sUrl = \Backend::url('backend/users/update/'.(int) $obUser->id);
+                ?>
+                <a href="<?= e($sUrl) ?>" target="_blank" rel="noopener">
+                    <i class="icon-user"></i> <?= e($sLogin) ?>
+                </a>
+                <?php
+            }
+        }
+        ?>
+    </p>
+</div>

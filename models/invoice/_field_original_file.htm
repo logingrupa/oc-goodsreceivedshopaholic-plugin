@@ -1,0 +1,38 @@
+<?php
+/* Backend form partial — Original `.HTM` file: Download button + Preview
+ * button that opens the parsed HTM contents in an October popup modal
+ * (NOT a new browser tab — keeps operator inside the backend context).
+ *
+ * Fallback: if no original_file attached (legacy invoices uploaded
+ * before BUG 4 / D-28 attach-on-upload landed), show `—`.
+ */
+$obInvoice = $formModel ?? null;
+$obFile = $obInvoice?->original_file ?? null;
+$iInvoiceId = (int) ($obInvoice?->id ?? 0);
+?>
+<div class="form-group span-full">
+    <label><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.field.original_file')) ?></label>
+    <p class="form-control-static">
+        <?php if ($obFile === null || $iInvoiceId === 0): ?>
+            <span class="text-muted">&mdash;</span>
+        <?php else: ?>
+            <span class="oc-icon-file-code-o"></span>
+            <?= e((string) ($obFile->file_name ?? 'invoice.htm')) ?>
+            &middot;
+            <a href="<?= e((string) $obFile->getPath()) ?>"
+               class="btn btn-default btn-sm"
+               target="_blank"
+               rel="noopener">
+                <i class="icon-download"></i> <?= e(trans('backend::lang.form.download_file')) ?>
+            </a>
+            <button type="button"
+                    class="btn btn-default btn-sm"
+                    data-control="popup"
+                    data-handler="onPreviewHtmFile"
+                    data-request-data="invoice_id: <?= $iInvoiceId ?>"
+                    data-popup-size="huge">
+                <i class="icon-eye"></i> Preview
+            </button>
+        <?php endif; ?>
+    </p>
+</div>

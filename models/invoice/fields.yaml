@@ -15,8 +15,8 @@ tabs:
         applied_by_user_id:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
             label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_by'
-            type: text
-            disabled: true
+            type: partial
+            path: $/logingrupa/goodsreceivedshopaholic/models/invoice/_field_applied_by.htm
             span: left
         applied_at:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
@@ -49,24 +49,17 @@ tabs:
             type: number
             disabled: true
             span: right
-        country_code:
-            tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
-            label: 'logingrupa.goodsreceivedshopaholic::lang.column.country_code'
-            type: text
-            disabled: true
-            span: left
         source_filename:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
             label: 'logingrupa.goodsreceivedshopaholic::lang.column.source_filename'
             type: text
             disabled: true
-            span: right
+            span: full
         original_file:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'
             label: 'logingrupa.goodsreceivedshopaholic::lang.field.original_file'
-            type: fileupload
-            mode: file
-            disabled: true
+            type: partial
+            path: $/logingrupa/goodsreceivedshopaholic/models/invoice/_field_original_file.htm
             span: full
         notes:
             tab: 'logingrupa.goodsreceivedshopaholic::lang.tab.summary'

@@ -9,6 +9,16 @@ $iStockAdded = (int) ($obModel?->stock_added_units ?? 0);
 $mAppliedBy = $obModel?->applied_by_user_id;
 $obAppliedAt = $obModel?->applied_at;
 $mOverrideOf = $obModel?->override_of_invoice_id;
+
+$sAppliedByDisplay = '—';
+if ($mAppliedBy !== null) {
+    $obUser = \Backend\Models\User::find((int) $mAppliedBy);
+    if ($obUser === null) {
+        $sAppliedByDisplay = '#'.(int) $mAppliedBy.' (deleted)';
+    } else {
+        $sAppliedByDisplay = (string) ($obUser->login ?? $obUser->email ?? ('#'.(int) $mAppliedBy));
+    }
+}
 ?>
 <div class="audit-panel">
     <h4>Audit</h4>
@@ -17,7 +27,7 @@ $mOverrideOf = $obModel?->override_of_invoice_id;
         <li>Total lines: <strong><?= $iTotalLines ?></strong></li>
         <li>Matched: <strong><?= $iMatched ?></strong> / Unmatched: <strong><?= $iUnmatched ?></strong></li>
         <li>Stock added (units): <strong><?= $iStockAdded ?></strong></li>
-        <li>Applied by user: <strong><?= $mAppliedBy !== null ? (int) $mAppliedBy : '—' ?></strong></li>
+        <li>Applied by: <strong><?= e($sAppliedByDisplay) ?></strong></li>
         <li>Applied at: <strong><?= $obAppliedAt ? e($obAppliedAt->format('Y-m-d H:i:s')) : '—' ?></strong></li>
         <?php if ($mOverrideOf !== null): ?>
             <li>Override of invoice: <strong>#<?= (int) $mOverrideOf ?></strong></li>

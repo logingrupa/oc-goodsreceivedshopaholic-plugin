@@ -168,6 +168,56 @@ class Invoices extends Controller
     }
 
     /**
+     * AJAX handler: render the original `.HTM` file contents in an October
+     * popup modal (instead of opening as a new browser page). Triggered by
+     * the Preview button on the Invoice update form (`models/invoice/
+     * _field_original_file.htm`).
+     *
+     * Permission-gated on `upload_invoices` — same scope as the controller's
+     * default access (any operator who can see invoices can preview the
+     * original receipt).
+     *
+     * @return array<string, mixed>
+     *
+     * @throws \October\Rain\Exception\ApplicationException When permission missing
+     *                                                      or invoice/file not found.
+     */
+    public function onPreviewHtmFile(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.upload_invoices');
+
+        $iInvoiceId = $this->scalarToInt(Input::get('invoice_id'));
+        if ($iInvoiceId === 0) {
+            throw new \October\Rain\Exception\ApplicationException('invoice_id is required.');
+        }
+
+        $obInvoice = Invoice::find($iInvoiceId);
+        if (!($obInvoice instanceof Invoice)) {
+            throw new \October\Rain\Exception\ApplicationException('Invoice not found.');
+        }
+
+        $obFile = $obInvoice->original_file;
+        if ($obFile === null) {
+            throw new \October\Rain\Exception\ApplicationException('No original .HTM file attached.');
+        }
+
+        $mFileName = $obFile->file_name ?? 'invoice.htm';
+        $sFilename = is_scalar($mFileName) ? (string) $mFileName : 'invoice.htm';
+        $mFileUrl = $obFile->getPath();
+        $sFileUrl = is_scalar($mFileUrl) ? (string) $mFileUrl : '';
+
+        $mPartial = $this->makePartial('_partials/htm_preview', [
+            'invoice_id' => $iInvoiceId,
+            'filename'   => $sFilename,
+            'file_url'   => $sFileUrl,
+        ]);
+
+        return [
+            'result' => is_string($mPartial) ? $mPartial : '',
+        ];
+    }
+
+    /**
      * Page action: render the Settings tab. Resolves the current site's
      * Settings model row and exposes it to the view (settings.htm) which
      * renders the four-toggle form via October's FormController behavior

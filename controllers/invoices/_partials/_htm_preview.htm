@@ -1,0 +1,49 @@
+<?php
+/* Popup partial — render the original distributor `.HTM` file inside an
+ * October popup modal. Mirror of the canonical popup-widget contract:
+ * header + body + footer with NO outer modal-dialog/modal-content
+ * wrapper (October popup.js wraps externally). See _apply_modal.htm for
+ * the same pattern.
+ *
+ * Expected vars (from controller's makePartial call):
+ *   - invoice_id: int
+ *   - filename:   string  (original .HTM filename)
+ *   - file_url:   string  (System\Models\File::getPath())
+ *
+ * The HTM file content is rendered via <iframe> sandboxed with
+ * `sandbox="allow-same-origin"` — distributor pages embed inline scripts
+ * we do NOT want executing in the backend session. allow-same-origin
+ * keeps the browser able to fetch the file URL but blocks JS execution.
+ */
+$iInvoiceId = (int) ($invoice_id ?? 0);
+$sFilename = (string) ($filename ?? 'invoice.htm');
+$sFileUrl = (string) ($file_url ?? '');
+?>
+<div class="modal-header" data-popup-size="huge">
+    <h4 class="modal-title">
+        <i class="icon-file-code-o"></i>
+        <?= e($sFilename) ?>
+        <small class="text-muted">(invoice #<?= $iInvoiceId ?>)</small>
+    </h4>
+    <button type="button" class="btn-close" data-dismiss="popup"></button>
+</div>
+<div class="modal-body" style="padding: 0;">
+    <?php if ($sFileUrl === ''): ?>
+        <p class="alert alert-warning" style="margin: 1em;">No file URL available.</p>
+    <?php else: ?>
+        <iframe src="<?= e($sFileUrl) ?>"
+                sandbox="allow-same-origin"
+                style="width: 100%; height: 70vh; border: 0;"
+                title="<?= e($sFilename) ?>"></iframe>
+    <?php endif; ?>
+</div>
+<div class="modal-footer">
+    <?php if ($sFileUrl !== ''): ?>
+        <a href="<?= e($sFileUrl) ?>" class="btn btn-default" target="_blank" rel="noopener">
+            <i class="icon-download"></i> <?= e(trans('backend::lang.form.download_file')) ?>
+        </a>
+    <?php endif; ?>
+    <button type="button" class="btn btn-default" data-dismiss="popup">
+        <?= e(trans('backend::lang.form.close')) ?>
+    </button>
+</div>

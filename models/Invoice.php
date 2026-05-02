@@ -117,6 +117,7 @@ class Invoice extends Model
     /** @var array<string, array<int|string, mixed>> */
     public $belongsTo = [
         'overrideOf' => [self::class, 'key' => 'override_of_invoice_id'],
+        'appliedByUser' => [\Backend\Models\User::class, 'key' => 'applied_by_user_id'],
     ];
 
     /**
