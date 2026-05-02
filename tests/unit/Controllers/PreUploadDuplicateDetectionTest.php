@@ -29,10 +29,18 @@ uses(ApplyTestCase::class);
  *     `lockForUpdate` duplicate detection (plan 03-06) remains the
  *     authoritative contract enforcer. Both gates together survive race
  *     conditions (T-03-06-01) AND skip needless parsing.
- *   - The gate ONLY treats `status='applied'` as a duplicate. A prior row
- *     with `status='parsed'` is NOT a duplicate — operator may re-upload to
- *     refresh the preview (the orchestrator's body-side check enforces the
- *     same rule via `lockForUpdate`).
+ *   - The gate treats BOTH `status='applied'` AND `status='parsed'` as
+ *     pre-parse rejection cases (Option B selected for the parsed-status
+ *     duplicate hole — see .planning/debug/parsed-status-duplicate-leaks-sql.md).
+ *     The two cases differ ONLY in the `reject_reason` discriminator on the
+ *     reject payload:
+ *       * `Invoices::REJECT_REASON_DUPLICATE_APPLIED` ⇒ Override flow.
+ *       * `Invoices::REJECT_REASON_PARSED_PENDING`    ⇒ apply or discard
+ *         the existing parse before re-upload.
+ *     Routing the parsed-status case through the same short-circuit gate
+ *     prevents the orchestrator from hitting the `invoice_number` UNIQUE
+ *     index and surfacing a raw `QueryException` (with SQL/connection
+ *     details) to the operator-visible flash.
  *
  * Reflection target: the helper `extractInvoiceNumberFromFilename` is
  * private; reflection-invoke pins the regex contract without widening the
@@ -131,8 +139,13 @@ it('short-circuits parse when prior applied invoice exists (UI-09 happy path)', 
     @unlink($arStaged['path']);
 });
 
-it('does NOT short-circuit when prior status is parsed (gate is applied-only)', function (): void {
-    // Seed prior with status='parsed' — NOT a hard duplicate per D-22 / D-16.
+it('short-circuits with parsed_pending reason when prior status is parsed (Option B)', function (): void {
+    // Seed prior with status='parsed' — the parsed-status duplicate hole.
+    // Pre-fix: gate did NOT short-circuit; orchestrator hit the UNIQUE index
+    // and raw QueryException (with SQL fragments) leaked to the UI flash.
+    // Post-fix (Option B): the gate short-circuits with reject_reason
+    // `parsed_pending_apply` so the operator gets a friendly "apply or
+    // discard before re-upload" panel and zero exception bubble-up.
     $obPrior = new Invoice();
     $obPrior->invoice_number = 'PRO033328';
     $obPrior->status = Invoice::STATUS_PARSED;
@@ -148,14 +161,15 @@ it('does NOT short-circuit when prior status is parsed (gate is applied-only)', 
     $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
     $obController->onUpload();
 
-    // The gate did NOT short-circuit — orchestrator WAS resolved. Counter
-    // proves the gate is applied-only (per D-22 / D-16): a prior parsed
-    // row does not trigger the optimization. The orchestrator runs its
-    // own body-side dup detection inside lockForUpdate and decides the
-    // outcome from there (covered by ParseAndPersistOrchestratorTest).
-    expect($obController->iOrchestratorResolvedCount)->toBe(1);
+    // Orchestrator was NEVER resolved — the gate now short-circuits parsed
+    // rows the same way it short-circuits applied ones. Counter pin proves
+    // zero parser invocations, zero file reads, zero transaction overhead
+    // and (the actual bug fix) zero QueryException bubble-up to the UI.
+    expect($obController->iOrchestratorResolvedCount)->toBe(0);
 
-    // Reject partial received an EMPTY rejects list (gate did not fire).
+    // Reject partial received exactly one entry with the parsed_pending
+    // discriminator and the prior invoice id wired through for the
+    // "Open existing parse" link in `_reject.htm`.
     $arRejectCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
         if ($arCall['name'] === '_partials/reject') {
@@ -164,13 +178,44 @@ it('does NOT short-circuit when prior status is parsed (gate is applied-only)', 
         }
     }
     expect($arRejectCall)->not->toBeNull();
-    expect($arRejectCall['data']['rejects'])->toBeArray();
-    expect($arRejectCall['data']['rejects'])->toBe([]);
+    $arRejects = $arRejectCall['data']['rejects'];
+    expect($arRejects)->toBeArray();
+    expect(count($arRejects))->toBe(1);
+    expect((string) $arRejects[0]['reject_reason'])->toBe(Invoices::REJECT_REASON_PARSED_PENDING);
+    expect((string) $arRejects[0]['invoice_number'])->toBe('PRO033328');
+    expect((int) $arRejects[0]['prior_invoice_id'])->toBe((int) $obPrior->id);
+
+    // Only the seeded prior persists; gate prevented any new write.
+    expect(Invoice::count())->toBe(1);
+    expect(InvoiceLine::count())->toBe(0);
 
     @unlink($arStaged['path']);
 });
 
-it('duplicate-check query filters on BOTH invoice_number AND status=applied (sanity contract pin)', function (): void {
+it('emits applied-duplicate reject_reason when prior status is applied', function (): void {
+    $obPrior = seedPriorAppliedInvoice('PRO033328', iStockAdded: 7, iAppliedBy: 11);
+
+    $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
+    $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
+    $obController->onUpload();
+
+    $arRejectCall = null;
+    foreach ($obController->arPartialCalls as $arCall) {
+        if ($arCall['name'] === '_partials/reject') {
+            $arRejectCall = $arCall;
+            break;
+        }
+    }
+    expect($arRejectCall)->not->toBeNull();
+    $arRejects = $arRejectCall['data']['rejects'];
+    expect(count($arRejects))->toBe(1);
+    expect((string) $arRejects[0]['reject_reason'])->toBe(Invoices::REJECT_REASON_DUPLICATE_APPLIED);
+    expect((int) $arRejects[0]['prior_invoice_id'])->toBe((int) $obPrior->id);
+
+    @unlink($arStaged['path']);
+});
+
+it('duplicate-check query filters on BOTH invoice_number AND status (sanity contract pin)', function (): void {
     seedPriorAppliedInvoice('PRO033328');
 
     // Capture executed SQL for the gate query.

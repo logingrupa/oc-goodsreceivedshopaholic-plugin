@@ -1,6 +1,15 @@
 <?php
-/* UI-09 / D-16 / D-17: pre-parse duplicate-detection reject screen. */
+/* UI-09 / D-16 / D-17: pre-parse duplicate-detection reject screen.
+ *
+ * Two reasons branch the UI:
+ *   - duplicate_applied  -> operator must use Override-and-re-import.
+ *   - parsed_pending_apply -> operator must apply or discard the existing
+ *     parse before re-uploading (closes the parsed-status duplicate hole
+ *     that previously leaked the unique-index QueryException to the UI).
+ */
 $arRejects = $rejects ?? [];
+$sReasonAppliedDuplicate = \Logingrupa\GoodsReceivedShopaholic\Controllers\Invoices::REJECT_REASON_DUPLICATE_APPLIED;
+$sReasonParsedPending = \Logingrupa\GoodsReceivedShopaholic\Controllers\Invoices::REJECT_REASON_PARSED_PENDING;
 ?>
 <?php if (count($arRejects) > 0): ?>
     <?php foreach ($arRejects as $arRejected):
@@ -9,24 +18,42 @@ $arRejects = $rejects ?? [];
         $sPriorAppliedAt = (string) ($arRejected['prior_applied_at'] ?? '—');
         $sPriorAppliedBy = (string) ($arRejected['prior_applied_by'] ?? '—');
         $iPriorStockAdded = (int) ($arRejected['prior_stock_added_units'] ?? 0);
+        $sPriorParsedAt = (string) ($arRejected['prior_parsed_at'] ?? '—');
+        $sReason = (string) ($arRejected['reject_reason'] ?? $sReasonAppliedDuplicate);
     ?>
-        <div class="alert alert-warning" data-prior-invoice-id="<?= $iPriorId ?>">
-            <h4>Duplicate invoice rejected</h4>
-            <p>Invoice <strong>#<?= e($sInvoiceNumber) ?></strong> was previously applied.</p>
-            <ul>
-                <li>Prior applied at: <strong><?= e($sPriorAppliedAt) ?></strong></li>
-                <li>Prior applied by user: <strong><?= e($sPriorAppliedBy) ?></strong></li>
-                <li>Prior stock added (units): <strong><?= $iPriorStockAdded ?></strong></li>
-                <li>Prior invoice id: <strong><?= $iPriorId ?></strong></li>
-            </ul>
-            <button type="button"
-                    class="btn btn-warning btn-sm"
-                    data-control="popup"
-                    data-handler="onOverrideShowConfirm"
-                    data-request-data="prior_invoice_id: <?= $iPriorId ?>">
-                Override and re-import
-            </button>
-            <p class="help-block">Use the Override flow if reapply is intended.</p>
-        </div>
+        <?php if ($sReason === $sReasonParsedPending): ?>
+            <div class="alert alert-warning" data-prior-invoice-id="<?= $iPriorId ?>" data-reject-reason="<?= e($sReason) ?>">
+                <h4>Invoice already parsed — apply or discard before re-upload</h4>
+                <p>Invoice <strong>#<?= e($sInvoiceNumber) ?></strong> is already in <code>parsed</code> status (uploaded but not yet applied).</p>
+                <ul>
+                    <li>Prior parsed at: <strong><?= e($sPriorParsedAt) ?></strong></li>
+                    <li>Prior invoice id: <strong><?= $iPriorId ?></strong></li>
+                </ul>
+                <a class="btn btn-primary btn-sm"
+                   href="<?= e(Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iPriorId)) ?>">
+                    Open existing parse
+                </a>
+                <p class="help-block">Apply or discard the existing parsed invoice, then re-upload to refresh the preview.</p>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-warning" data-prior-invoice-id="<?= $iPriorId ?>" data-reject-reason="<?= e($sReason) ?>">
+                <h4>Duplicate invoice rejected</h4>
+                <p>Invoice <strong>#<?= e($sInvoiceNumber) ?></strong> was previously applied.</p>
+                <ul>
+                    <li>Prior applied at: <strong><?= e($sPriorAppliedAt) ?></strong></li>
+                    <li>Prior applied by user: <strong><?= e($sPriorAppliedBy) ?></strong></li>
+                    <li>Prior stock added (units): <strong><?= $iPriorStockAdded ?></strong></li>
+                    <li>Prior invoice id: <strong><?= $iPriorId ?></strong></li>
+                </ul>
+                <button type="button"
+                        class="btn btn-warning btn-sm"
+                        data-control="popup"
+                        data-handler="onOverrideShowConfirm"
+                        data-request-data="prior_invoice_id: <?= $iPriorId ?>">
+                    Override and re-import
+                </button>
+                <p class="help-block">Use the Override flow if reapply is intended.</p>
+            </div>
+        <?php endif; ?>
     <?php endforeach; ?>
 <?php endif; ?>

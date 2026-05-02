@@ -106,6 +106,25 @@ class Invoices extends Controller
      */
     private const RESET_LITERAL = 'RESET';
 
+    /**
+     * Reject-reason discriminator written into the per-file reject payload
+     * by `buildRejectPayload()` and consumed by the `_reject.htm` partial
+     * to branch the operator-visible UI between the two pre-parse rejection
+     * cases:
+     *
+     *   - DUPLICATE_APPLIED: prior `Invoice@status='applied'` exists; the
+     *     operator must use the Override-and-re-import flow if reapply is
+     *     intended (D-16 / D-17 / UI-09 — pre-existing contract).
+     *
+     *   - PARSED_PENDING_APPLY: prior `Invoice@status='parsed'` exists; the
+     *     operator must apply or discard the existing parse before
+     *     re-uploading. Added to close the parsed-status duplicate hole that
+     *     previously surfaced the unique-index `QueryException` to the UI.
+     */
+    public const REJECT_REASON_DUPLICATE_APPLIED = 'duplicate_applied';
+
+    public const REJECT_REASON_PARSED_PENDING = 'parsed_pending_apply';
+
     /** @var list<string> */
     public $implement = [
         'Backend.Behaviors.ListController',
@@ -322,9 +341,9 @@ class Invoices extends Controller
      * auto-closes (UAT feedback 2026-05-02). No flash when at least one
      * file parsed — the apply popup itself is the success surface.
      *
-     * @param  list<mixed> $arPreviews
-     * @param  list<mixed> $arRejects
-     * @param  list<mixed> $arErrors
+     * @param  list<mixed>                                   $arPreviews
+     * @param  list<array<string, mixed>>                    $arRejects
+     * @param  list<array{filename: string, message: string}> $arErrors
      */
     private function flashFailOnlyOutcome(array $arPreviews, array $arRejects, array $arErrors): void
     {
@@ -333,9 +352,8 @@ class Invoices extends Controller
         }
 
         if (count($arRejects) > 0) {
-            Flash::warning((string) Lang::get(
-                'logingrupa.goodsreceivedshopaholic::lang.flash.upload_rejected_duplicate',
-            ));
+            $sFlashKey = $this->resolveRejectFlashKey($arRejects);
+            Flash::warning((string) Lang::get($sFlashKey));
 
             return;
         }
@@ -345,6 +363,32 @@ class Invoices extends Controller
                 'logingrupa.goodsreceivedshopaholic::lang.flash.upload_failed',
             ));
         }
+    }
+
+    /**
+     * Pick the flash key for a fail-only batch of rejects. If EVERY reject
+     * carries reason=parsed_pending_apply, surface the apply-or-discard
+     * message; otherwise fall back to the existing applied-duplicate message
+     * (which also covers mixed batches — operator still needs the override
+     * flow for at least one file).
+     *
+     * @param  list<array<string, mixed>> $arRejects
+     */
+    private function resolveRejectFlashKey(array $arRejects): string
+    {
+        $bAllParsedPending = true;
+        foreach ($arRejects as $arReject) {
+            $mReason = $arReject['reject_reason'] ?? null;
+            $sReason = is_string($mReason) ? $mReason : self::REJECT_REASON_DUPLICATE_APPLIED;
+            if ($sReason !== self::REJECT_REASON_PARSED_PENDING) {
+                $bAllParsedPending = false;
+                break;
+            }
+        }
+
+        return $bAllParsedPending
+            ? 'logingrupa.goodsreceivedshopaholic::lang.flash.upload_rejected_parsed_pending'
+            : 'logingrupa.goodsreceivedshopaholic::lang.flash.upload_rejected_duplicate';
     }
 
     /**
@@ -1068,10 +1112,13 @@ class Invoices extends Controller
             $sNumber = $this->extractInvoiceNumberFromFilename($sFilename);
             if ($sNumber !== null) {
                 $obPrior = Invoice::where('invoice_number', $sNumber)
-                    ->where('status', Invoice::STATUS_APPLIED)
+                    ->whereIn('status', [Invoice::STATUS_APPLIED, Invoice::STATUS_PARSED])
                     ->first();
                 if ($obPrior instanceof Invoice) {
-                    $arRejects[] = $this->buildRejectPayload($obPrior);
+                    $sReason = ((string) $obPrior->status === Invoice::STATUS_PARSED)
+                        ? self::REJECT_REASON_PARSED_PENDING
+                        : self::REJECT_REASON_DUPLICATE_APPLIED;
+                    $arRejects[] = $this->buildRejectPayload($obPrior, $sReason);
 
                     return;
                 }
@@ -1288,24 +1335,39 @@ class Invoices extends Controller
     }
 
     /**
-     * Build the per-file reject payload for the duplicate-detection partial.
-     * Carries enough audit context (prior_applied_at / prior_applied_by /
-     * prior_stock_added_units / prior_invoice_id) for the operator to decide
-     * whether to proceed via the Override flow (plan 04-06).
+     * Build the per-file reject payload for the pre-parse duplicate-detection
+     * partial. Carries enough audit context (prior_applied_at /
+     * prior_applied_by / prior_stock_added_units / prior_invoice_id /
+     * prior_parsed_at) for the operator to decide the next action — which
+     * branches by `reject_reason`:
+     *
+     *   - REJECT_REASON_DUPLICATE_APPLIED: route through the Override flow
+     *     (plan 04-06).
+     *
+     *   - REJECT_REASON_PARSED_PENDING: apply or discard the existing parsed
+     *     invoice before re-upload — closes the pre-apply duplicate hole that
+     *     previously surfaced the unique-index `QueryException` to the UI.
      *
      * @return array<string, mixed>
      */
-    private function buildRejectPayload(Invoice $obPrior): array
-    {
+    private function buildRejectPayload(
+        Invoice $obPrior,
+        string $sReason = self::REJECT_REASON_DUPLICATE_APPLIED,
+    ): array {
         $mAppliedAt = $obPrior->applied_at;
         $sAppliedAt = $mAppliedAt instanceof \Carbon\Carbon ? $mAppliedAt->toIso8601String() : null;
 
+        $mParsedAt = $obPrior->parsed_at;
+        $sParsedAt = $mParsedAt instanceof \Carbon\Carbon ? $mParsedAt->toIso8601String() : null;
+
         return [
+            'reject_reason'           => $sReason,
             'invoice_number'          => (string) $obPrior->invoice_number,
             'prior_applied_at'        => $sAppliedAt,
             'prior_applied_by'        => $obPrior->applied_by_user_id,
             'prior_stock_added_units' => (int) $obPrior->stock_added_units,
             'prior_invoice_id'        => (int) $obPrior->id,
+            'prior_parsed_at'         => $sParsedAt,
         ];
     }
 

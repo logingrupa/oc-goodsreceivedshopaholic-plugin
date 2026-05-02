@@ -89,8 +89,9 @@ return [
         'apply_success'     => 'Rēķins #:id piemērots — pievienotas :units vienības :offers piedāvājumiem.',
         'apply_already_done' => 'Rēķins jau ir piemērots; nekas nav jādara.',
         'forbidden'         => 'Jums nav atļaujas veikt šo darbību.',
-        'upload_rejected_duplicate' => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
-        'upload_failed'             => 'Augšupielāde neizdevās. Sk. kļūdu paneli zemāk.',
+        'upload_rejected_duplicate'      => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
+        'upload_rejected_parsed_pending' => 'Rēķins jau ir apstrādāts — piemēro vai atmet esošo apstrādi pirms atkārtotas augšupielādes.',
+        'upload_failed'                  => 'Augšupielāde neizdevās. Sk. kļūdu paneli zemāk.',
     ],
     'upload' => [
         'no_files'      => 'Faili netika augšupielādēti.',
