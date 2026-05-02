@@ -1250,12 +1250,95 @@ class Invoices extends Controller
             : [];
 
         return [
-            'invoice'           => $obInvoice,
-            'lines'             => $obLines,
-            'total_units'       => (int) InvoiceLine::where('invoice_id', $iInvoiceId)->sum('qty'),
-            'matched_count'     => (int) $obInvoice->matched_lines,
-            'unmatched_count'   => (int) $obInvoice->unmatched_lines,
-            'current_qty_map'   => $arCurrentQtyMap,
+            'invoice'             => $obInvoice,
+            'lines'               => $obLines,
+            'total_units'         => (int) InvoiceLine::where('invoice_id', $iInvoiceId)->sum('qty'),
+            'matched_count'       => (int) $obInvoice->matched_lines,
+            'unmatched_count'     => (int) $obInvoice->unmatched_lines,
+            'current_qty_map'     => $arCurrentQtyMap,
+            'matched_product_map' => $this->buildMatchedProductMap($obLines, $arOfferIds),
         ];
+    }
+
+    /**
+     * Build line_id => matched offer/product lookup for the apply modal's
+     * "Matched Product" column.
+     *
+     * Two DB queries regardless of line count: offers by id, products by id.
+     * Falls back to offer.name when product_id is missing or the product row
+     * has been deleted; falls back to '' when neither is reachable.
+     *
+     * @param  iterable<mixed> $obLines
+     * @param  array<mixed>    $arOfferIds
+     *
+     * @return array<int, array{product_name: string, product_id: int, offer_id: int, strategy: string}>
+     */
+    private function buildMatchedProductMap(iterable $obLines, array $arOfferIds): array
+    {
+        if (empty($arOfferIds)) {
+            return [];
+        }
+
+        $arOfferRows = Offer::whereIn('id', $arOfferIds)
+            ->select('id', 'product_id', 'name')
+            ->get()
+            ->keyBy('id')
+            ->all();
+
+        $arProductIds = [];
+        foreach ($arOfferRows as $obOffer) {
+            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
+            $iProductId = (int) ($obOffer->product_id ?? 0);
+            if ($iProductId > 0) {
+                $arProductIds[$iProductId] = true;
+            }
+        }
+
+        $arProductRows = !empty($arProductIds)
+            ? Product::whereIn('id', array_keys($arProductIds))
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id')
+                ->all()
+            : [];
+
+        $arMap = [];
+        /** @var InvoiceLine $obLine */
+        foreach ($obLines as $obLine) {
+            $iLineId = (int) $obLine->id;
+            $iOfferId = (int) ($obLine->matched_offer_id ?? 0);
+            if ($iOfferId === 0 || !isset($arOfferRows[$iOfferId])) {
+                continue;
+            }
+            $obOffer = $arOfferRows[$iOfferId];
+            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc */
+            $iProductId = (int) ($obOffer->product_id ?? 0);
+            $arMap[$iLineId] = [
+                'product_name' => $this->resolveMatchedDisplayName($obOffer, $arProductRows, $iProductId),
+                'product_id'   => $iProductId,
+                'offer_id'     => $iOfferId,
+                'strategy'     => (string) ($obLine->match_strategy ?? ''),
+            ];
+        }
+
+        return $arMap;
+    }
+
+    /**
+     * Display name for the matched-product column. Prefers the Product.name
+     * (parent product) over Offer.name (variant); falls back to '' if neither
+     * row is reachable from the partial-row pluck.
+     *
+     * @param  array<mixed> $arProductRows  product_id => Product (id/name keyed)
+     */
+    private function resolveMatchedDisplayName(mixed $obOffer, array $arProductRows, int $iProductId): string
+    {
+        if ($iProductId > 0 && isset($arProductRows[$iProductId])) {
+            $obProductRow = $arProductRows[$iProductId];
+            /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc */
+            return (string) $obProductRow->name;
+        }
+        /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc */
+        return (string) $obOffer->name;
     }
 }

@@ -27,6 +27,7 @@
  *       matched_count: int,
  *       unmatched_count: int,
  *       current_qty_map: array<int, int>,  // matched_offer_id => current Offer.quantity
+ *       matched_product_map: array<int, array{product_name:string,product_id:int,offer_id:int,strategy:string}>,  // line_id => matched offer/product
  *     }>
  *
  * The `data-request="onApply"` button POSTs `invoice_id` + `override_qty[]`
@@ -59,6 +60,7 @@ $arInvoices = $invoices ?? [];
         $iTotalUnits = (int) ($arPreview['total_units'] ?? 0);
         $obLines = $arPreview['lines'] ?? [];
         $arCurrentQtyMap = (array) ($arPreview['current_qty_map'] ?? []);
+        $arMatchedProductMap = (array) ($arPreview['matched_product_map'] ?? []);
         $sNotes = (string) ($obInvoice->notes ?? '');
         $sFormId = 'gr-apply-form-'.$iInvoiceId;
     ?>
@@ -81,7 +83,7 @@ $arInvoices = $invoices ?? [];
                             <th style="width: 8%; text-align: right;">Parsed qty</th>
                             <th style="width: 12%; text-align: right;">Override qty</th>
                             <th style="width: 10%; text-align: right;">After import</th>
-                            <th style="width: 8%;">Match</th>
+                            <th style="width: 22%;">Matched Product</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -133,11 +135,32 @@ $arInvoices = $invoices ?? [];
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($bMatched): ?>
-                                        <span class="label label-success">matched</span>
-                                    <?php else: ?>
-                                        <span class="label label-warning">unmatched</span>
-                                    <?php endif; ?>
+                                    <?php
+                                    if (!$bMatched) {
+                                        echo '<span class="label label-warning">unmatched</span>';
+                                    } else {
+                                        $arMatched = $arMatchedProductMap[$iLineId] ?? null;
+                                        $sMatchedName = is_array($arMatched) ? (string) ($arMatched['product_name'] ?? '') : '';
+                                        $iMatchedProductId = is_array($arMatched) ? (int) ($arMatched['product_id'] ?? 0) : 0;
+                                        $iMatchedOfferIdLink = is_array($arMatched) ? (int) ($arMatched['offer_id'] ?? 0) : 0;
+                                        $sMatchUrl = $iMatchedProductId > 0
+                                            ? \Backend::url('lovata/shopaholic/products/update/'.$iMatchedProductId)
+                                            : ($iMatchedOfferIdLink > 0
+                                                ? \Backend::url('lovata/shopaholic/offers/update/'.$iMatchedOfferIdLink)
+                                                : null);
+                                        $bIsVariation = $sStrategy === 'variation';
+                                        $sLinkStyle = $bIsVariation ? ' style="color: orange"' : '';
+                                        $sAsterisk = $bIsVariation ? '*' : '';
+                                        $sTitle = $sProductName !== '' ? ' title="'.e($sProductName).'"' : '';
+                                        if ($sMatchUrl !== null && $sMatchedName !== '') {
+                                            echo '<a href="'.e($sMatchUrl).'" target="_blank" rel="noopener"'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</a>';
+                                        } elseif ($sMatchedName !== '') {
+                                            echo '<span'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</span>';
+                                        } else {
+                                            echo '<span class="label label-success">matched</span>';
+                                        }
+                                    }
+                                    ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
