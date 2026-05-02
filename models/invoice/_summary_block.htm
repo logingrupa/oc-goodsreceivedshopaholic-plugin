@@ -1,0 +1,106 @@
+<?php
+/* Backend form partial — compact summary block for the Invoice update
+ * page. Replaces 8 separate `type:text`/`type:number` widgets that
+ * each wrapped in their own .form-group with input chrome.
+ *
+ * Pure read-only render: definition-list grid (Bootstrap-style row of
+ * <dl> pairs). No input widgets, no edit affordance — the Invoice
+ * record is immutable post-apply (the only editable surface is `notes`,
+ * which keeps its own textarea field).
+ *
+ * Resolves applied_by_user_id → username + link to backend/users/update
+ * inline (mirrors _field_applied_by.htm — kept here for the compact
+ * single-block render so the form renders ONE <fieldset> instead of
+ * eight chrome-heavy inputs).
+ */
+$obInvoice = $formModel ?? null;
+
+$sInvoiceNumber = (string) ($obInvoice?->invoice_number ?? '—');
+$sStatus = (string) ($obInvoice?->status ?? '—');
+$sSourceFilename = (string) ($obInvoice?->source_filename ?? '—');
+$iTotalLines = (int) ($obInvoice?->total_lines ?? 0);
+$iMatched = (int) ($obInvoice?->matched_lines ?? 0);
+$iUnmatched = (int) ($obInvoice?->unmatched_lines ?? 0);
+$iStockAdded = (int) ($obInvoice?->stock_added_units ?? 0);
+$obAppliedAt = $obInvoice?->applied_at;
+$mAppliedBy = $obInvoice?->applied_by_user_id;
+
+$sAppliedByHtml = '<span class="text-muted">&mdash;</span>';
+if ($mAppliedBy !== null) {
+    $obUser = \Backend\Models\User::find((int) $mAppliedBy);
+    if ($obUser === null) {
+        $sAppliedByHtml = '<span class="text-muted">#'.(int) $mAppliedBy.' (deleted)</span>';
+    } else {
+        $sLogin = (string) ($obUser->login ?? $obUser->email ?? ('#'.(int) $mAppliedBy));
+        $sUserUrl = \Backend::url('backend/users/update/'.(int) $obUser->id);
+        $sAppliedByHtml = '<a href="'.e($sUserUrl).'" target="_blank" rel="noopener"><i class="icon-user"></i> '.e($sLogin).'</a>';
+    }
+}
+
+$sAppliedAt = $obAppliedAt !== null ? $obAppliedAt->format('Y-m-d H:i') : '—';
+$sStatusBadge = match ($sStatus) {
+    'applied' => '<span class="label label-success">applied</span>',
+    'parsed' => '<span class="label label-info">parsed</span>',
+    'failed', 'rejected' => '<span class="label label-danger">'.e($sStatus).'</span>',
+    default => '<span class="label label-default">'.e($sStatus).'</span>',
+};
+?>
+<style>
+    .gr-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.4rem 1.5rem;
+        padding: 0.75rem 0;
+    }
+    .gr-summary-grid dt {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #888;
+        margin: 0;
+        font-weight: normal;
+    }
+    .gr-summary-grid dd {
+        margin: 0 0 0.25rem 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .gr-summary-grid dd code {
+        font-size: 13px;
+        padding: 1px 4px;
+    }
+</style>
+<div class="gr-summary-grid">
+    <div>
+        <dt>Invoice #</dt>
+        <dd><code><?= e($sInvoiceNumber) ?></code></dd>
+    </div>
+    <div>
+        <dt>Status</dt>
+        <dd><?= $sStatusBadge ?></dd>
+    </div>
+    <div>
+        <dt>Applied by</dt>
+        <dd><?= $sAppliedByHtml ?></dd>
+    </div>
+    <div>
+        <dt>Applied at</dt>
+        <dd><?= e($sAppliedAt) ?></dd>
+    </div>
+    <div>
+        <dt>Total lines</dt>
+        <dd><?= $iTotalLines ?></dd>
+    </div>
+    <div>
+        <dt>Matched / Unmatched</dt>
+        <dd><strong><?= $iMatched ?></strong> / <?= $iUnmatched ?></dd>
+    </div>
+    <div>
+        <dt>Stock added (units)</dt>
+        <dd><?= $iStockAdded ?></dd>
+    </div>
+    <div style="grid-column: 1 / -1;">
+        <dt>Source filename</dt>
+        <dd><code><?= e($sSourceFilename) ?></code></dd>
+    </div>
+</div>

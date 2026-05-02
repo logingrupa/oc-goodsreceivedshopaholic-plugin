@@ -40,10 +40,10 @@ $sFileUrl = (string) ($file_url ?? '');
 <div class="modal-footer">
     <?php if ($sFileUrl !== ''): ?>
         <a href="<?= e($sFileUrl) ?>" class="btn btn-default" target="_blank" rel="noopener">
-            <i class="icon-download"></i> <?= e(trans('backend::lang.form.download_file')) ?>
+            <i class="icon-download"></i> Download
         </a>
     <?php endif; ?>
     <button type="button" class="btn btn-default" data-dismiss="popup">
-        <?= e(trans('backend::lang.form.close')) ?>
+        Close
     </button>
 </div>
