@@ -210,12 +210,14 @@ $arInvoices = $invoices ?? [];
         $sFilename = (string) ($obInvoice->source_filename ?? '');
         $sFormId = 'gr-apply-form-'.$iInvoiceId;
         $sLabelSuffix = count($arInvoices) > 1 ? ' &mdash; '.e($sFilename) : '';
+        $sUpdateUrl = \Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId);
     ?>
         <button type="button"
                 class="btn btn-primary"
                 data-request="onApply"
                 data-request-form="#<?= e($sFormId) ?>"
                 data-request-loading=".applying-spinner-<?= $iInvoiceId ?>"
+                data-request-success="setTimeout(function(){ window.location.href = '<?= e($sUpdateUrl) ?>'; }, 50);"
                 data-popup-load-indicator>
             <i class="icon-check"></i>
             <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?><?= $sLabelSuffix ?>
