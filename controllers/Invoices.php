@@ -972,22 +972,60 @@ class Invoices extends Controller
                 ],
             ));
 
-            return [
-                '#applyResult' => $this->makePartial('_partials/apply_success', [
-                    'invoice_id' => $iInvoiceId,
-                    'result'     => $obResult,
-                ]),
-                'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId),
-            ];
+            return array_merge(
+                $this->refreshInvoiceList(),
+                [
+                    '#applyResult' => $this->makePartial('_partials/apply_success', [
+                        'invoice_id' => $iInvoiceId,
+                        'result'     => $obResult,
+                    ]),
+                ],
+            );
         } catch (ApplyAlreadyDoneException $obException) {
             Flash::info((string) Lang::get('logingrupa.goodsreceivedshopaholic::lang.flash.apply_already_done'));
 
-            return [
-                '#applyResult' => $this->makePartial('_partials/apply_already_done', [
-                    'context' => $obException->arContext,
-                ]),
-                'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId),
-            ];
+            return array_merge(
+                $this->refreshInvoiceList(),
+                [
+                    '#applyResult' => $this->makePartial('_partials/apply_already_done', [
+                        'context' => $obException->arContext,
+                    ]),
+                ],
+            );
+        }
+    }
+
+    /**
+     * After a successful apply (or already-done), refresh the backend
+     * Invoices list partial in-place so the operator sees the new row /
+     * status without a full page reload. Calls into the ListController
+     * behavior's listRefresh() when available; falls back to an empty
+     * array when the modal was opened from a non-list context (e.g.
+     * direct deep link to /update/{id}) so the apply still succeeds.
+     *
+     * @return array<string, mixed>
+     */
+    private function refreshInvoiceList(): array
+    {
+        if (!method_exists($this, 'listRefresh')) {
+            return [];
+        }
+
+        try {
+            $arRefresh = $this->listRefresh();
+            if (!is_array($arRefresh)) {
+                return [];
+            }
+            $arResult = [];
+            foreach ($arRefresh as $sKey => $mValue) {
+                $arResult[(string) $sKey] = $mValue;
+            }
+
+            return $arResult;
+        } catch (\Throwable $obException) {
+            // silent: list refresh is a UX nicety, not a correctness gate;
+            // apply already succeeded.
+            return [];
         }
     }
 

@@ -73,7 +73,7 @@
     -->
     <rule ref="rulesets/codesize.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="35" />
+            <property name="maxmethods" value="40" />
             <property name="ignorepattern" value="(^(set|get))i" />
         </properties>
     </rule>

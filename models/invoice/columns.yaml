@@ -21,7 +21,9 @@ columns:
         type: number
     applied_by_user_id:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_by'
-        type: number
+        type: text
+        relation: appliedByUser
+        select: "concat(coalesce(first_name, ''), ' ', coalesce(last_name, ''), ' (', login, ')')"
     applied_at:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_at'
         type: datetime
