@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Logingrupa\GoodsReceivedShopaholic;
 
+use Backend;
+use BackendMenu;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Logingrupa\GoodsReceivedShopaholic\Console\RecomputeActiveFromStock;
@@ -86,6 +88,23 @@ class Plugin extends PluginBase
         if (! App::runningInBackend()) {
             return;
         }
+
+        // Inject "Goods Received" as a side-menu item under the Catalog
+        // main menu (Lovata.Shopaholic / shopaholic-menu-main, defined in
+        // plugins/lovata/shopaholic/plugin.yaml). Avoids a noisy top-level
+        // entry — operators reach the GRN feature from inside the catalog
+        // workflow context.
+        BackendMenu::registerCallback(static function (\Backend\Classes\NavigationManager $obManager): void {
+            $obManager->addSideMenuItems('Lovata.Shopaholic', 'shopaholic-menu-main', [
+                'goodsreceived' => [
+                    'label'       => 'logingrupa.goodsreceivedshopaholic::lang.menu.goods_received',
+                    'icon'        => 'icon-truck',
+                    'url'         => Backend::url('logingrupa/goodsreceivedshopaholic/invoices'),
+                    'permissions' => ['logingrupa.goodsreceived.upload_invoices'],
+                    'order'       => 400,
+                ],
+            ]);
+        });
 
         $iMaxUploads = (int) ini_get('max_file_uploads');
         if ($iMaxUploads < 20) {
@@ -230,14 +249,12 @@ class Plugin extends PluginBase
      */
     public function registerNavigation(): array
     {
-        return [
-            'goodsreceived' => [
-                'label'       => 'logingrupa.goodsreceivedshopaholic::lang.menu.goods_received',
-                'icon'        => 'icon-truck',
-                'url'         => \Backend::url('logingrupa/goodsreceivedshopaholic/invoices'),
-                'permissions' => ['logingrupa.goodsreceived.upload_invoices'],
-                'order'       => 510,
-            ],
-        ];
+        // Top-level "Goods Received" entry intentionally omitted — the
+        // sideMenu callback in boot() registers the feature beneath
+        // Catalog (Lovata.Shopaholic / shopaholic-menu-main) instead so
+        // operators reach it from inside the existing catalog workflow.
+        // Keeping the method as an explicit empty return documents the
+        // decision and prevents October from inferring auto-navigation.
+        return [];
     }
 }

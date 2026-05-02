@@ -95,14 +95,21 @@ it('view templates and partials exist', function (): void {
     }
 });
 
-it('Plugin::registerNavigation returns goodsreceived entry routing to the Invoices controller', function (): void {
+it('Plugin::registerNavigation returns empty array — top-level entry intentionally omitted; sideMenu callback in boot() injects under Catalog', function (): void {
     $obPlugin = new Plugin($this->app);
     $arNav = $obPlugin->registerNavigation();
-    expect($arNav)->toHaveKey('goodsreceived');
-    expect($arNav['goodsreceived'])->toHaveKey('url');
-    expect($arNav['goodsreceived']['url'])->toContain('logingrupa/goodsreceivedshopaholic/invoices');
-    expect($arNav['goodsreceived'])->toHaveKey('permissions');
-    expect($arNav['goodsreceived']['permissions'])->toContain('logingrupa.goodsreceived.upload_invoices');
+    expect($arNav)->toBe([]);
+});
+
+it('Plugin source contains the BackendMenu::registerCallback wiring to addSideMenuItems on Lovata.Shopaholic / shopaholic-menu-main', function (): void {
+    $sPluginPath = realpath(__DIR__.'/../../../Plugin.php');
+    expect($sPluginPath)->toBeString();
+    $sPluginSrc = (string) file_get_contents((string) $sPluginPath);
+
+    expect($sPluginSrc)->toContain('BackendMenu::registerCallback');
+    expect($sPluginSrc)->toContain("addSideMenuItems('Lovata.Shopaholic', 'shopaholic-menu-main'");
+    expect($sPluginSrc)->toContain("'goodsreceived' => [");
+    expect($sPluginSrc)->toContain('logingrupa.goodsreceived.upload_invoices');
 });
 
 it('Plugin::registerSettings returns only the canonical goodsreceived-settings entry (single-surface fix)', function (): void {

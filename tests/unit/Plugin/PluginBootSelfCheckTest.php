@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use BackendMenu;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Logingrupa\GoodsReceivedShopaholic\Plugin;
@@ -106,6 +107,7 @@ it('boot honours max_file_uploads threshold against live ini value (UI-12 / D-34
     $sLiveUploadSize = (string) ini_get('upload_max_filesize');
 
     App::shouldReceive('runningInBackend')->once()->andReturn(true);
+    BackendMenu::shouldReceive('registerCallback')->once();
 
     if ($iLiveMaxUploads < 20) {
         Log::shouldReceive('warning')
@@ -151,6 +153,7 @@ it('boot honours upload_max_filesize threshold against live ini value (UI-12 / D
     })($sLiveUploadSize);
 
     App::shouldReceive('runningInBackend')->once()->andReturn(true);
+    BackendMenu::shouldReceive('registerCallback')->once();
 
     if ($iLiveBytes < 10 * 1024 * 1024) {
         Log::shouldReceive('warning')
@@ -197,6 +200,7 @@ it('boot is silent when both thresholds are satisfied — verified against live 
     }
 
     App::shouldReceive('runningInBackend')->once()->andReturn(true);
+    BackendMenu::shouldReceive('registerCallback')->once();
     Log::shouldReceive('warning')->never();
 
     makeBootablePlugin()->boot();
