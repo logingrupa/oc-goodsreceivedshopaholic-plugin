@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Logingrupa\GoodsReceivedShopaholic;
 
 use Backend;
-use BackendMenu;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Logingrupa\GoodsReceivedShopaholic\Console\RecomputeActiveFromStock;
 use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
@@ -94,7 +94,14 @@ class Plugin extends PluginBase
         // plugins/lovata/shopaholic/plugin.yaml). Avoids a noisy top-level
         // entry — operators reach the GRN feature from inside the catalog
         // workflow context.
-        BackendMenu::registerCallback(static function (\Backend\Classes\NavigationManager $obManager): void {
+        //
+        // Use the modern Event::listen('backend.menu.extendItems') hook —
+        // the deprecated BackendMenu::registerCallback() fires too early
+        // (before NavigationManager::loadItems initializes $items) and
+        // throws "Unable to add navigation items before they are loaded".
+        // The extendItems event fires AFTER plugin nav arrays have been
+        // collected, so addSideMenuItems can safely target Lovata.Shopaholic.
+        Event::listen('backend.menu.extendItems', static function (\Backend\Classes\NavigationManager $obManager): void {
             $obManager->addSideMenuItems('Lovata.Shopaholic', 'shopaholic-menu-main', [
                 'goodsreceived' => [
                     'label'       => 'logingrupa.goodsreceivedshopaholic::lang.menu.goods_received',

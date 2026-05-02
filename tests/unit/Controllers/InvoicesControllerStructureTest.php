@@ -101,12 +101,12 @@ it('Plugin::registerNavigation returns empty array — top-level entry intention
     expect($arNav)->toBe([]);
 });
 
-it('Plugin source contains the BackendMenu::registerCallback wiring to addSideMenuItems on Lovata.Shopaholic / shopaholic-menu-main', function (): void {
+it('Plugin source contains the Event::listen(backend.menu.extendItems) wiring to addSideMenuItems on Lovata.Shopaholic / shopaholic-menu-main', function (): void {
     $sPluginPath = realpath(__DIR__.'/../../../Plugin.php');
     expect($sPluginPath)->toBeString();
     $sPluginSrc = (string) file_get_contents((string) $sPluginPath);
 
-    expect($sPluginSrc)->toContain('BackendMenu::registerCallback');
+    expect($sPluginSrc)->toContain("Event::listen('backend.menu.extendItems'");
     expect($sPluginSrc)->toContain("addSideMenuItems('Lovata.Shopaholic', 'shopaholic-menu-main'");
     expect($sPluginSrc)->toContain("'goodsreceived' => [");
     expect($sPluginSrc)->toContain('logingrupa.goodsreceived.upload_invoices');
