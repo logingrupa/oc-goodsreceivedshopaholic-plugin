@@ -1,7 +1,11 @@
+<?php
+/* Legacy page-action surface — bookmark back-compat. The wrap divs
+ * (#invoiceUploadErrors / #invoiceRejectWrap / #invoicePreviewWrap)
+ * live inside `_upload_form.htm` so the same partial renders correctly
+ * BOTH inline here AND inside the upload popup (modal context where
+ * the parent list view does not own those selectors). Single source.
+ */
+?>
 <div class="layout-row">
     <?= $this->makePartial('_partials/upload_form') ?>
 </div>
-
-<div class="layout-row" id="invoiceUploadErrors"></div>
-<div class="layout-row" id="invoicePreviewWrap"></div>
-<div class="layout-row" id="invoiceRejectWrap"></div>
