@@ -1,368 +1,328 @@
 # Goods Received Shopaholic
 
-October CMS plugin for the Lovata Shopaholic ecosystem that imports distributor goods-received notes (`.HTM` delivery receipts) and applies them as incremental stock additions to matched offers.
+October CMS plugin for Lovata Shopaholic. Imports distributor `.HTM` delivery receipts. Applies as incremental stock additions to matched offers.
 
 [![Composer](https://img.shields.io/badge/composer-logingrupa%2Foc--goodsreceivedshopaholic--plugin-blue.svg)](https://packagist.org/packages/logingrupa/oc-goodsreceivedshopaholic-plugin)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![PHP](https://img.shields.io/badge/php-%5E8.3-777bb4.svg)](https://www.php.net/)
 [![October CMS](https://img.shields.io/badge/october--cms-v4-orange.svg)](https://octobercms.com/)
 
-The plugin is operator-facing: a warehouse clerk uploads the distributor's `.HTM` delivery receipt in the backend; the plugin parses it, matches each line by EAN, previews matched / unmatched lines, and on confirmation increments `offer.quantity` additively. Per-site Settings drive the active-flag automation (deactivate at zero, reactivate on inbound) and a one-shot baseline-reset for the first import.
+**Flow:** clerk uploads `.HTM` → plugin parses + matches by EAN → preview shows matched/unmatched → on Apply, `offer.quantity` increments additively. Per-site Settings drive active-flag automation + one-shot baseline reset.
 
 ---
 
-## Table of Contents
+## TOC
 
-1. [Installation](#installation)
-2. [Configuration — Settings](#configuration--settings)
+1. [Install](#install)
+2. [Settings](#settings)
 3. [Permissions](#permissions)
-4. [Operator workflow (Upload → Preview → Apply)](#operator-workflow-upload--preview--apply)
-5. [Override and re-import (D12 — add-on-top semantics)](#override-and-re-import-d12--add-on-top-semantics)
-6. [Initial-reset runbook (one-shot baseline)](#initial-reset-runbook-one-shot-baseline)
-7. [GRN-canonical stock writer — disabling 1C XML quantity import (D13)](#grn-canonical-stock-writer--disabling-1c-xml-quantity-import-d13)
-8. [Console command — recompute active flags from stock](#console-command--recompute-active-flags-from-stock)
-9. [Troubleshooting — `Log::*` event key map](#troubleshooting--log-event-key-map)
-10. [Multi-site notes](#multi-site-notes)
+4. [Operator workflow](#operator-workflow)
+5. [Override + re-import (D12)](#override--re-import-d12)
+6. [Initial reset (one-shot)](#initial-reset-one-shot)
+7. [Disable 1C XML quantity import (D13)](#disable-1c-xml-quantity-import-d13)
+8. [Console command](#console-command)
+9. [Logs + troubleshooting](#logs--troubleshooting)
+10. [Multi-site](#multi-site)
+11. [Publish + verify](#publish--verify)
 
 ---
 
-## Installation
+## Install
 
-The plugin installs as a standard October CMS plugin via Composer. It is targeted at PHP `^8.3` (production runs 8.4) and depends on Lovata Toolbox + Lovata Shopaholic.
-
-**Recommended — `plugin:install` from the public GitHub repo (one-shot, no manual `composer.json` edit):**
+PHP `^8.3` (prod 8.4). Requires Lovata Toolbox + Shopaholic.
 
 ```bash
 php artisan plugin:install Logingrupa.GoodsReceivedShopaholic \
     --from=https://github.com/logingrupa/oc-goodsreceivedshopaholic-plugin.git \
     --want=dev-master --oc
 
-# Run the plugin migrations (creates 3 tables + extends offers + extends products)
 php artisan october:migrate
 ```
 
-October's CLI auto-registers the GitHub repo as a `vcs` repository in the root `composer.json`, runs `composer require logingrupa/oc-goodsreceivedshopaholic-plugin dev-master`, and installs to `plugins/logingrupa/goodsreceivedshopaholic/`. After a `v1.x.y` tag lands, swap `--want=dev-master` for `--want=^1.1` (or the desired constraint).
+October auto-registers the GitHub VCS repo + runs `composer require`. After v1.x tag swap `--want=dev-master` → `--want=^1.1`.
 
-**Alternative — manual Composer require (if the project already has the VCS repo registered):**
+Manual alternative (if VCS repo already registered):
 
 ```bash
 composer require logingrupa/oc-goodsreceivedshopaholic-plugin
 php artisan october:migrate
 ```
 
-After migrations succeed, sign into the backend and turn the plugin on:
+After migrate: **Backend → Settings → Goods Received → toggle `Enable goods-received import` ON.** Plugin ships disabled.
 
-> **Backend → Settings → Goods Received → toggle `Enable goods-received import` to ON.**
+**Sister plugins** (auto-pulled):
 
-The plugin ships disabled by default. Until `enabled=true` is set on the site, no upload UI is reachable and no automation fires.
+| Plugin | Constraint | Role |
+|---|---|---|
+| `lovata/toolbox-plugin` | `^2.2` | Hungarian backbone, Item/Collection/Store cache |
+| `lovata/shopaholic-plugin` | `^1.32` | Core e-commerce — `Offer`, `Product`, `Category`, `Brand` |
 
-**Required sister plugins** (already declared in `composer.json` `require` — Composer pulls them automatically):
+**Migrations:**
 
-| Plugin                       | Constraint | Role                                 |
-|------------------------------|------------|--------------------------------------|
-| `lovata/toolbox-plugin`      | `^2.2`     | Hungarian-notation backbone, Item/Collection/Store cache scaffold |
-| `lovata/shopaholic-plugin`   | `^1.32`    | Core e-commerce — provides `Offer`, `Product`, `Category`, `Brand` |
-
-**Migrations created on `october:migrate`:**
-
-| Table                                                             | Role                                                          |
-|-------------------------------------------------------------------|---------------------------------------------------------------|
-| `logingrupa_goods_received_invoices`                              | Invoice header — one row per uploaded `.HTM` file             |
-| `logingrupa_goods_received_invoice_lines`                         | One row per `.HTM` data row (EAN, qty, override_qty, match)   |
-| `lovata_shopaholic_offers.active_managed_by` (column added)       | Provenance flag — `'system'` (default) or `'operator'`        |
+| Table | Role |
+|---|---|
+| `logingrupa_goods_received_invoices` | Invoice header — one row per `.HTM` |
+| `logingrupa_goods_received_invoice_lines` | One row per data row (EAN, qty, override, match) |
+| `lovata_shopaholic_offers.active_managed_by` (col) | Provenance — `'system'` (default) or `'operator'` |
 
 ---
 
-## Configuration — Settings
+## Settings
 
-All four toggles live at **Backend → Settings → Goods Received**. Each is a per-site switch — see [Multi-site notes](#multi-site-notes) for what "per-site" means.
+**Backend → Settings → Goods Received.** Per-site (see [Multi-site](#multi-site)).
 
-| Setting key                  | Type   | Default | Purpose                                                                                                  | When to enable                                                                          |
-|------------------------------|--------|---------|----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `enabled`                    | switch | OFF     | Master toggle. While OFF, the upload UI is hidden and no automation fires.                               | Always — turning this on is the first action after install.                             |
-| `auto_deactivate_on_zero`    | switch | OFF     | When an offer's `quantity` reaches `0`, set `offer.active=false`.                                         | Turn ON if the storefront should hide out-of-stock offers automatically.                |
-| `auto_activate_on_stock`     | switch | OFF     | When inbound stock arrives for an inactive offer, set `offer.active=true`.                                | Turn ON if previously-deactivated offers should re-appear once stock returns.           |
-| `allow_initial_reset`        | switch | OFF     | Show the one-shot baseline-reset checkbox on the upload preview screen.                                   | Turn ON only on day-zero, before the first ever GRN apply. See the runbook below.       |
+| Key | Type | Default | Purpose | Enable when |
+|---|---|---|---|---|
+| `enabled` | switch | OFF | Master toggle. OFF = upload UI hidden, no automation. | Always — first action after install. |
+| `auto_deactivate_on_zero` | switch | OFF | Offer qty hits `0` → `offer.active=false`. | Storefront should hide OOS offers. |
+| `auto_activate_on_stock` | switch | OFF | Inbound stock for inactive offer → `offer.active=true`. | Deactivated offers should re-appear on stock return. |
+| `allow_initial_reset` | switch | OFF | Show one-shot baseline-reset checkbox on upload preview. | Day-zero only, before first GRN apply. See runbook. |
 
-Both auto-flag toggles honor `offer.active_managed_by='operator'` — offers that an operator manually deactivated stay deactivated regardless of stock movement (the operator wins).
+Auto-flags honor `active_managed_by='operator'` — operator-set deactivations are sticky.
 
 ---
 
 ## Permissions
 
-The plugin registers four split permissions under **Backend → Settings → Administrators → Roles → tab `Goods Received`**. Each backend AJAX handler checks exactly one of them. Split-permission design enables least-privilege role assignment.
+**Backend → Settings → Administrators → Roles → tab `Goods Received`.** Each AJAX handler checks one. Server-side enforced.
 
-| Permission                                       | Required for                              | Typical role     | Why split                                                                                                  |
-|--------------------------------------------------|-------------------------------------------|------------------|------------------------------------------------------------------------------------------------------------|
-| `logingrupa.goodsreceived.upload_invoices`       | Upload `.HTM` files (parse + persist)     | Warehouse clerk  | Reading distributor invoices is low-trust; clerks shouldn't be able to commit stock.                       |
-| `logingrupa.goodsreceived.apply_invoices`        | Click Apply (commit stock writes)         | Warehouse manager| Apply changes the storefront — limit to senior operators who reconcile vs. the physical receipt.           |
-| `logingrupa.goodsreceived.override_invoices`     | Re-apply a duplicate invoice ADDITIVELY   | Senior operator  | Override-and-reimport is a destructive correction path (D12 add-on-top); only senior operators trigger it. |
-| `logingrupa.goodsreceived.run_initial_reset`     | Trigger the one-shot baseline reset       | Admin / owner    | Reset zeroes every offer + deactivates every product on this site — admin / launch-day only.               |
+| Permission | Required for | Typical role | Why split |
+|---|---|---|---|
+| `upload_invoices` | Upload `.HTM` (parse + persist) | Warehouse clerk | Reading distributor invoices is low-trust. |
+| `apply_invoices` | Click Apply (commit stock writes) | Warehouse manager | Apply changes storefront — limit to seniors. |
+| `override_invoices` | Re-apply duplicate ADDITIVELY | Senior operator | Destructive correction (D12 add-on-top). |
+| `run_initial_reset` | Trigger one-shot baseline reset | Admin / owner | Zeroes every offer + deactivates every product on this site. |
 
-A typical day-1 role layout:
+All keys prefix `logingrupa.goodsreceived.`. Example day-1 layout:
 
-- **Warehouse clerk role** — `upload_invoices` only (drops files into the queue; senior operator clicks Apply).
-- **Warehouse manager role** — `upload_invoices` + `apply_invoices`.
-- **Senior operator role** — `upload_invoices` + `apply_invoices` + `override_invoices`.
-- **Admin role** — all four (only the admin should hold `run_initial_reset` after launch day).
-
-Each permission is enforced server-side at the AJAX handler — checking the role checkbox is the contract; the backend is the enforcer.
+- **Clerk** — `upload_invoices`
+- **Manager** — `upload_invoices` + `apply_invoices`
+- **Senior** — adds `override_invoices`
+- **Admin** — all four (`run_initial_reset` admin-only after launch)
 
 ---
 
-## Operator workflow (Upload → Preview → Apply)
+## Operator workflow
 
-The everyday path. All steps happen inside the October CMS backend.
+1. Sign in. Navigate **Settings → Goods Received → Invoice History**.
+2. Click **Upload .HTM Invoices** (multi-select OK; per-file 10 MB, ≤20 files).
+3. Plugin parses each:
+   - Invoice number from body (or filename `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM` fallback).
+   - Prior `applied` row → reject with override link.
+   - Prior `parsed` row (operator closed modal earlier) → silently replaced by fresh parse.
+   - Each EAN matched: `offer.code` → `product.code` (single-offer fallback) → `offer.variation` (last comma segment).
+4. **Preview modal** — single form, N invoice sections, per-row checkbox (default checked):
 
-1. Sign in to the backend.
-2. Navigate **Settings → Goods Received → Invoice History**. The list view shows all prior invoices (status / country code / applied_at, sorted newest first).
-3. Click **Upload .HTM Invoices** (or use the toolbar button on an empty list).
-4. Select one or many `.HTM` files (per-file size limit: 10 MB; total: ≤ 20 files). The browser's file-picker accepts multi-select.
-5. Click **Upload**. The plugin parses each file in turn:
-   - Each invoice's number is read from the body (or filename `Nr_PRO<num>_<country>_<DDMMYYYY>.HTM` as a fallback).
-   - If an invoice with that number is already `applied` on this site, the upload is rejected with a "duplicate invoice" notice that links to the prior apply (timestamp + applying user + units added). See [Override and re-import](#override-and-re-import-d12--add-on-top-semantics).
-   - Otherwise, all data rows are extracted, each EAN is matched (offer.code → product.code fallback for single-offer products).
-6. The **Preview** screen shows one card per uploaded invoice with a per-line table:
+   | Column | Meaning |
+   |---|---|
+   | Row # | Line number from `.HTM` |
+   | EAN | 13-digit |
+   | Product | Distributor name + `(N pcs)` current stock |
+   | Parsed qty | From `.HTM`. Applied unless override set. |
+   | Override qty | Operator override (audit + apply path). |
+   | After import | LIVE preview — current stock + override (or parsed) qty. |
+   | Matched | Link to product/offer page; orange* = variation match. |
 
-   | Column            | Meaning                                                                                                  |
-   |-------------------|----------------------------------------------------------------------------------------------------------|
-   | Row #             | The line's row number from the `.HTM` table.                                                              |
-   | EAN               | 13-digit EAN from the invoice line.                                                                       |
-   | Product name      | Distributor's product name (from the `.HTM`).                                                             |
-   | Qty               | Quantity from the `.HTM`. **This is what gets applied unless override_qty is set.**                       |
-   | Override qty      | Optional operator override (audit-only metadata; consumed at apply time as `COALESCE(override_qty, qty)`).|
-   | Override reason   | Free-text justification when override_qty is non-null.                                                    |
-   | Match strategy    | `offer_code`, `product_code_single_offer`, or `unmatched`.                                                |
-   | Matched offer     | Short link to the matched offer page (when found).                                                        |
+5. Uncheck rows to skip. Edit `override_qty` inline (table updates). Notes textarea per invoice.
+6. Click **Apply selected**. Modal disables button + spins. Server runs each checked invoice under `Cache::lock('apply-invoice-{id}', 60)` — double-click safe.
+7. On success modal closes + page reloads. Status `parsed` → `applied`. Stock incremented; auto-activate fires per Settings.
 
-   Operators can edit `override_qty` + `override_reason` inline per row — these save via AJAX and persist on the InvoiceLine row.
-
-7. Click **Apply** on the invoice card. A confirmation modal appears:
-
-   > **About to apply invoice `Nr_PROxxxxx`:**
-   > - Total units to add: **N**
-   > - Matched offers: **M**
-   > - Unmatched lines: **K**
-
-8. Click **Confirm** in the modal. The plugin runs the apply under a server-side `Cache::lock('apply-invoice-{id}', 60)` — clicking Apply twice in rapid succession does **not** double-apply. The first click acquires the lock and writes; the second click sees the lock and renders the "apply in progress" partial.
-9. On success, the Invoice card flips to `applied` status. Stock is now incremented on every matched offer; auto-activate fires for offers that were inactive (when `auto_activate_on_stock=true`).
-
-If the apply fails partway (DB error, model handler exception), the entire transaction rolls back — no partial state is committed. Re-upload is rejected as a duplicate; use override-and-reimport to retry deliberately.
+Apply failure → full transaction rollback, no partial state.
 
 ---
 
-## Override and re-import (D12 — add-on-top semantics)
+## Override + re-import (D12)
 
-> **Warning copy (verbatim, shown in the override modal):**
-> *"This re-applies the invoice ADDITIVELY on top of the prior apply. Stock will be incremented by new line quantities. This is NOT a delta calculation."*
+> *"Re-applies invoice ADDITIVELY on top of prior apply. Stock incremented by new line quantities. NOT a delta calculation."*
 
-**When to use this flow:** the distributor re-sends an invoice with corrected quantities AFTER the original was already applied, and the corrected quantities should stack on top of the original receipt (not replace it, not be a diff). The most common real-world cause is a missed pallet that ships separately under the same invoice number — the second receipt is genuinely additional stock.
+**When:** distributor re-sends invoice with corrected/additional quantities AFTER original was applied. Most common: missed pallet ships separately under same invoice number = genuinely additional stock.
 
-**What happens technically:**
+**Flow:**
 
-1. Operator uploads the `.HTM` whose `invoice_number` already exists with `status='applied'` on this site.
-2. The system rejects the duplicate AND surfaces a reject screen with the prior-apply summary:
-   - Prior `applied_at` timestamp
-   - Applying user
-   - Units added per offer
-   - "Override and re-import" button (visible only when the operator holds `override_invoices`).
-3. The operator clicks **Override and re-import**.
-4. A typed-confirmation modal asks the operator to type the literal `OVERRIDE` (uppercase). The server-side check is strict equality (`===`) — no case-insensitive match, no whitespace trimming. Mistyped input is rejected.
-5. On confirm, the plugin creates a NEW Invoice row:
-   - `override_of_invoice_id` → points at the prior invoice.
-   - `invoice_number` → suffixed `-OVR-<priorId>` (the UNIQUE index on `invoice_number` would otherwise reject the new row; the suffix is a derived label that satisfies the index while preserving the canonical reference).
-6. The new invoice runs the standard parse → preview → apply flow. When the operator clicks Apply, stock is **incremented again** — `offer.quantity` grows by the new line quantities.
+1. Upload `.HTM` whose invoice_number is already `applied`.
+2. Reject screen surfaces prior-apply summary (timestamp, user, units added) + **Override and re-import** button (gated by `override_invoices` perm).
+3. Type literal `OVERRIDE` (uppercase, strict `===`). Mistype → reject.
+4. New Invoice row created:
+   - `override_of_invoice_id` → prior id
+   - `invoice_number` → `<orig>-OVR-<priorId>` (UNIQUE index satisfied)
+5. Standard parse → preview → apply. Stock incremented AGAIN.
 
-**What this flow does NOT do:**
+**Does NOT:**
+- Decrement-then-reapply (no rollback of prior).
+- Calculate delta.
+- Mutate prior Invoice row (audit preserved).
 
-- It does NOT decrement-then-reapply (no rollback of the prior apply).
-- It does NOT calculate a delta between the prior apply and the new invoice.
-- It does NOT mutate the prior Invoice row (audit trail preserved verbatim).
-
-If the distributor sent a corrected invoice meant to **replace** the prior receipt (rare), do NOT use this flow — adjust stock manually via the CMS Offer editor, then disable auto-deactivate-on-zero before the next apply if needed.
+For "replace" intent (rare) → adjust stock manually in Offer editor. Not this flow.
 
 ---
 
-## Initial-reset runbook (one-shot baseline)
+## Initial reset (one-shot)
 
-The one-shot baseline reset is the day-zero mechanism that hands `offer.quantity` ownership from the legacy import path (or manual DB state) to this plugin. It zeroes every offer's quantity, deactivates every offer + product, then immediately applies the first GRN invoice on top of the cleared state (or runs reset-only if no `.HTM` is selected).
+Day-zero handover from legacy `quantity` ownership to plugin. Zeroes every offer.quantity, deactivates every offer + product, optionally applies first GRN on top.
 
-> **Reset is one-shot — once `Invoice.initial_reset_applied=true` exists on this site, the gate cannot fire again. There is NO automated rollback. Take a DB backup before continuing.**
+> **One-shot. `Invoice.initial_reset_applied=true` exists → gate cannot fire again on this site. NO automated rollback. Take DB backup first.**
 
-### Pre-flight checklist
+### Pre-flight
 
-Before starting, confirm every item below:
-
-1. **`Settings.allow_initial_reset` is ON for this site.** Toggle at Backend → Settings → Goods Received.
-2. **No prior reset has been recorded.** Check the Invoice History list — no row has `initial_reset_applied=true`.
-3. **You hold `logingrupa.goodsreceived.run_initial_reset`** — verify under Settings → Administrators → Edit role.
-4. **A DB backup is taken.** Use `/home/forge/backup_db.sh` (or your equivalent) and verify the dump file exists before continuing. This is the only recovery path if reset runs in error.
-5. **No other backend session is uploading or applying.** Reset takes a write-heavy lock on `lovata_shopaholic_offers` + `lovata_shopaholic_products`; concurrent activity makes diagnostics painful if anything fails.
+1. `Settings.allow_initial_reset` ON for this site.
+2. No prior reset (no `initial_reset_applied=true` row in Invoice History).
+3. Operator holds `run_initial_reset`.
+4. DB backup taken + verified (`/home/forge/backup_db.sh` or equivalent).
+5. No concurrent backend uploads/applies (write-heavy lock on offers + products).
 
 ### Procedure
 
-1. Open the Invoices list → click **Initial Reset** in the toolbar.
-2. The pre-mutation modal opens with actual counts (`This will zero out N offers and deactivate M products`).
-3. Type the literal `RESET` (uppercase) in the confirmation field. Server-side check is strict equality.
-4. (Optional) Select the FIRST `.HTM` invoice to apply on top of the cleared state. Leave blank for reset-only.
-5. Click **Run reset + apply**. The plugin runs:
-   1. **(if file)** PARSE the `.HTM`.
-   2. RESET — zero every `offer.quantity`, set `offer.active=false`, set `product.active=false`, mark `Invoice.initial_reset_applied=true`.
-   3. **(if file)** APPLY — increment `offer.quantity` by the new invoice's line quantities; auto-activate fires per Settings (offer + parent product).
+1. Invoices list → **Initial Reset** in toolbar.
+2. Pre-mutation modal shows actual counts (`zero N offers, deactivate M products`).
+3. Type `RESET` (uppercase, strict `===`).
+4. Optional: select first `.HTM` to apply atop cleared state. Blank = reset-only.
+5. Click **Run reset + apply**. Plugin runs:
+   1. **(if file)** PARSE `.HTM`
+   2. RESET — zero `offer.quantity`, `offer.active=false`, `product.active=false`, mark `Invoice.initial_reset_applied=true`
+   3. **(if file)** APPLY — increment per parsed lines; auto-activate fires per Settings.
 
-### What gets zeroed / deactivated
+### Post-reset state
 
-After RESET (and before APPLY when a file is provided):
-
-| Field                                        | New value           |
-|----------------------------------------------|---------------------|
-| `lovata_shopaholic_offers.quantity`          | `0` (every row)     |
-| `lovata_shopaholic_offers.active`            | `false` (every row) |
-| `lovata_shopaholic_offers.active_managed_by` | `'plugin'`          |
-| `lovata_shopaholic_products.active`          | `false` (every row) |
-
-The Invoice row gets `initial_reset_applied=true` so the gate cannot fire again on this site.
+| Field | Value |
+|---|---|
+| `lovata_shopaholic_offers.quantity` | `0` (every row) |
+| `lovata_shopaholic_offers.active` | `false` (every row) |
+| `lovata_shopaholic_offers.active_managed_by` | `'plugin'` |
+| `lovata_shopaholic_products.active` | `false` (every row) |
 
 ### Rollback
 
-There is no automated rollback. Recovery path: restore the pre-reset DB backup. Snapshot scaffolding was removed 2026-05-05 because no programmatic restore was ever shipped — the table existed forensic-only and added unmaintained surface area.
+None automated. Recovery = restore pre-reset DB backup. Snapshot scaffolding removed 2026-05-05 (forensic-only, no programmatic restore shipped).
 
 ---
 
-## GRN-canonical stock writer — disabling 1C XML quantity import (D13)
+## Disable 1C XML quantity import (D13)
 
-> **This step is required before turning the plugin on.**
+> **Required before turning plugin on.**
 
-Two import paths could write to `lovata_shopaholic_offers.quantity` on a fully-equipped Shopaholic store:
+Two paths could write `lovata_shopaholic_offers.quantity`:
+1. **This plugin** — owns `quantity` + `active` per D-13.
+2. **`Logingrupa.ExtendShopaholic`** 1C XML import — legacy stock-sync.
 
-1. **This plugin (the new GRN canonical writer).** Owns `quantity` and `active` (when the auto-flag toggles are ON).
-2. **`Logingrupa.ExtendShopaholic` 1C XML import.** The legacy stock-sync path used before this plugin shipped.
-
-Per locked decision **D-13**, this plugin **owns** the `quantity` column. Operators MUST manually disable quantity-write in `Logingrupa.ExtendShopaholic`'s 1C XML config so the two writers don't fight (one apply increments stock; the next 1C XML run could blow it back to zero — exactly the silent stock-drift bug D-13 prevents).
-
-This plugin does **not** auto-disable that setting — D-13 was deliberately scoped as an explicit out-of-band step (no cross-plugin migration, no surprise behaviour in someone else's plugin).
+Two writers fight: apply increments → next 1C XML run blows it back to zero (silent stock-drift bug). Plugin does NOT auto-disable D-13 — explicit out-of-band step.
 
 ### Steps
 
-1. **Backend → Settings → ExtendShopaholic → 1C XML Import** (the exact menu label may differ slightly between releases of `Logingrupa.ExtendShopaholic`; verify in your install).
-2. Locate the toggle that controls **import quantity from 1C XML**. In recent releases it is labelled `Import offer quantity` or `Sync stock from 1C` and lives in the ExtendShopaholic Settings model. The settings file is at `plugins/logingrupa/extendshopaholic/models/settings/fields.yaml`; search for fields whose name contains `quantity` or `stock`.
-3. Set it to **OFF** on every site running this plugin (.no, .lv, .lt — see [Multi-site notes](#multi-site-notes); each site has its own Settings store).
-4. Verify by triggering the next 1C XML import (CLI: `php artisan shopaholic:import_from_xml` or the ExtendShopaholic-specific variant) and confirming `offer.quantity` does **not** change for offers that the GRN apply has already written.
+1. **Backend → Settings → ExtendShopaholic → 1C XML Import** (label may vary).
+2. Find toggle `Import offer quantity` / `Sync stock from 1C` (in `plugins/logingrupa/extendshopaholic/models/settings/fields.yaml` — grep for `quantity`/`stock`).
+3. Set **OFF** on every site running this plugin (.no, .lv, .lt — each site has own Settings store).
+4. Verify: trigger next 1C XML import (`php artisan shopaholic:import_from_xml`); confirm `offer.quantity` does NOT change for offers GRN already wrote.
 
-If you cannot find the toggle, ask the ExtendShopaholic maintainer or grep the plugin source for the import path that writes `offer.quantity`:
+Can't find toggle → grep:
 
 ```bash
 grep -RnE "quantity\s*=" plugins/logingrupa/extendshopaholic/classes/import/
 ```
 
-The location to patch is wherever an import step assigns `$obOffer->quantity = ...` from 1C XML data.
+Patch wherever import assigns `$obOffer->quantity = ...` from 1C XML.
 
 ---
 
-## Console command — recompute active flags from stock
+## Console command
 
 ```bash
 php artisan goodsreceived:recompute_active_from_stock {--chunk=500}
 ```
 
-Reconciles every offer's `active` flag from its current `quantity` and the live Settings, in chunks. Honors `active_managed_by='operator'` — operator-set deactivations are **sticky** and never get reverted by the reconcile pass.
+Reconciles every offer's `active` from current `quantity` + Settings, in chunks. Honors `active_managed_by='operator'` — operator deactivations sticky.
 
-### When to run
+### Run when
 
-- **After flipping `auto_deactivate_on_zero` or `auto_activate_on_stock` ON for the first time.** The toggles only fire on subsequent applies; the existing catalog needs one pass to converge.
-- **After bulk-importing stock outside the plugin** (manual SQL `UPDATE`, restored from backup, etc.).
-- **After a disaster-recovery restore.** Run this as a dry-run to confirm the active flags match the restored quantities.
-- **As a periodic reconcile cron.** Recommended cadence: weekly, low-traffic window (e.g. Sunday 04:00). Drift between `quantity` and `active` is rare in normal operation but a reconcile cron is cheap insurance.
+- After flipping `auto_deactivate_on_zero` / `auto_activate_on_stock` ON first time (existing catalog needs one pass to converge).
+- After bulk stock import outside plugin (manual SQL, backup restore).
+- Disaster-recovery sanity check.
+- Periodic cron — weekly low-traffic window (Sun 04:00). Cheap insurance.
 
-### What it does
+### Logic per non-operator offer
 
-For every offer that is NOT operator-managed:
+| `qty > 0` | Settings | Action |
+|---|---|---|
+| true | `auto_activate_on_stock=true` | `offer.active = true` |
+| false | `auto_deactivate_on_zero=true` | `offer.active = false` |
+| any | both auto-flag toggles OFF | exit 0 (no-op) |
 
-| `quantity > 0` | `auto_activate_on_stock` | Setting | Action                                            |
-|----------------|--------------------------|---------|---------------------------------------------------|
-| `true`         | `true`                   |         | `offer.active = true`                             |
-| `false`        | `auto_deactivate_on_zero` = `true` |   | `offer.active = false`                            |
-| any            | both auto-flag toggles OFF        |   | nothing — the command short-circuits to exit 0    |
+Idempotent. Re-run = SELECT-only on second pass.
 
-The reconcile is idempotent — running it twice in a row writes nothing on the second run (each row's target state is a pure function of its current `quantity` + the Settings). Verify cheaply via `php artisan goodsreceived:recompute_active_from_stock` followed by a query log: the first run runs `SELECT + UPDATE` for changed rows; the second runs `SELECT` only.
+### Options + exit
 
-### Options
-
-- `--chunk=N` — chunk size for the offer iteration. Default: `500`. Non-positive values silently coerce to `500` (T-04-02-01 — operator typos must never DoS via infinite-loop or zero-chunk).
-
-### Exit codes
-
-- `0` — success. Final line printed: `Reconciled N offers (chunk=K).`
-- `1` — uncaught exception. Final line printed: `Recompute failed: <message>`. Inspect `storage/logs/laravel-*.log` for the stack trace.
+- `--chunk=N` (default 500). Non-positive coerces to 500 (T-04-02-01 — typo can't DoS).
+- Exit 0 success: `Reconciled N offers (chunk=K).`
+- Exit 1 throw: `Recompute failed: <msg>` — see `storage/logs/laravel-*.log`.
 
 ---
 
-## Troubleshooting — `Log::*` event key map
+## Logs + troubleshooting
 
-Every plugin operation emits a structured log entry through Laravel's `Log` facade. The string in the message is a stable event key — grep for it.
+Every operation emits structured `Log::*` entry. Stable event keys — grep them.
 
-| Event key                    | Level    | When fired                                             | Context fields                                                                                                                       | grep recipe                                                                       |
-|------------------------------|----------|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
-| `goodsreceived.parse`        | info     | `HtmInvoiceParser` produces a `ParsedInvoice`          | `invoice_id`, `invoice_number`, `source_filename`, `total_lines`, `skipped_count`, `correlation_id`                                  | `grep -F 'goodsreceived.parse' storage/logs/laravel-*.log`                        |
-| `goodsreceived.apply`        | info     | `StockApplyService` writes complete                    | `invoice_id`, `units_added`, `offers_touched`, `lines_applied`, `lines_skipped`, `applied_by`, `correlation_id`                      | `grep -F 'goodsreceived.apply' storage/logs/laravel-*.log`                        |
-| `goodsreceived.reject`       | warning  | Duplicate / malformed / invalid HTM rejected           | `event=reject`, `reason`, `invoice_number_attempted`, `prior_invoice_id` (when duplicate), `prior_applied_at`, `correlation_id`      | `grep -F 'goodsreceived.reject' storage/logs/laravel-*.log`                       |
-| `goodsreceived.initial_reset`| info     | `InitialResetService` completes                        | `invoice_id`, `offers_zeroed`, `products_deactivated`, `correlation_id`                                                              | `grep -F 'goodsreceived.initial_reset' storage/logs/laravel-*.log`                |
-| `plugin.boot.config_warning` | warning  | Plugin boot detects PHP `max_file_uploads<20` or `upload_max_filesize<10M` | `current`, `recommended`                                                                                                              | `grep -F 'plugin.boot.config_warning' storage/logs/laravel-*.log`                 |
+| Event key | Level | When | Context fields |
+|---|---|---|---|
+| `goodsreceived.parse` | info | `HtmInvoiceParser` produces `ParsedInvoice` | `invoice_id`, `invoice_number`, `source_filename`, `total_lines`, `skipped_count`, `correlation_id` |
+| `goodsreceived.apply` | info | `StockApplyService` writes complete | `invoice_id`, `units_added`, `offers_touched`, `lines_applied`, `lines_skipped`, `applied_by`, `correlation_id` |
+| `goodsreceived.reject` | warning | Duplicate / malformed / invalid HTM rejected | `event=reject`, `reason`, `invoice_number_attempted`, `prior_invoice_id`, `prior_applied_at`, `correlation_id` |
+| `goodsreceived.initial_reset` | info | `InitialResetService` completes | `invoice_id`, `offers_zeroed`, `products_deactivated`, `correlation_id` |
+| `plugin.boot.config_warning` | warning | PHP `max_file_uploads<20` or `upload_max_filesize<10M` | `current`, `recommended` |
 
-### Tracing one upload end-to-end via `correlation_id`
+### Trace one upload via correlation_id
 
-Every `goodsreceived.*` log entry carries a `correlation_id` — a uuid-v7 string (time-ordered) generated per `ImportAuditService` call. To follow one upload from parse through apply (or reject), find any entry for the upload, copy the `correlation_id`, and grep:
+Every entry carries a uuid-v7 `correlation_id` (time-ordered, per `ImportAuditService` call). Grep:
 
 ```bash
 tail -f storage/logs/laravel-*.log | grep "goodsreceived\."
-# pick out the correlation_id from a goodsreceived.parse line, then:
+# pick correlation_id from goodsreceived.parse, then:
 grep -F '0190a4e3-7b4e-7000-8e95-1f4b7e2f9c01' storage/logs/laravel-*.log
 ```
 
-That single grep surfaces every parse / apply / reject event sharing the same upload's audit chain.
+One grep surfaces every parse / apply / reject sharing that audit chain.
 
-### Common error scenarios — first-line debug
+### First-line debug
 
-| Symptom                                                       | First check                                                                                                                                                                  |
-|---------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Apply silently does nothing                                    | Check `storage/logs/laravel-*.log` for `goodsreceived.apply`. If absent, check `goodsreceived.reject` — the upload may have been rejected before parse.                       |
-| "Apply already done" rendered in the UI                        | Inspect `Invoice.status` for the invoice. If `'applied'`, the dedicated handler intentionally rejects (idempotency). Use the override-and-reimport flow if reapply was meant. |
-| "Initial reset not allowed" rendered in the UI                 | The two-gate guard fired. Check the log for `goodsreceived.reject` with `reason=settings_disabled` or `reason=already_applied`.                                              |
-| "Forbidden" on upload / apply / override / reset               | Backend user lacks the corresponding permission. Verify role assignments under Settings → Administrators → Roles → tab `Goods Received`.                                     |
-| Upload fails with no log entry                                 | Browser-side or PHP-ini reject before the controller runs. Check `plugin.boot.config_warning` lines for `max_file_uploads` or `upload_max_filesize` warnings.                |
-| Offer stock didn't increment after apply                        | Check `goodsreceived.apply` `units_added` + `offers_touched`. If `offers_touched=0`, every line was unmatched — look at the InvoiceLine rows for `match_strategy='unmatched'`. |
-| 1C XML import keeps overwriting plugin-applied stock            | Re-read [GRN-canonical stock writer](#grn-canonical-stock-writer--disabling-1c-xml-quantity-import-d13). The 1C XML quantity-write toggle is still ON in ExtendShopaholic.    |
-
----
-
-## Multi-site notes
-
-The same plugin code runs on three deployments under one Git repo:
-
-| Site                 | Country | Currency | Distributor language tag |
-|----------------------|---------|----------|--------------------------|
-| nailscosmetics.no    | Norway  | NOK      | `_no_`                   |
-| nailscosmetics.lv    | Latvia  | EUR      | `_lv_`                   |
-| nailscosmetics.lt    | Lithuania | EUR    | `_lt_`                   |
-
-Each site has its **own database** — there is no shared schema. Consequently:
-
-- **Settings are per-site.** The October Settings model writes into the site's own DB; toggling `enabled` on `.no` does NOT change `enabled` on `.lv` or `.lt`. Each site is configured independently.
-- **Permissions are per-site.** Each site has its own backend users + roles table. A clerk on `.no` does NOT automatically have access to `.lv` — they need a separate role assignment on each site they operate.
-- **Invoice history is per-site.** The `logingrupa_goods_received_invoices` table is per-DB; `.no` and `.lv` invoice numbers can collide (they're scoped to their respective sites' UNIQUE index).
-- **Initial reset is per-site one-shot.** Doing the reset on `.no` does NOT reset `.lv` or `.lt`. Each site has its own day-zero.
-- **The 1C XML disable step (D13) must be applied separately on each site.** ExtendShopaholic's settings live in each site's DB; turning off the quantity import on `.no` leaves `.lv` and `.lt` untouched.
-
-Multi-site isolation is verified manually per OPS-06 (UAT checklist documented separately under plan 05-05). The expected verification: change a Setting on `.no`, confirm `.lv` and `.lt` do not flip; upload one `.HTM` to `.no`, confirm the same EAN's stock on `.lv` is unchanged.
+| Symptom | First check |
+|---|---|
+| Apply silently does nothing | `goodsreceived.apply` absent → check `goodsreceived.reject` (rejected pre-parse). |
+| "Apply already done" UI | `Invoice.status='applied'` — handler rejects per idempotency. Use override flow. |
+| "Initial reset not allowed" UI | Two-gate guard fired. Log: `reason=settings_disabled` or `reason=already_applied`. |
+| "Forbidden" on action | User lacks permission. Verify role under Settings → Administrators. |
+| Upload fails, no log | Pre-controller reject (browser/PHP-ini). Check `plugin.boot.config_warning`. |
+| Stock didn't increment | `goodsreceived.apply` `units_added`/`offers_touched`. If `0` → all unmatched. Check InvoiceLine `match_strategy='unmatched'`. |
+| 1C XML overwrites plugin stock | Re-do [D13](#disable-1c-xml-quantity-import-d13). 1C XML quantity-write still ON. |
+| `/invoices/update/<id>` "Form behavior not initialized" | Invoice deleted; controller redirects to list with flash (since 2026-05-05). Old behavior shouldn't recur — file a bug if seen. |
 
 ---
 
-## Publishing — Making the plugin installable via Composer (D11 / OPS-03)
+## Multi-site
 
-The plugin's `composer.json` is publish-ready (verified at v1.0 close):
+Three deployments, one Git repo:
+
+| Site | Country | Currency | Distributor lang tag |
+|---|---|---|---|
+| nailscosmetics.no | Norway | NOK | `_no_` |
+| nailscosmetics.lv | Latvia | EUR | `_lv_` |
+| nailscosmetics.lt | Lithuania | EUR | `_lt_` |
+
+Each site has **own DB**. No shared schema:
+
+- **Settings per-site.** `enabled` ON on `.no` ≠ ON on `.lv`/`.lt`.
+- **Permissions per-site.** Each site has own users + roles. Clerk on `.no` needs separate role on `.lv`.
+- **Invoice history per-site.** UNIQUE on `invoice_number` scoped to site DB; `.no` and `.lv` numbers can collide harmlessly.
+- **Initial reset per-site one-shot.** `.no` reset doesn't affect `.lv`/`.lt`.
+- **D13 (1C XML disable) per-site.** Separate toggle on each site.
+
+Multi-site UAT per OPS-06: change Setting on `.no`, confirm `.lv`/`.lt` don't flip; upload `.HTM` to `.no`, confirm same EAN's stock on `.lv` unchanged.
+
+---
+
+## Publish + verify
+
+`composer.json` publish-ready (verified at v1.0):
 
 | Field | Value |
-|-------|-------|
+|---|---|
 | `name` | `logingrupa/oc-goodsreceivedshopaholic-plugin` |
 | `type` | `october-plugin` |
 | `license` | `MIT` |
@@ -371,32 +331,30 @@ The plugin's `composer.json` is publish-ready (verified at v1.0 close):
 | `extra.october.plugin` | `Logingrupa.GoodsReceivedShopaholic` |
 | `extra.october.installer-name` | `goodsreceivedshopaholic` |
 
-**Pre-publish secret-leak guard** — BEFORE making the GitHub repo public, grep the repo for credential-like strings. Public repos retain every commit forever; a leaked secret cannot be un-committed by a delete.
+### Pre-publish secret-leak guard
+
+Public repos retain every commit forever. Audit before going public:
 
 ```bash
-# Run from plugin root. CLEAN means safe to publish; non-empty output means audit before proceeding.
 git ls-files | xargs grep -l -iE '(password|secret|api_key|aws_|stripe_|sendgrid_|_token)' || echo CLEAN
 ```
 
-To make the GitHub repo PUBLIC and tag v1.0.0:
+CLEAN = safe. Any output = audit before push.
+
+### Make public + tag v1.0.0
 
 ```bash
-# 1. Create the public repo + push (run from plugin root)
 gh repo create logingrupa/oc-goodsreceivedshopaholic-plugin --public --source=. --remote=origin --push
-
-# 2. Tag v1.0.0
 git tag v1.0.0
 git push --tags
 ```
 
-Optional Packagist submission (gives versioned package discovery + download stats):
+### Optional Packagist
 
-1. Visit https://packagist.org
-2. Click "Submit"
-3. Paste the GitHub URL: `https://github.com/logingrupa/oc-goodsreceivedshopaholic-plugin`
-4. Click Check → Submit
+1. https://packagist.org → Submit
+2. Paste GitHub URL → Check → Submit
 
-Without Packagist, Composer's native GitHub auto-discovery still works — consumers add a `repositories` block to their `composer.json`:
+Without Packagist, consumers add VCS block:
 
 ```json
 "repositories": [
@@ -404,26 +362,21 @@ Without Packagist, Composer's native GitHub auto-discovery still works — consu
 ]
 ```
 
----
-
-## Verification — composer require on a clean install (OPS-03 + OPS-06)
-
-Pre-publish dry-run (recommended before tagging v1.0.0):
+### Pre-publish dry-run (clean OctoberCMS 4 sandbox)
 
 ```bash
-# On a clean OctoberCMS 4 sandbox (or scratch project), with Lovata Shopaholic + Toolbox already installed:
 composer require logingrupa/oc-goodsreceivedshopaholic-plugin:dev-master
 php artisan october:migrate
 ```
 
-Expected outcome:
-- Composer pulls the plugin into `plugins/logingrupa/goodsreceivedshopaholic/`
-- `october:migrate` runs migrations: 3 plugin tables created + `lovata_shopaholic_offers.active_managed_by` column added
-- Backend → Settings → Goods Received page renders with the 4 toggles
+Expected:
+- Plugin in `plugins/logingrupa/goodsreceivedshopaholic/`
+- 3 plugin tables created + `lovata_shopaholic_offers.active_managed_by` column added
+- Backend → Settings → Goods Received page renders 4 toggles
 
-For the multi-site UAT (.no / .lv / .lt staging or dev parity), use the printable checklist at `.planning/UAT-CHECKLIST.md`. The checklist proves multi-site Settings isolation (toggle on .no does not propagate to .lv).
+Multi-site UAT checklist: `.planning/UAT-CHECKLIST.md`.
 
-Once UAT signs off and v1.0.0 tag is pushed, downstream installs use the canonical pin:
+After UAT + v1.0.0 tag:
 
 ```bash
 composer require logingrupa/oc-goodsreceivedshopaholic-plugin:^1.0
@@ -431,14 +384,14 @@ composer require logingrupa/oc-goodsreceivedshopaholic-plugin:^1.0
 
 ---
 
-## License
-
-[MIT License](LICENSE) © Logingrupa.
-
 ## Reference
 
-- Plugin source: `plugins/logingrupa/goodsreceivedshopaholic/` (this directory).
-- Composer package: `logingrupa/oc-goodsreceivedshopaholic-plugin`.
-- October plugin code: `Logingrupa.GoodsReceivedShopaholic`.
-- QA pipeline: `composer qa` (runs `pint-test` + `analyse` + `phpmd` + `test`).
-- Issue tracker: see the GitHub repo `logingrupa/oc-goodsreceivedshopaholic-plugin`.
+- Source: `plugins/logingrupa/goodsreceivedshopaholic/`
+- Composer: `logingrupa/oc-goodsreceivedshopaholic-plugin`
+- October code: `Logingrupa.GoodsReceivedShopaholic`
+- QA: `composer qa` (pint-test + analyse + phpmd + test)
+- Issues: GitHub `logingrupa/oc-goodsreceivedshopaholic-plugin`
+
+## License
+
+[MIT](LICENSE) © Logingrupa.
