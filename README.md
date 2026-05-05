@@ -38,7 +38,7 @@ php artisan plugin:install Logingrupa.GoodsReceivedShopaholic \
     --want=dev-master --oc
 
 # Run the plugin migrations (creates 3 tables + extends offers + extends products)
-php artisan october:up
+php artisan october:migrate
 ```
 
 October's CLI auto-registers the GitHub repo as a `vcs` repository in the root `composer.json`, runs `composer require logingrupa/oc-goodsreceivedshopaholic-plugin dev-master`, and installs to `plugins/logingrupa/goodsreceivedshopaholic/`. After a `v1.x.y` tag lands, swap `--want=dev-master` for `--want=^1.1` (or the desired constraint).
@@ -47,7 +47,7 @@ October's CLI auto-registers the GitHub repo as a `vcs` repository in the root `
 
 ```bash
 composer require logingrupa/oc-goodsreceivedshopaholic-plugin
-php artisan october:up
+php artisan october:migrate
 ```
 
 After migrations succeed, sign into the backend and turn the plugin on:
@@ -63,7 +63,7 @@ The plugin ships disabled by default. Until `enabled=true` is set on the site, n
 | `lovata/toolbox-plugin`      | `^2.2`     | Hungarian-notation backbone, Item/Collection/Store cache scaffold |
 | `lovata/shopaholic-plugin`   | `^1.32`    | Core e-commerce — provides `Offer`, `Product`, `Category`, `Brand` |
 
-**Migrations created on `october:up`:**
+**Migrations created on `october:migrate`:**
 
 | Table                                                             | Role                                                          |
 |-------------------------------------------------------------------|---------------------------------------------------------------|
@@ -438,12 +438,12 @@ Pre-publish dry-run (recommended before tagging v1.0.0):
 ```bash
 # On a clean OctoberCMS 4 sandbox (or scratch project), with Lovata Shopaholic + Toolbox already installed:
 composer require logingrupa/oc-goodsreceivedshopaholic-plugin:dev-master
-php artisan october:up
+php artisan october:migrate
 ```
 
 Expected outcome:
 - Composer pulls the plugin into `plugins/logingrupa/goodsreceivedshopaholic/`
-- `october:up` runs migrations: 3 plugin tables created + `lovata_shopaholic_offers.active_managed_by` column added
+- `october:migrate` runs migrations: 3 plugin tables created + `lovata_shopaholic_offers.active_managed_by` column added
 - Backend → Settings → Goods Received page renders with the 4 toggles
 
 For the multi-site UAT (.no / .lv / .lt staging or dev parity), use the printable checklist at `.planning/UAT-CHECKLIST.md`. The checklist proves multi-site Settings isolation (toggle on .no does not propagate to .lv).
