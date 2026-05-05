@@ -6,7 +6,6 @@ parameters:
     level: 10
     paths:
         - classes
-        - components
         - console
         - controllers
         - models
@@ -15,7 +14,7 @@ parameters:
         - tests
         - updates
         - lang
-        - assets
+        - assets (?)
     tmpDir: ../../../storage/temp/phpstan/goodsreceived
 
     # Stub for October\Rain\Support\Traits\Singleton::instance() — the

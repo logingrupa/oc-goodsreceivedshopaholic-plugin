@@ -1240,8 +1240,10 @@ class Invoices extends Controller
      * parser still runs and is the authoritative contract).
      *
      * Visibility: protected so the Pest test shim's reflection invocation
-     * remains stable. Reflection is the test-discipline pin per the
-     * PluginBootSelfCheckTest::callParseIniSize precedent (D-35).
+     * remains stable. Reflection is the test-discipline pin —
+     * `callExtractInvoiceNumberFromFilename` in
+     * tests/unit/Controllers/PreUploadDuplicateDetectionTest.php drives
+     * the regex contract directly without widening the public API surface.
      */
     protected function extractInvoiceNumberFromFilename(string $sFilename): ?string
     {

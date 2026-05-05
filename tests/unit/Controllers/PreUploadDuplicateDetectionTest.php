@@ -43,9 +43,8 @@ uses(ApplyTestCase::class);
  *     details) to the operator-visible flash.
  *
  * Reflection target: the helper `extractInvoiceNumberFromFilename` is
- * private; reflection-invoke pins the regex contract without widening the
- * public API surface (pattern reused from PluginBootSelfCheckTest's
- * `parseIniSize` reflection — D-35).
+ * private; reflection-invoke pins the regex contract without widening
+ * the public API surface.
  */
 
 /**

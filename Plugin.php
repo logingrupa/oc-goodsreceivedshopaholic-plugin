@@ -7,7 +7,6 @@ namespace Logingrupa\GoodsReceivedShopaholic;
 use Backend;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
 use Logingrupa\GoodsReceivedShopaholic\Console\RecomputeActiveFromStock;
 use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 use System\Classes\PluginBase;
@@ -69,19 +68,9 @@ class Plugin extends PluginBase
     /**
      * Boot method, called right before the request route.
      *
-     * Backend-gated runtime self-check (UI-12 / D-34, D-35): warn-log when the
-     * host's PHP upload prerequisites fall below the multi-file `.HTM` import
-     * thresholds. Runs ONLY when the request is dispatched to the backend so
-     * frontend page-loads incur zero `ini_get` / `Log::warning` overhead
-     * (T-04-01-03).
-     *
-     * Threshold rationale:
-     *   - `max_file_uploads >= 20`  — matches D-07 "Total upload ≤ 20 files"
-     *   - `upload_max_filesize >= 10M` — matches D-07 "Per-file size limit ≤ 10 MB"
-     *
-     * Both checks degrade safely: a misconfigured host yields ONE structured
-     * `Log::warning` line (greppable by ops) but NEVER a thrown boot-time
-     * exception that would brick the plugin (T-04-01-01).
+     * Backend-gated: only registers the Catalog-side-menu item when the
+     * request is dispatched to the backend so frontend page-loads incur
+     * zero overhead.
      */
     public function boot(): void
     {
@@ -112,59 +101,6 @@ class Plugin extends PluginBase
                 ],
             ]);
         });
-
-        $iMaxUploads = (int) ini_get('max_file_uploads');
-        if ($iMaxUploads < 20) {
-            Log::warning('GoodsReceived: max_file_uploads is below 20', [
-                'current'     => $iMaxUploads,
-                'recommended' => 20,
-            ]);
-        }
-
-        $sUploadMaxSize = (string) ini_get('upload_max_filesize');
-        $iUploadMaxBytes = self::parseIniSize($sUploadMaxSize);
-        if ($iUploadMaxBytes < 10 * 1024 * 1024) {
-            Log::warning('GoodsReceived: upload_max_filesize is below 10M', [
-                'current'     => $sUploadMaxSize,
-                'recommended' => '10M',
-            ]);
-        }
-    }
-
-    /**
-     * Parse a php.ini-style size string ('10M', '512K', '2G', '1024') into bytes.
-     *
-     * Designed for boot-time self-checks: NEVER throws — returns 0 on empty
-     * or malformed input so a misconfigured host can never abort plugin
-     * registration via this helper (T-04-01-01 mitigation per D-35).
-     *
-     * @param  string  $sIni  raw ini value, e.g. result of `ini_get('upload_max_filesize')`
-     * @return int            byte count, or 0 on empty/malformed input
-     */
-    private static function parseIniSize(string $sIni): int
-    {
-        $sIni = trim($sIni);
-        if ($sIni === '') {
-            return 0;
-        }
-
-        $sLast = strtoupper(substr($sIni, -1));
-        $sNumeric = in_array($sLast, ['G', 'M', 'K'], true)
-            ? substr($sIni, 0, -1)
-            : $sIni;
-
-        if (! is_numeric($sNumeric)) {
-            return 0;
-        }
-
-        $iValue = (int) $sNumeric;
-
-        return match ($sLast) {
-            'G' => $iValue * 1024 * 1024 * 1024,
-            'M' => $iValue * 1024 * 1024,
-            'K' => $iValue * 1024,
-            default => $iValue,
-        };
     }
 
     /**
