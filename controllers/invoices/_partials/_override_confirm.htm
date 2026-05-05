@@ -1,6 +1,12 @@
 <?php
 /* UI-10 / D-18..D-21: typed-OVERRIDE confirmation modal — canonical popup
  * widget contract (header + body + footer only; popup.js wraps externally).
+ *
+ * Form scope MUST enclose both the inputs in modal-body AND the trigger
+ * button in modal-footer. October Larajax serializes the form ancestor of
+ * the AJAX trigger; if `<form>` only wraps the inputs and the button lives
+ * outside it, the request fires with NO `confirm_typed` / `prior_invoice_id`
+ * / uploaded file, so the server-side OVERRIDE-literal gate always rejects.
  */
 $iPriorInvoiceId = (int) ($prior_invoice_id ?? 0);
 ?>
@@ -8,14 +14,14 @@ $iPriorInvoiceId = (int) ($prior_invoice_id ?? 0);
     <h4 class="modal-title">Override and re-import — Confirm</h4>
     <button type="button" class="btn-close" data-dismiss="popup"></button>
 </div>
-<div class="modal-body">
-    <div class="alert alert-warning">
-        <p><strong>This re-applies the invoice ADDITIVELY on top of the prior apply.</strong></p>
-        <p>Stock will be incremented by new line quantities.</p>
-        <p>This is NOT a delta calculation. Continue?</p>
-    </div>
-    <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
-    <?= Form::open(['files' => true]) ?>
+<?= Form::open(['files' => true]) ?>
+    <div class="modal-body">
+        <div class="alert alert-warning">
+            <p><strong>This re-applies the invoice ADDITIVELY on top of the prior apply.</strong></p>
+            <p>Stock will be incremented by new line quantities.</p>
+            <p>This is NOT a delta calculation. Continue?</p>
+        </div>
+        <p>Type <code>OVERRIDE</code> exactly (uppercase) to confirm:</p>
         <input type="hidden" name="prior_invoice_id" value="<?= $iPriorInvoiceId ?>">
         <div class="form-group">
             <input type="text"
@@ -30,16 +36,16 @@ $iPriorInvoiceId = (int) ($prior_invoice_id ?? 0);
             <label>Re-upload the .HTM file</label>
             <input type="file" name="files[]" accept=".htm,.HTM">
         </div>
-    <?= Form::close() ?>
-</div>
-<div class="modal-footer">
-    <button type="button"
-            class="btn btn-warning"
-            data-request="onOverrideConfirm"
-            data-request-files
-            data-request-loading=".override-spinner">
-        Confirm override
-    </button>
-    <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-    <span class="override-spinner" style="display:none;">Re-importing&hellip;</span>
-</div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit"
+                class="btn btn-warning"
+                data-request="onOverrideConfirm"
+                data-request-files
+                data-request-loading=".override-spinner">
+            Confirm override
+        </button>
+        <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
+        <span class="override-spinner" style="display:none;">Re-importing&hellip;</span>
+    </div>
+<?= Form::close() ?>
