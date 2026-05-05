@@ -89,6 +89,7 @@ return [
         'apply_in_progress' => 'Apply already in progress for this invoice; please wait.',
         'apply_success'     => 'Invoice #:id applied — :units units added across :offers offers.',
         'apply_already_done' => 'Invoice already applied; nothing to do.',
+        'apply_bulk_summary' => 'Bulk apply complete — :applied applied (:units units), :skipped skipped (already-applied or non-parsed), :failed failed.',
         'initial_reset_only_success' => 'Initial reset done — all offer quantities zeroed and all products deactivated. No invoice imported (marker #:id).',
         'forbidden'         => 'You do not have permission to perform this action.',
         'upload_rejected_duplicate'      => 'Duplicate invoice rejected. Use Override and re-import below if reapply is intended.',
@@ -113,6 +114,8 @@ return [
         'spinner'              => 'Applying…',
         'invoice_id_required'  => 'invoice_id is required.',
         'invoice_not_found'    => 'Invoice #:id not found.',
+        'bulk_confirm'         => 'Apply all selected parsed invoices to live stock? Already-applied rows are skipped.',
+        'bulk_no_selection'    => 'No rows selected. Tick at least one parsed invoice before clicking Apply selected.',
     ],
     'override' => [
         'title'      => 'Override and re-import — Confirm',
@@ -143,5 +146,6 @@ return [
     ],
     'toolbar' => [
         'upload_invoices' => 'Upload Invoices',
+        'apply_bulk'      => 'Apply selected',
     ],
 ];

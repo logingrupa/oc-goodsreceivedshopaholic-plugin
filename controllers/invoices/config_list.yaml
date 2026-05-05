@@ -7,7 +7,7 @@ defaultSort:
     column: applied_at
     direction: desc
 showSetup: true
-showCheckboxes: false
+showCheckboxes: true
 toolbar:
     buttons: list_toolbar
     search:

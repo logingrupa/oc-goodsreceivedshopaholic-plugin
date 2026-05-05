@@ -89,6 +89,7 @@ return [
         'apply_in_progress' => 'Piemērošana jau notiek šim rēķinam; lūdzu, uzgaidiet.',
         'apply_success'     => 'Rēķins #:id piemērots — pievienotas :units vienības :offers piedāvājumiem.',
         'apply_already_done' => 'Rēķins jau ir piemērots; nekas nav jādara.',
+        'apply_bulk_summary' => 'Masveida piemērošana pabeigta — :applied piemēroti (:units vienības), :skipped izlaisti (jau piemēroti vai nav apstrādāti), :failed neizdevās.',
         'initial_reset_only_success' => 'Sākotnējā atiestatīšana pabeigta — visi piedāvājumu daudzumi nullēti un visi produkti deaktivizēti. Rēķins netika importēts (marķieris #:id).',
         'forbidden'         => 'Jums nav atļaujas veikt šo darbību.',
         'upload_rejected_duplicate'      => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
@@ -113,6 +114,8 @@ return [
         'spinner'             => 'Piemēro…',
         'invoice_id_required' => 'invoice_id ir obligāts.',
         'invoice_not_found'   => 'Rēķins #:id nav atrasts.',
+        'bulk_confirm'        => 'Piemērot visus atlasītos apstrādātos rēķinus krājumiem? Jau piemērotās rindas tiek izlaistas.',
+        'bulk_no_selection'   => 'Nav atlasītu rindu. Atzīmē vismaz vienu apstrādātu rēķinu, pirms klikšķini «Piemērot atlasītos».',
     ],
     'override' => [
         'title'      => 'Pārrakstīt un atkārtoti importēt — apstiprināt',
@@ -143,5 +146,6 @@ return [
     ],
     'toolbar' => [
         'upload_invoices' => 'Augšupielādēt rēķinus',
+        'apply_bulk'      => 'Piemērot atlasītos',
     ],
 ];

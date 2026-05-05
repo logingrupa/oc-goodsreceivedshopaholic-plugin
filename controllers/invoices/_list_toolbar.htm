@@ -7,4 +7,15 @@
         data-size="huge">
         <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.toolbar.upload_invoices')) ?>
     </button>
+    <button
+        type="button"
+        class="btn btn-success oc-icon-check"
+        data-request="onApplyBulk"
+        data-request-confirm="<?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.bulk_confirm')) ?>"
+        data-list-checked-trigger
+        data-list-checked-request
+        disabled="disabled">
+        <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.toolbar.apply_bulk')) ?>
+        <span data-list-checked-counter></span>
+    </button>
 </div>

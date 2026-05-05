@@ -631,6 +631,162 @@ class Invoices extends Controller
     }
 
     /**
+     * AJAX handler — bulk apply across operator-selected list rows.
+     *
+     * UAT 2026-05-05: operator uploaded 16 `.HTM` files, applied one
+     * via the in-popup button, then could not reach the remaining 15
+     * parsed invoices' Apply buttons (modal closed, re-upload blocked
+     * by the parsed-pending duplicate gate). The per-row Apply button
+     * on the detail page (commit f371976) unblocks the workflow but
+     * forces 15 round-trips. This bulk handler accepts the list-widget
+     * `checked[]` POST and applies every selected `parsed`-status row
+     * in one request.
+     *
+     * Status-skip contract (per UAT guidance): rows with status !=
+     * `parsed` are SILENTLY skipped. Operator can safely shift-click
+     * across mixed rows; already-applied rows are no-op rather than
+     * raising an error. `failed` and `rejected_duplicate` rows are
+     * also skipped (operator must explicitly retry those via the
+     * detail page).
+     *
+     * Per-row apply runs through the same Cache::lock + orchestrator
+     * path as `onApply`, so every Tiger-Style invariant from the
+     * single-apply contract is honoured (idempotency,
+     * lockForUpdate, audit log). Lock TTL is per invoice id, so
+     * parallel single-applies from another operator on a row not in
+     * this batch are not blocked.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onApplyBulk(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.apply_invoices');
+
+        $mChecked = Input::get('checked');
+        $arCheckedIds = $this->normalizeCheckedIds($mChecked);
+        if ($arCheckedIds === []) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.apply.bulk_no_selection',
+                ),
+            ]);
+        }
+
+        $iUserId = $this->resolveBackendUserId();
+
+        $arParsedIds = $this->fetchParsedInvoiceIds($arCheckedIds);
+
+        $iApplied = 0;
+        $iSkipped = count($arCheckedIds) - count($arParsedIds);
+        $iFailed = 0;
+        $arErrorIds = [];
+        $iTotalUnits = 0;
+
+        foreach ($arParsedIds as $iInvoiceId) {
+            $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
+            if (! $obLock->get()) {
+                $iFailed++;
+                $arErrorIds[] = $iInvoiceId;
+                continue;
+            }
+            try {
+                $obResult = $this->resolveApplyOrchestrator()->apply($iInvoiceId, $iUserId);
+                $iApplied++;
+                $iTotalUnits += (int) $obResult->units_added;
+            } catch (ApplyAlreadyDoneException $obException) {
+                $iSkipped++;
+            } catch (Throwable $obException) {
+                Log::error('goodsreceived.apply_bulk.failed', [
+                    'invoice_id' => $iInvoiceId,
+                    'exception'  => (string) $obException,
+                ]);
+                $iFailed++;
+                $arErrorIds[] = $iInvoiceId;
+            } finally {
+                $obLock->release();
+            }
+        }
+
+        Flash::success((string) Lang::get(
+            'logingrupa.goodsreceivedshopaholic::lang.flash.apply_bulk_summary',
+            [
+                'applied' => $iApplied,
+                'skipped' => $iSkipped,
+                'failed'  => $iFailed,
+                'units'   => $iTotalUnits,
+            ],
+        ));
+
+        if ($iFailed > 0) {
+            return [];
+        }
+
+        return [
+            'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices'),
+        ];
+    }
+
+    /**
+     * Filter `list<int>` of candidate invoice ids down to the ones whose
+     * status is `parsed`. Extracted from `onApplyBulk` so PHPStan L10
+     * sees the typed return shape rather than the mixed-typed pluck()
+     * collection (which trips `cast.int` on the foreach cast).
+     *
+     * @param  list<int>  $arCandidateIds
+     * @return list<int>
+     */
+    private function fetchParsedInvoiceIds(array $arCandidateIds): array
+    {
+        if ($arCandidateIds === []) {
+            return [];
+        }
+
+        $arOut = [];
+        $obRows = Invoice::whereIn('id', $arCandidateIds)
+            ->where('status', Invoice::STATUS_PARSED)
+            ->get(['id']);
+        foreach ($obRows as $obInvoice) {
+            if (! $obInvoice instanceof Invoice) {
+                continue;
+            }
+            $arOut[] = (int) $obInvoice->id;
+        }
+
+        return $arOut;
+    }
+
+    /**
+     * Coerce the raw `checked[]` POST payload into `list<int>`. October's
+     * list widget posts an array of stringified integer ids; defensively
+     * filter non-numeric entries (no malformed-POST UI error — clamp to
+     * empty list and let the caller handle the empty-selection case).
+     *
+     * @param  mixed  $mChecked
+     * @return list<int>
+     */
+    private function normalizeCheckedIds(mixed $mChecked): array
+    {
+        if (! is_array($mChecked)) {
+            return [];
+        }
+
+        $arOut = [];
+        foreach ($mChecked as $mId) {
+            if (! is_scalar($mId)) {
+                continue;
+            }
+            $iId = (int) $mId;
+            if ($iId > 0) {
+                $arOut[] = $iId;
+            }
+        }
+
+        return array_values(array_unique($arOut));
+    }
+
+    /**
      * Persist the `override_qty[]` POST array + `notes` field that arrive
      * from `_apply_modal.htm`. Idempotent — safe to call again with the
      * same payload (line saves use saveQuietly, notes save uses saveQuietly

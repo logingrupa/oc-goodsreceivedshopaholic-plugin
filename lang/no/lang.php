@@ -89,6 +89,7 @@ return [
         'apply_in_progress' => 'En anvendelse pågår allerede for denne fakturaen; vennligst vent.',
         'apply_success'     => 'Faktura #:id anvendt — :units enheter lagt til på :offers tilbud.',
         'apply_already_done' => 'Fakturaen er allerede anvendt; ingenting å gjøre.',
+        'apply_bulk_summary' => 'Bulk-anvendelse fullført — :applied anvendt (:units enheter), :skipped hoppet over (allerede anvendt eller ikke parset), :failed feilet.',
         'initial_reset_only_success' => 'Innledende tilbakestilling utført — alle tilbudsantall nullstilt og alle produkter deaktivert. Ingen faktura importert (markør #:id).',
         'forbidden'         => 'Du har ikke tillatelse til å utføre denne handlingen.',
         'upload_rejected_duplicate'      => 'Duplikatfaktura avvist. Bruk «Override and re-import» nedenfor hvis ny anvendelse er ønsket.',
@@ -113,6 +114,8 @@ return [
         'spinner'             => 'Anvender…',
         'invoice_id_required' => 'invoice_id er påkrevd.',
         'invoice_not_found'   => 'Faktura #:id ikke funnet.',
+        'bulk_confirm'        => 'Anvend alle valgte parsede fakturaer på lager? Allerede anvendte rader hoppes over.',
+        'bulk_no_selection'   => 'Ingen rader valgt. Kryss av minst én parset faktura før du klikker «Anvend valgte».',
     ],
     'override' => [
         'title'      => 'Overstyr og importer på nytt — bekreft',
@@ -143,5 +146,6 @@ return [
     ],
     'toolbar' => [
         'upload_invoices' => 'Last opp fakturaer',
+        'apply_bulk'      => 'Anvend valgte',
     ],
 ];
