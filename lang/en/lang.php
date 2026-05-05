@@ -92,6 +92,8 @@ return [
         'upload_rejected_duplicate'      => 'Duplicate invoice rejected. Use Override and re-import below if reapply is intended.',
         'upload_rejected_parsed_pending' => 'Invoice already parsed — apply or discard the existing parse before re-uploading.',
         'upload_failed'                  => 'Upload failed. See the error panel for details.',
+        'upload_failed_detail'           => 'Upload failed for ":filename" (:count error(s)). See the error panel below for details.',
+        'upload_failed_unexpected'       => 'Upload failed for ":filename" (:count error(s)) due to an unexpected error. The full exception has been logged server-side (storage/logs/system.log, channel: goodsreceived.upload.unexpected). See the error panel below.',
     ],
     'upload' => [
         'no_files'         => 'No files were uploaded.',

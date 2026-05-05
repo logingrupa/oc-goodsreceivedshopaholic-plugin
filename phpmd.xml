@@ -123,10 +123,21 @@
        (Safety > Performance > Features); the threshold bump documents
        the trade-off rather than inlining the discriminator into a
        single expression that obscures the two-case routing.
+
+       130 → 135 (descriptive error-only flash, 2026-05-05): the
+       fail-only flash no longer hard-codes a generic message — it now
+       composes filename + count + a log-pointer hint when the
+       boundary sanitizer's `upload.unexpected_error` sentinel is
+       present. Helper `buildErrorOnlyFlashMessage` adds a foreach +
+       sentinel match + ternary lang-key pick. Net +1 branch. Driven
+       by UAT feedback 2026-05-05: the previous "Upload failed. See
+       the error panel for details." flash gave operators no
+       attribution to the failed file or visibility into whether the
+       full Throwable was logged server-side.
     -->
     <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
         <properties>
-            <property name="maximum" value="130" />
+            <property name="maximum" value="135" />
         </properties>
     </rule>
 

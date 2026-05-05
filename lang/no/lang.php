@@ -92,6 +92,8 @@ return [
         'upload_rejected_duplicate'      => 'Duplikatfaktura avvist. Bruk «Override and re-import» nedenfor hvis ny anvendelse er ønsket.',
         'upload_rejected_parsed_pending' => 'Fakturaen er allerede parset — anvend eller forkast den eksisterende parsingen før du laster opp på nytt.',
         'upload_failed'                  => 'Opplasting feilet. Se feilpanelet nedenfor for detaljer.',
+        'upload_failed_detail'           => 'Opplasting feilet for «:filename» (:count feil). Se feilpanelet nedenfor for detaljer.',
+        'upload_failed_unexpected'       => 'Opplasting feilet for «:filename» (:count feil) på grunn av en uventet feil. Hele unntaket er logget på serveren (storage/logs/system.log, kanal: goodsreceived.upload.unexpected). Se feilpanelet nedenfor.',
     ],
     'upload' => [
         'no_files'         => 'Ingen filer ble lastet opp.',

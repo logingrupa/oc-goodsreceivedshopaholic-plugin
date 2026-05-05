@@ -360,10 +360,45 @@ class Invoices extends Controller
         }
 
         if (count($arErrors) > 0) {
-            Flash::error((string) Lang::get(
-                'logingrupa.goodsreceivedshopaholic::lang.flash.upload_failed',
-            ));
+            Flash::error($this->buildErrorOnlyFlashMessage($arErrors));
         }
+    }
+
+    /**
+     * Compose a descriptive flash for fail-only batches: include the error
+     * count and the first filename so the operator gets something actionable
+     * before reading the (also-rendered) per-file panel below. When ANY
+     * error message matches the boundary-sanitizer's generic
+     * `upload.unexpected_error` text, append a log-pointer hint so the
+     * operator knows the full Throwable was logged server-side rather than
+     * silently swallowed.
+     *
+     * @param  list<array{filename: string, message: string}> $arErrors
+     */
+    private function buildErrorOnlyFlashMessage(array $arErrors): string
+    {
+        $sFirstFilename = $arErrors === [] ? '' : $arErrors[0]['filename'];
+        $iCount = count($arErrors);
+
+        $sUnexpectedSentinel = (string) Lang::get(
+            'logingrupa.goodsreceivedshopaholic::lang.upload.unexpected_error',
+        );
+        $bHasUnexpected = false;
+        foreach ($arErrors as $arErr) {
+            if ($arErr['message'] === $sUnexpectedSentinel) {
+                $bHasUnexpected = true;
+                break;
+            }
+        }
+
+        $sKey = $bHasUnexpected
+            ? 'logingrupa.goodsreceivedshopaholic::lang.flash.upload_failed_unexpected'
+            : 'logingrupa.goodsreceivedshopaholic::lang.flash.upload_failed_detail';
+
+        return (string) Lang::get($sKey, [
+            'count'    => $iCount,
+            'filename' => $sFirstFilename,
+        ]);
     }
 
     /**

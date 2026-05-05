@@ -92,6 +92,8 @@ return [
         'upload_rejected_duplicate'      => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
         'upload_rejected_parsed_pending' => 'Rēķins jau ir apstrādāts — piemēro vai atmet esošo apstrādi pirms atkārtotas augšupielādes.',
         'upload_failed'                  => 'Augšupielāde neizdevās. Sk. kļūdu paneli zemāk.',
+        'upload_failed_detail'           => 'Augšupielāde neizdevās failam «:filename» (:count kļūda(s)). Sk. kļūdu paneli zemāk.',
+        'upload_failed_unexpected'       => 'Augšupielāde neizdevās failam «:filename» (:count kļūda(s)) negaidītas kļūdas dēļ. Pilna izņēmuma informācija ir reģistrēta servera žurnālā (storage/logs/system.log, kanāls: goodsreceived.upload.unexpected). Sk. kļūdu paneli zemāk.',
     ],
     'upload' => [
         'no_files'         => 'Faili netika augšupielādēti.',
