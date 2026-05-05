@@ -1,0 +1,33 @@
+<?php
+/* List-column partial for `Applied by` — replaces the prior
+ * `relation: appliedByUser` + `select:` SQL fragment that rendered
+ * `0` on production. The custom-select join failed when the SELECT
+ * clause was rewritten by October's list-widget query builder
+ * against the joined `backend_users` row, so the column display
+ * fell back to the raw `applied_by_user_id` int. The partial form
+ * sidesteps that by lazy-loading the relation per-row directly
+ * on the model instance.
+ */
+$obInvoice = $record;
+$obUser = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+    ? $obInvoice->appliedByUser
+    : null;
+
+if (! $obUser instanceof \Backend\Models\User) {
+    echo '&mdash;';
+
+    return;
+}
+
+$sFirst = trim((string) $obUser->first_name);
+$sLast = trim((string) $obUser->last_name);
+$sLogin = (string) $obUser->login;
+$sName = trim($sFirst.' '.$sLast);
+
+if ($sName === '') {
+    echo e($sLogin);
+
+    return;
+}
+
+echo e(sprintf('%s (%s)', $sName, $sLogin));

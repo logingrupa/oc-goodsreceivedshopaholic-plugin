@@ -21,9 +21,8 @@ columns:
         type: number
     applied_by_user_id:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_by'
-        type: text
-        relation: appliedByUser
-        select: "concat(coalesce(first_name, ''), ' ', coalesce(last_name, ''), ' (', login, ')')"
+        type: partial
+        path: $/logingrupa/goodsreceivedshopaholic/controllers/invoices/_partials/_column_applied_by.htm
     applied_at:
         label: 'logingrupa.goodsreceivedshopaholic::lang.column.applied_at'
         type: datetime
