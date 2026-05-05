@@ -6,6 +6,3 @@
     - create_logingrupa_goods_received_invoice_lines_table.php
     - create_logingrupa_goods_received_initial_reset_snapshot_table.php
     - update_lovata_shopaholic_offers_add_active_managed_by.php
-"1.0.2":
-    - "Widen prior_quantity to signed int — Lovata offer.quantity allows negatives (over-sold / back-order)."
-    - update_initial_reset_snapshot_widen_prior_quantity.php

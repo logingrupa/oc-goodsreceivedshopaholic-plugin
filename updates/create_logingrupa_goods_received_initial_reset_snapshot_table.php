@@ -33,7 +33,11 @@ class CreateLogingrupaGoodsReceivedInitialResetSnapshotTable extends Migration
             $obTable->bigIncrements('id');
             $obTable->unsignedBigInteger('invoice_id');
             $obTable->unsignedInteger('offer_id');
-            $obTable->unsignedInteger('prior_quantity')->default(0);
+            // Signed int — Lovata `lovata_shopaholic_offers.quantity` permits
+            // negative values (over-sold / back-order). The snapshot must
+            // mirror that semantics or the initial-reset transaction blows
+            // up with SQLSTATE[22003] on the first negative row.
+            $obTable->integer('prior_quantity')->default(0);
             $obTable->boolean('prior_offer_active')->default(false);
             $obTable->unsignedInteger('prior_product_id')->nullable();
             $obTable->boolean('prior_product_active')->default(false);
