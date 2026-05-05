@@ -69,7 +69,6 @@ The plugin ships disabled by default. Until `enabled=true` is set on the site, n
 |-------------------------------------------------------------------|---------------------------------------------------------------|
 | `logingrupa_goods_received_invoices`                              | Invoice header — one row per uploaded `.HTM` file             |
 | `logingrupa_goods_received_invoice_lines`                         | One row per `.HTM` data row (EAN, qty, override_qty, match)   |
-| `logingrupa_goods_received_initial_reset_snapshot`                | Pre-mutation snapshot for one-shot baseline reset (rollback)  |
 | `lovata_shopaholic_offers.active_managed_by` (column added)       | Provenance flag — `'system'` (default) or `'operator'`        |
 
 ---
@@ -186,37 +185,34 @@ If the distributor sent a corrected invoice meant to **replace** the prior recei
 
 ## Initial-reset runbook (one-shot baseline)
 
-The one-shot baseline reset is the day-zero mechanism that hands `offer.quantity` ownership from the legacy import path (or manual DB state) to this plugin. It zeroes every offer's quantity, deactivates every offer + product, snapshots prior values for rollback, and then immediately applies the first GRN invoice on top of the cleared state.
+The one-shot baseline reset is the day-zero mechanism that hands `offer.quantity` ownership from the legacy import path (or manual DB state) to this plugin. It zeroes every offer's quantity, deactivates every offer + product, then immediately applies the first GRN invoice on top of the cleared state (or runs reset-only if no `.HTM` is selected).
 
-> **Reset is one-shot — once `Invoice.initial_reset_applied=true` exists on this site, the gate cannot fire again. There is no automated rollback CLI in v1.**
+> **Reset is one-shot — once `Invoice.initial_reset_applied=true` exists on this site, the gate cannot fire again. There is NO automated rollback. Take a DB backup before continuing.**
 
 ### Pre-flight checklist
 
 Before starting, confirm every item below:
 
 1. **`Settings.allow_initial_reset` is ON for this site.** Toggle at Backend → Settings → Goods Received.
-2. **No prior reset has been recorded.** Check the Invoice History list — no row has `initial_reset_applied=true`. (The pre-mutation modal will refuse if a prior reset exists; this is the second of two guards — defense in depth.)
+2. **No prior reset has been recorded.** Check the Invoice History list — no row has `initial_reset_applied=true`.
 3. **You hold `logingrupa.goodsreceived.run_initial_reset`** — verify under Settings → Administrators → Edit role.
-4. **A DB backup is taken.** This plugin's `logingrupa_goods_received_initial_reset_snapshot` table captures per-row prior values (`prior_quantity`, `prior_offer_active`, `prior_product_active`, `prior_product_id`) — but a full DB backup is the operator's safety net for anything outside the snapshot scope. Do NOT skip this step.
-5. **Estimate snapshot count.** The pre-mutation modal will show actual counts before commit (`This will zero out N offers and deactivate M products`); you should already have a rough idea of N + M from the catalog.
-6. **No other backend session is uploading or applying.** Reset takes a write-heavy lock on `lovata_shopaholic_offers` + `lovata_shopaholic_products`; concurrent activity makes diagnostics painful if anything fails.
+4. **A DB backup is taken.** Use `/home/forge/backup_db.sh` (or your equivalent) and verify the dump file exists before continuing. This is the only recovery path if reset runs in error.
+5. **No other backend session is uploading or applying.** Reset takes a write-heavy lock on `lovata_shopaholic_offers` + `lovata_shopaholic_products`; concurrent activity makes diagnostics painful if anything fails.
 
 ### Procedure
 
-1. Upload the first `.HTM` invoice via the standard upload flow.
-2. On the preview screen, tick the **One-shot baseline reset** checkbox (visible only when `allow_initial_reset=true` AND no prior reset exists).
-3. Click Apply. The pre-mutation modal opens with the actual snapshot count:
-   > *"This will zero out N offers and deactivate M products before applying invoice `Nr_PROxxxxx`."*
-4. Type the literal `RESET` (uppercase) in the confirmation field. The server-side check is strict equality (`===`) — mistyped input is rejected.
-5. Click **Run reset + apply**.
-6. The plugin runs in **strict order** (locked per D-24):
-   1. **PARSE** — extract data rows from the `.HTM`.
-   2. **RESET** — snapshot every offer + product into `logingrupa_goods_received_initial_reset_snapshot` (chunked-of-500 batched INSERT), zero `offer.quantity`, set `offer.active=false`, set `product.active=false`, mark `Invoice.initial_reset_applied=true`.
-   3. **APPLY** — increment `offer.quantity` by the new invoice's line quantities; auto-activate fires per the Settings.
+1. Open the Invoices list → click **Initial Reset** in the toolbar.
+2. The pre-mutation modal opens with actual counts (`This will zero out N offers and deactivate M products`).
+3. Type the literal `RESET` (uppercase) in the confirmation field. Server-side check is strict equality.
+4. (Optional) Select the FIRST `.HTM` invoice to apply on top of the cleared state. Leave blank for reset-only.
+5. Click **Run reset + apply**. The plugin runs:
+   1. **(if file)** PARSE the `.HTM`.
+   2. RESET — zero every `offer.quantity`, set `offer.active=false`, set `product.active=false`, mark `Invoice.initial_reset_applied=true`.
+   3. **(if file)** APPLY — increment `offer.quantity` by the new invoice's line quantities; auto-activate fires per Settings (offer + parent product).
 
 ### What gets zeroed / deactivated
 
-After step 6.2 (RESET) and before step 6.3 (APPLY):
+After RESET (and before APPLY when a file is provided):
 
 | Field                                        | New value           |
 |----------------------------------------------|---------------------|
@@ -227,30 +223,9 @@ After step 6.2 (RESET) and before step 6.3 (APPLY):
 
 The Invoice row gets `initial_reset_applied=true` so the gate cannot fire again on this site.
 
-### Reading the snapshot table for rollback
+### Rollback
 
-If reset was triggered in error, the snapshot lets the operator reconstruct prior state. **No automated rollback CLI ships in v1** — the procedure below is manual operator action against the DB.
-
-```sql
--- Inspect the snapshot rows for the reset invoice
-SELECT *
-FROM logingrupa_goods_received_initial_reset_snapshot
-WHERE invoice_id = <reset_invoice_id>;
-```
-
-Each snapshot row carries:
-
-| Column                 | Pre-reset value source                       |
-|------------------------|----------------------------------------------|
-| `offer_id`             | the offer's id                               |
-| `prior_quantity`       | `lovata_shopaholic_offers.quantity` before   |
-| `prior_offer_active`   | `lovata_shopaholic_offers.active` before     |
-| `prior_product_id`     | `lovata_shopaholic_offers.product_id` before |
-| `prior_product_active` | `lovata_shopaholic_products.active` before   |
-
-To roll back manually: walk the snapshot, restore each field on `lovata_shopaholic_offers` + `lovata_shopaholic_products`, then `DELETE` the reset Invoice row + its `initial_reset_applied=true` flag. Take a DB backup BEFORE rolling back — this is a destructive secondary operation.
-
-A rollback CLI (`php artisan goodsreceived:rollback_initial_reset --invoice=<id>`) is on the v2 backlog.
+There is no automated rollback. Recovery path: restore the pre-reset DB backup. Snapshot scaffolding was removed 2026-05-05 because no programmatic restore was ever shipped — the table existed forensic-only and added unmaintained surface area.
 
 ---
 

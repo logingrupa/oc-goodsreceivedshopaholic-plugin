@@ -160,10 +160,21 @@
        catch (1), failed-vs-success redirect branch (1), normalize-
        checked-ids helper foreach + filters (4). Plus the new
        `normalizeCheckedIds` method itself. Net +8 branches.
+
+       155 → 170 (onDelete with stock-rollback, 2026-05-05): adds
+       `onDelete` handler that reverses stock writes when an applied
+       invoice is deleted (subtracts each matched line's
+       `override_qty ?? qty` from `Offer.quantity`, reconciles via
+       ActiveFlagService). Branching for: invoice-id guard (1),
+       not-found guard (1), override-chain guard (1), status check
+       (1), reset-marker skip (1), reverse-stock helper foreach +
+       defensive instanceof + qty source ternary + offer find (5).
+       Plus `reverseAppliedStockWrites` + `resolveActiveFlagService`
+       methods. Net +10 branches.
     -->
     <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
         <properties>
-            <property name="maximum" value="155" />
+            <property name="maximum" value="170" />
         </properties>
     </rule>
 

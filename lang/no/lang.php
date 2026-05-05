@@ -45,6 +45,7 @@ return [
         'operator_overrides_active_flag' => 'Hopper over dette tilbudet fordi en operatør manuelt satte aktiv-flagget (active_managed_by=operator).',
         'malformed_htm'                  => 'Den opplastede HTM-filen er feilformatert og kan ikke parses.',
         'initial_reset_unexpected'       => 'Innledende tilbakestilling feilet på grunn av en uventet feil (markørfaktura #:id). Hele unntaket er logget på serveren (storage/logs/system.log, kanal: goodsreceived.initial_reset.unexpected). Gjennomgå loggen og forkast markørfakturaen hvis ny kjøring er ønsket.',
+        'delete_blocked_by_override'     => 'Kan ikke slette: denne fakturaen er overstyrt av en senere anvendt faktura. Slett overstyringen først.',
     ],
     'validation' => [
         'invoice_number_required'      => 'Fakturanummer er påkrevd.',
@@ -91,6 +92,8 @@ return [
         'apply_already_done' => 'Fakturaen er allerede anvendt; ingenting å gjøre.',
         'apply_bulk_summary' => 'Bulk-anvendelse fullført — :applied anvendt (:units enheter), :skipped hoppet over (allerede anvendt eller ikke parset), :failed feilet.',
         'initial_reset_only_success' => 'Innledende tilbakestilling utført — alle tilbudsantall nullstilt og alle produkter deaktivert. Ingen faktura importert (markør #:id).',
+        'invoice_deleted'    => 'Faktura :number slettet; lagerendringer reversert hvis fakturaen var anvendt.',
+        'delete_confirm'     => 'Slette denne fakturaen? Anvendte fakturaer får sine lagerendringer reversert. Denne handlingen kan ikke angres.',
         'forbidden'         => 'Du har ikke tillatelse til å utføre denne handlingen.',
         'upload_rejected_duplicate'      => 'Duplikatfaktura avvist. Bruk «Override and re-import» nedenfor hvis ny anvendelse er ønsket.',
         'upload_rejected_parsed_pending' => 'Fakturaen er allerede parset — anvend eller forkast den eksisterende parsingen før du laster opp på nytt.',

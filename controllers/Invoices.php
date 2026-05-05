@@ -787,6 +787,139 @@ class Invoices extends Controller
     }
 
     /**
+     * AJAX handler — delete an invoice with stock-rollback semantics.
+     *
+     *   - status=applied  → reverse the stock writes (subtract every
+     *                       matched line's `override_qty ?? qty` from
+     *                       `Offer.quantity`), run ActiveFlagService so
+     *                       offers/products go inactive at zero, then
+     *                       cascade-delete the invoice + lines.
+     *   - status=parsed   → just delete (no stock was written).
+     *   - RESET marker    → just delete (no real stock writes — initial
+     *                       reset is recorded but cannot be undone via
+     *                       this handler).
+     *
+     * Override chain guard: refuses to delete an invoice that has been
+     * overridden by a later applied invoice (would break the audit
+     * chain). Operator must delete the override first.
+     *
+     * Permission gate: `apply_invoices` (same surface as forward apply
+     * — rollback is the inverse operation, requires the same trust).
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    public function onDelete(): array
+    {
+        $this->assertPermission('logingrupa.goodsreceived.apply_invoices');
+
+        $iInvoiceId = $this->scalarToInt(Input::get('invoice_id'));
+        if ($iInvoiceId <= 0) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.apply.invoice_id_required',
+                ),
+            ]);
+        }
+
+        $obInvoice = Invoice::find($iInvoiceId);
+        if (! $obInvoice instanceof Invoice) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.apply.invoice_not_found',
+                    ['id' => $iInvoiceId],
+                ),
+            ]);
+        }
+
+        $bHasOverrides = Invoice::where('override_of_invoice_id', $iInvoiceId)->exists();
+        if ($bHasOverrides) {
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.exception.delete_blocked_by_override',
+                ),
+            ]);
+        }
+
+        DB::transaction(function () use ($obInvoice): void {
+            if ((string) $obInvoice->status === Invoice::STATUS_APPLIED && ! (bool) $obInvoice->initial_reset_applied) {
+                $this->reverseAppliedStockWrites($obInvoice);
+            }
+            $obInvoice->delete();
+        });
+
+        Flash::success((string) Lang::get(
+            'logingrupa.goodsreceivedshopaholic::lang.flash.invoice_deleted',
+            ['number' => (string) $obInvoice->invoice_number],
+        ));
+
+        return [
+            'redirect' => Backend::url('logingrupa/goodsreceivedshopaholic/invoices'),
+        ];
+    }
+
+    /**
+     * Subtract each matched line's applied units from the parent offer's
+     * `Offer.quantity`. Mirrors `StockApplyService::apply` in reverse:
+     *   - For each matched InvoiceLine, decrement `Offer.quantity` by
+     *     `override_qty ?? qty` via saveQuietly (no event spam).
+     *   - Reconcile via ActiveFlagService so an offer that returns to
+     *     zero deactivates per the auto-deactivate setting.
+     *
+     * Negative results are allowed (Lovata permits negative quantity for
+     * back-order semantics). The operator's signal that something went
+     * wrong is a negative value showing on the storefront — not a thrown
+     * exception in the rollback path.
+     */
+    private function reverseAppliedStockWrites(Invoice $obInvoice): void
+    {
+        $arLines = InvoiceLine::where('invoice_id', (int) $obInvoice->id)
+            ->whereNotNull('matched_offer_id')
+            ->get();
+
+        $arAffectedOfferIds = [];
+        foreach ($arLines as $obLine) {
+            if (! $obLine instanceof InvoiceLine) {
+                continue;
+            }
+            $iOfferId = $this->scalarToInt($obLine->matched_offer_id);
+            if ($iOfferId <= 0) {
+                continue;
+            }
+            $mOverride = $obLine->override_qty;
+            $mQty = $obLine->qty;
+            $iUnits = $mOverride !== null
+                ? $this->scalarToInt($mOverride)
+                : $this->scalarToInt($mQty);
+            if ($iUnits <= 0) {
+                continue;
+            }
+            $obOffer = Offer::find($iOfferId);
+            if (! $obOffer instanceof Offer) {
+                continue;
+            }
+            $obOffer->quantity = $this->scalarToInt($obOffer->quantity) - $iUnits;
+            $obOffer->saveQuietly();
+            $arAffectedOfferIds[] = $iOfferId;
+        }
+
+        if ($arAffectedOfferIds !== []) {
+            $this->resolveActiveFlagService()->reconcile(array_values(array_unique($arAffectedOfferIds)));
+        }
+    }
+
+    /**
+     * Resolve ActiveFlagService from the IoC container. Protected so the
+     * Pest test shim can swap the seam (mirrors `resolveApplyOrchestrator`
+     * + `resolveParseOrchestrator`).
+     */
+    protected function resolveActiveFlagService(): \Logingrupa\GoodsReceivedShopaholic\Classes\Apply\ActiveFlagService
+    {
+        return app(\Logingrupa\GoodsReceivedShopaholic\Classes\Apply\ActiveFlagService::class);
+    }
+
+    /**
      * Persist the `override_qty[]` POST array + `notes` field that arrive
      * from `_apply_modal.htm`. Idempotent — safe to call again with the
      * same payload (line saves use saveQuietly, notes save uses saveQuietly
@@ -1002,8 +1135,8 @@ class Invoices extends Controller
     }
 
     /**
-     * AJAX handler: render the RESET warning modal with pre-mutation snapshot
-     * counts (UI-08 / D-22 / D-23).
+     * AJAX handler: render the RESET warning modal with pre-mutation
+     * offer + product counts (UI-08 / D-22 / D-23).
      *
      * Two-gate guard mirrors InitialResetService::assertAllowed: the
      * SettingsAccessor::allowInitialReset() toggle must be on AND no prior
@@ -1087,8 +1220,8 @@ class Invoices extends Controller
 
         // No file → reset-only path (zero stock + deactivate products,
         // no invoice import). The reset service still requires an Invoice
-        // row for the snapshot foreign key + the one-shot bit, so a
-        // sentinel marker invoice is created with status=applied and
+        // row to flip the one-shot bit on, so a sentinel marker invoice
+        // is created with status=applied and
         // invoice_number=RESET_NO_INVOICE_<YmdHis_uniq>. The unique-index
         // is honoured by the timestamp + 4-digit suffix.
         if ($arFiles === null || $arFiles === []) {
@@ -1232,9 +1365,9 @@ class Invoices extends Controller
      * invoice import. Operator typed RESET but did not select a `.HTM`
      * file, signaling "I want a clean baseline; the next upload will
      * be the first stock event." The reset service requires an Invoice
-     * row for the snapshot foreign key + one-shot bit, so a sentinel
-     * marker invoice is created with status=applied and a synthetic
-     * invoice_number so the UNIQUE index is honoured.
+     * row to flip the one-shot bit on, so a sentinel marker invoice is
+     * created with status=applied and a synthetic invoice_number so
+     * the UNIQUE index is honoured.
      *
      * @return array<string, mixed>
      *

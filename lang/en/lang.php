@@ -45,6 +45,7 @@ return [
         'operator_overrides_active_flag' => 'Skipping this offer because an operator manually set its active flag (active_managed_by=operator).',
         'malformed_htm'                  => 'The uploaded HTM file is malformed and cannot be parsed.',
         'initial_reset_unexpected'       => 'Initial reset failed due to an unexpected error (marker invoice #:id). The full exception has been logged server-side (storage/logs/system.log, channel: goodsreceived.initial_reset.unexpected). Review the log and discard the marker invoice if rerun is intended.',
+        'delete_blocked_by_override'     => 'Cannot delete: this invoice has been overridden by a later applied invoice. Delete the override first.',
     ],
     'validation' => [
         'invoice_number_required'      => 'An invoice number is required.',
@@ -91,6 +92,8 @@ return [
         'apply_already_done' => 'Invoice already applied; nothing to do.',
         'apply_bulk_summary' => 'Bulk apply complete — :applied applied (:units units), :skipped skipped (already-applied or non-parsed), :failed failed.',
         'initial_reset_only_success' => 'Initial reset done — all offer quantities zeroed and all products deactivated. No invoice imported (marker #:id).',
+        'invoice_deleted'    => 'Invoice :number deleted; stock writes reversed if the invoice was applied.',
+        'delete_confirm'     => 'Delete this invoice? Applied invoices have their stock writes reversed. This action cannot be undone.',
         'forbidden'         => 'You do not have permission to perform this action.',
         'upload_rejected_duplicate'      => 'Duplicate invoice rejected. Use Override and re-import below if reapply is intended.',
         'upload_rejected_parsed_pending' => 'Invoice already parsed — apply or discard the existing parse before re-uploading.',

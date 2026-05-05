@@ -114,30 +114,10 @@ abstract class ApplyTestCase extends GoodsReceivedTestCase
             $obTable->index('matched_offer_id');
         });
 
-        // Plan 03-05 (APPLY-05 / QA-06): InitialResetService snapshots prior
-        // offer + product state to this table BEFORE the one-shot baseline
-        // mutation. `created_at` only — no `updated_at`; rows are write-once.
-        // Mirror of the Phase 1 plugin migration; recreated inline here so the
-        // hermetic Apply schema remains decoupled from migration order
-        // (rationale: same SQLite drop-indexed-column trap that motivated the
-        // rest of this base class).
-        \Schema::create('logingrupa_goods_received_initial_reset_snapshot', function ($obTable): void {
-            $obTable->increments('id');
-            $obTable->unsignedBigInteger('invoice_id');
-            $obTable->unsignedBigInteger('offer_id');
-            $obTable->integer('prior_quantity');
-            $obTable->boolean('prior_offer_active');
-            $obTable->unsignedBigInteger('prior_product_id')->nullable();
-            $obTable->boolean('prior_product_active');
-            $obTable->timestamp('created_at')->nullable();
-            $obTable->index('invoice_id');
-            $obTable->index('offer_id');
-        });
     }
 
     protected function tearDown(): void
     {
-        \Schema::dropIfExists('logingrupa_goods_received_initial_reset_snapshot');
         \Schema::dropIfExists('logingrupa_goods_received_invoice_lines');
         \Schema::dropIfExists('logingrupa_goods_received_invoices');
         \Schema::dropIfExists('lovata_shopaholic_offers');

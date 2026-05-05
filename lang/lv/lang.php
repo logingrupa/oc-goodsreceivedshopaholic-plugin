@@ -45,6 +45,7 @@ return [
         'operator_overrides_active_flag' => 'Šis piedāvājums tiek izlaists, jo operators manuāli iestatīja tā aktīvo karogu (active_managed_by=operator).',
         'malformed_htm'                  => 'Augšupielādētais HTM fails ir bojāts un to nevar apstrādāt.',
         'initial_reset_unexpected'       => 'Sākotnējā atiestatīšana neizdevās negaidītas kļūdas dēļ (marķiera rēķins #:id). Pilna izņēmuma informācija ir reģistrēta servera žurnālā (storage/logs/system.log, kanāls: goodsreceived.initial_reset.unexpected). Pārbaudi žurnālu un atmet marķiera rēķinu, ja paredzēta atkārtota palaišana.',
+        'delete_blocked_by_override'     => 'Nevar dzēst: šis rēķins ir pārrakstīts ar vēlāku piemērotu rēķinu. Vispirms dzēs pārrakstīšanu.',
     ],
     'validation' => [
         'invoice_number_required'      => 'Rēķina numurs ir obligāts.',
@@ -91,6 +92,8 @@ return [
         'apply_already_done' => 'Rēķins jau ir piemērots; nekas nav jādara.',
         'apply_bulk_summary' => 'Masveida piemērošana pabeigta — :applied piemēroti (:units vienības), :skipped izlaisti (jau piemēroti vai nav apstrādāti), :failed neizdevās.',
         'initial_reset_only_success' => 'Sākotnējā atiestatīšana pabeigta — visi piedāvājumu daudzumi nullēti un visi produkti deaktivizēti. Rēķins netika importēts (marķieris #:id).',
+        'invoice_deleted'    => 'Rēķins :number dzēsts; krājumu izmaiņas atgrieztas, ja rēķins bija piemērots.',
+        'delete_confirm'     => 'Dzēst šo rēķinu? Piemērotiem rēķiniem krājumu izmaiņas tiek atgrieztas. Šī darbība nav atsaucama.',
         'forbidden'         => 'Jums nav atļaujas veikt šo darbību.',
         'upload_rejected_duplicate'      => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
         'upload_rejected_parsed_pending' => 'Rēķins jau ir apstrādāts — piemēro vai atmet esošo apstrādi pirms atkārtotas augšupielādes.',

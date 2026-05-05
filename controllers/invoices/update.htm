@@ -1,18 +1,27 @@
 <?php
 /* Sticky-footer form layout — same pattern as
  * `lovata/shopaholic/controllers/categories/update.htm`. October's
- * `Form::open(['class' => 'layout'])` + the trailing
- * `.form-buttons` div produce a fixed bottom toolbar that sticks
- * to the viewport while the form scrolls. The Apply button surfaces
- * here when status=parsed (UAT 2026-05-05) — same `onApplyShowConfirm`
- * AJAX handler that the upload modal calls.
+ * `Form::open(['class' => 'layout'])` + the trailing `.form-buttons`
+ * div produce a fixed bottom toolbar that sticks to the viewport
+ * while the form scrolls. The Apply button surfaces here when
+ * status=parsed (UAT 2026-05-05) — same `onApplyShowConfirm` AJAX
+ * handler that the upload modal calls.
  *
- * Breadcrumb at top wires "Invoices" → current invoice number per
+ * Delete button is danger-styled, danger-iconned, gated by
+ * `apply_invoices` permission server-side (same trust surface as
+ * forward apply). For applied invoices it reverses stock writes;
+ * for parsed invoices it just discards. Override-chain guard
+ * server-side refuses if a later override invoice points at this id.
+ *
+ * Breadcrumb at top wires "Invoices" -> current invoice number per
  * the canonical October backend pattern.
  */
 $obInvoice = $this->formGetModel();
 $bIsParsed = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
     && (string) $obInvoice->status === \Logingrupa\GoodsReceivedShopaholic\Models\Invoice::STATUS_PARSED;
+$iInvoiceId = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+    ? (int) $obInvoice->id
+    : 0;
 $sListUrl = Backend::url('logingrupa/goodsreceivedshopaholic/invoices');
 ?>
 
@@ -37,8 +46,17 @@ $sListUrl = Backend::url('logingrupa/goodsreceivedshopaholic/invoices');
                         class="btn btn-primary oc-icon-check"
                         data-control="popup"
                         data-handler="onApplyShowConfirm"
-                        data-request-data="invoice_id: <?= (int) $obInvoice->id ?>">
+                        data-request-data="invoice_id: <?= $iInvoiceId ?>">
                     <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
+                </button>
+            <?php endif; ?>
+            <?php if ($iInvoiceId > 0): ?>
+                <button type="button"
+                        class="oc-icon-trash-o btn-icon danger pull-right"
+                        data-request="onDelete"
+                        data-request-data="invoice_id: <?= $iInvoiceId ?>"
+                        data-request-confirm="<?= e(trans('logingrupa.goodsreceivedshopaholic::lang.flash.delete_confirm')) ?>"
+                        data-load-indicator="<?= e(trans('backend::lang.form.deleting')) ?>">
                 </button>
             <?php endif; ?>
             <span class="btn-text">

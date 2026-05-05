@@ -19,7 +19,7 @@ $iProductCount = (int) ($product_count ?? 0);
     <div class="modal-body">
         <div class="alert alert-danger">
             <p><strong>This will zero out <?= $iOfferCount ?> offers and deactivate <?= $iProductCount ?> products.</strong></p>
-            <p>The current state is snapshotted to <code>logingrupa_goods_received_initial_reset_snapshot</code> for rollback. This is one-shot.</p>
+            <p>This is one-shot — there is no automated rollback. Take a DB backup before continuing.</p>
         </div>
         <p>Type <code>RESET</code> exactly (uppercase) to confirm:</p>
         <div class="form-group">

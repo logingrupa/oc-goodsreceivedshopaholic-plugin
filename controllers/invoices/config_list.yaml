@@ -21,8 +21,6 @@ filter:
             options:
                 parsed: 'Parsed'
                 applied: 'Applied'
-                failed: 'Failed'
-                rejected_duplicate: 'Rejected (duplicate)'
 # country_code filter dropped — each site (.no/.lv/.lt) has own DB so
 # every row already has the same country_code. Column kept on the model
 # for audit trail (proves file matched the distributor namespace at parse

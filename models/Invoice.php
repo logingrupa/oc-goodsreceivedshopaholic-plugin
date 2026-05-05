@@ -45,7 +45,6 @@ use October\Rain\Database\Traits\Validation;
  * @property \Carbon\Carbon $updated_at
  *
  * @property-read \October\Rain\Database\Collection|InvoiceLine[] $lines
- * @property-read \October\Rain\Database\Collection|InitialResetSnapshot[] $snapshots
  * @property-read Invoice|null $overrideOf
  * @property-read \October\Rain\Database\Collection|Invoice[] $overrides
  * @property-read \System\Models\File|null $original_file
@@ -59,10 +58,6 @@ class Invoice extends Model
     public const STATUS_PARSED = 'parsed';
 
     public const STATUS_APPLIED = 'applied';
-
-    public const STATUS_FAILED = 'failed';
-
-    public const STATUS_REJECTED_DUPLICATE = 'rejected_duplicate';
 
     /** @var string */
     public $table = 'logingrupa_goods_received_invoices';
@@ -110,7 +105,6 @@ class Invoice extends Model
     /** @var array<string, array<int|string, mixed>> */
     public $hasMany = [
         'lines' => [InvoiceLine::class, 'key' => 'invoice_id'],
-        'snapshots' => [InitialResetSnapshot::class, 'key' => 'invoice_id'],
         'overrides' => [self::class, 'key' => 'override_of_invoice_id'],
     ];
 
