@@ -7,6 +7,7 @@ namespace Logingrupa\GoodsReceivedShopaholic\Classes\Apply;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor;
 use Lovata\Shopaholic\Models\Offer;
+use Lovata\Shopaholic\Models\Product;
 use October\Rain\Database\Collection as DbCollection;
 
 /**
@@ -90,9 +91,66 @@ class ActiveFlagService
         /** @var DbCollection<int, Offer> $obOffers */
         $obOffers = Offer::whereIn('id', $arOfferIds)->get();
 
-        foreach ($obOffers as $obOffer) {
-            $this->reconcileSingleOffer($obOffer, $bAutoDeactivate, $bAutoActivate);
+        $arActivatedProductIds = $this->reconcileOfferBatch($obOffers, $bAutoDeactivate, $bAutoActivate);
+
+        if ($bAutoActivate && $arActivatedProductIds !== []) {
+            $this->reactivateInactiveProducts($arActivatedProductIds);
         }
+    }
+
+    /**
+     * Iterate the offer batch through `reconcileSingleOffer`, collecting
+     * parent product ids of offers that flipped to active=true. Extracted
+     * from `reconcile()` so the caller stays under the cyclomatic
+     * threshold — the symmetric apply-after-reset case (D-19) requires
+     * the parent-product activation pass to live alongside the offer
+     * loop, but inlining tripped the gate.
+     *
+     * @param  DbCollection<int, Offer>  $obOffers
+     * @return list<int>  Distinct product ids whose offers just flipped active=true.
+     */
+    private function reconcileOfferBatch(DbCollection $obOffers, bool $bAutoDeactivate, bool $bAutoActivate): array
+    {
+        $arActivatedProductIds = [];
+        foreach ($obOffers as $obOffer) {
+            $bActivated = $this->reconcileSingleOffer($obOffer, $bAutoDeactivate, $bAutoActivate);
+            if (! $bActivated || (bool) $obOffer->active !== true) {
+                continue;
+            }
+            $iProductId = (int) $obOffer->product_id;
+            if ($iProductId > 0) {
+                $arActivatedProductIds[$iProductId] = true;
+            }
+        }
+
+        return array_keys($arActivatedProductIds);
+    }
+
+    /**
+     * Activate products that are currently inactive and now have at least
+     * one in-stock offer. Single batched UPDATE per call. NO provenance
+     * gate on Product (D-19 retained — Lovata Product has no
+     * `active_managed_by` column); the only safety is the inactive-only
+     * filter so an operator-deactivated product is NOT clobbered.
+     *
+     * Note: this method does NOT deactivate products on zero stock — that
+     * concern is left to a future product-level reconcile pass. Reset is
+     * the only path that broadly deactivates products today, so the
+     * forward direction (apply re-activates) is the only one needed for
+     * the symmetric apply-after-reset workflow.
+     *
+     * @param  list<int>  $arProductIds  Distinct product ids whose offers
+     *                                   just flipped to active=true.
+     */
+    private function reactivateInactiveProducts(array $arProductIds): void
+    {
+        if ($arProductIds === []) {
+            return;
+        }
+
+        Product::whereIn('id', $arProductIds)
+            ->where('active', false)
+            ->update(['active' => true]);
     }
 
     /**
