@@ -2,7 +2,7 @@
 
 October CMS plugin for the Lovata Shopaholic ecosystem that imports distributor goods-received notes (`.HTM` delivery receipts) and applies them as incremental stock additions to matched offers.
 
-[![Composer](https://img.shields.io/badge/composer-logingrupa%2Foc--goodsreceived--plugin-blue.svg)](https://packagist.org/packages/logingrupa/oc-goodsreceived-plugin)
+[![Composer](https://img.shields.io/badge/composer-logingrupa%2Foc--goodsreceivedshopaholic--plugin-blue.svg)](https://packagist.org/packages/logingrupa/oc-goodsreceivedshopaholic-plugin)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![PHP](https://img.shields.io/badge/php-%5E8.3-777bb4.svg)](https://www.php.net/)
 [![October CMS](https://img.shields.io/badge/october--cms-v4-orange.svg)](https://octobercms.com/)
@@ -32,7 +32,7 @@ The plugin installs as a standard October CMS plugin via Composer. It is targete
 
 ```bash
 # 1. Pull the plugin into the project's composer.json
-composer require logingrupa/oc-goodsreceived-plugin
+composer require logingrupa/oc-goodsreceivedshopaholic-plugin
 
 # 2. Run the plugin migrations (creates 3 tables + extends offers + extends products)
 php artisan october:up
@@ -376,7 +376,7 @@ The plugin's `composer.json` is publish-ready (verified at v1.0 close):
 
 | Field | Value |
 |-------|-------|
-| `name` | `logingrupa/oc-goodsreceived-plugin` |
+| `name` | `logingrupa/oc-goodsreceivedshopaholic-plugin` |
 | `type` | `october-plugin` |
 | `license` | `MIT` |
 | `require` | `lovata/toolbox-plugin ^2.2`, `lovata/shopaholic-plugin ^1.32`, `php ^8.3`, `october/system ^4.0`, `october/rain ^4.0` |
@@ -395,7 +395,7 @@ To make the GitHub repo PUBLIC and tag v1.0.0:
 
 ```bash
 # 1. Create the public repo + push (run from plugin root)
-gh repo create logingrupa/oc-goodsreceived-plugin --public --source=. --remote=origin --push
+gh repo create logingrupa/oc-goodsreceivedshopaholic-plugin --public --source=. --remote=origin --push
 
 # 2. Tag v1.0.0
 git tag v1.0.0
@@ -406,14 +406,14 @@ Optional Packagist submission (gives versioned package discovery + download stat
 
 1. Visit https://packagist.org
 2. Click "Submit"
-3. Paste the GitHub URL: `https://github.com/logingrupa/oc-goodsreceived-plugin`
+3. Paste the GitHub URL: `https://github.com/logingrupa/oc-goodsreceivedshopaholic-plugin`
 4. Click Check → Submit
 
 Without Packagist, Composer's native GitHub auto-discovery still works — consumers add a `repositories` block to their `composer.json`:
 
 ```json
 "repositories": [
-    { "type": "vcs", "url": "https://github.com/logingrupa/oc-goodsreceived-plugin" }
+    { "type": "vcs", "url": "https://github.com/logingrupa/oc-goodsreceivedshopaholic-plugin" }
 ]
 ```
 
@@ -425,7 +425,7 @@ Pre-publish dry-run (recommended before tagging v1.0.0):
 
 ```bash
 # On a clean OctoberCMS 4 sandbox (or scratch project), with Lovata Shopaholic + Toolbox already installed:
-composer require logingrupa/oc-goodsreceived-plugin:dev-master
+composer require logingrupa/oc-goodsreceivedshopaholic-plugin:dev-master
 php artisan october:up
 ```
 
@@ -439,7 +439,7 @@ For the multi-site UAT (.no / .lv / .lt staging or dev parity), use the printabl
 Once UAT signs off and v1.0.0 tag is pushed, downstream installs use the canonical pin:
 
 ```bash
-composer require logingrupa/oc-goodsreceived-plugin:^1.0
+composer require logingrupa/oc-goodsreceivedshopaholic-plugin:^1.0
 ```
 
 ---
@@ -451,7 +451,7 @@ composer require logingrupa/oc-goodsreceived-plugin:^1.0
 ## Reference
 
 - Plugin source: `plugins/logingrupa/goodsreceivedshopaholic/` (this directory).
-- Composer package: `logingrupa/oc-goodsreceived-plugin`.
+- Composer package: `logingrupa/oc-goodsreceivedshopaholic-plugin`.
 - October plugin code: `Logingrupa.GoodsReceivedShopaholic`.
 - QA pipeline: `composer qa` (runs `pint-test` + `analyse` + `phpmd` + `test`).
-- Issue tracker: see the GitHub repo `logingrupa/oc-goodsreceived-plugin`.
+- Issue tracker: see the GitHub repo `logingrupa/oc-goodsreceivedshopaholic-plugin`.

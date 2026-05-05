@@ -1,5 +1,5 @@
 {
-    "name": "logingrupa/oc-goodsreceived-plugin",
+    "name": "logingrupa/oc-goodsreceivedshopaholic-plugin",
     "type": "october-plugin",
     "description": "Distributor goods-received note (GRN) import for Lovata Shopaholic — parses HTM delivery receipts, increments offer stock, manages active flags per site.",
     "license": "MIT",
