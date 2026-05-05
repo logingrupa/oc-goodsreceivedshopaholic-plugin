@@ -114,10 +114,28 @@ abstract class ApplyTestCase extends GoodsReceivedTestCase
             $obTable->index('matched_offer_id');
         });
 
+        // `system_files` — Invoice::beforeDelete cascades the polymorphic
+        // attachment, so deleting any Invoice in tests would otherwise hit
+        // "no such table: system_files" under this hermetic schema slice.
+        \Schema::create('system_files', function ($obTable): void {
+            $obTable->increments('id');
+            $obTable->string('disk_name')->nullable();
+            $obTable->string('file_name')->nullable();
+            $obTable->integer('file_size')->nullable();
+            $obTable->string('content_type', 128)->nullable();
+            $obTable->string('title')->nullable();
+            $obTable->text('description')->nullable();
+            $obTable->string('field')->nullable();
+            $obTable->morphs('attachment');
+            $obTable->boolean('is_public')->default(true);
+            $obTable->integer('sort_order')->default(0);
+            $obTable->timestamps();
+        });
     }
 
     protected function tearDown(): void
     {
+        \Schema::dropIfExists('system_files');
         \Schema::dropIfExists('logingrupa_goods_received_invoice_lines');
         \Schema::dropIfExists('logingrupa_goods_received_invoices');
         \Schema::dropIfExists('lovata_shopaholic_offers');

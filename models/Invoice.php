@@ -126,4 +126,30 @@ class Invoice extends Model
     public $attachOne = [
         'original_file' => [\System\Models\File::class],
     ];
+
+    /**
+     * Cascade-delete the polymorphic `system_files` row + on-disk artefact when
+     * the Invoice is deleted.
+     *
+     * October's polymorphic attachment table is NOT covered by FK cascade
+     * (attachment_type is a class-name string, not an FK). Deleting an Invoice
+     * row therefore left an orphan row in `system_files` plus the file on
+     * disk. Once auto-increment recycled the freed id (e.g., after
+     * truncate-and-reseed during admin cleanup), a freshly created Invoice
+     * inherited the orphan attachment and `attachOriginalFile()` then refused
+     * to overwrite it — producing rows whose `source_filename` no longer
+     * matched the file behind the download button.
+     *
+     * The `bindEvent('model.beforeDelete')` hook runs inside the same DB
+     * transaction the Invoices controller's `onDelete()` opens, so a failure
+     * to delete the file rolls the entire delete back. `original_file->delete()`
+     * unlinks the disk artefact via System\Models\File's `afterDelete` event.
+     */
+    public function beforeDelete(): void
+    {
+        $obFile = $this->original_file;
+        if ($obFile !== null) {
+            $obFile->delete();
+        }
+    }
 }

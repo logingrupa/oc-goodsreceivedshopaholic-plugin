@@ -226,12 +226,22 @@ class ParseAndPersistOrchestrator
     /**
      * Duplicate-detection gate. `lockForUpdate()` serializes concurrent
      * uploads of the same `invoice_number` via row-lock — the SECOND
-     * upload blocks until the first commits, then sees the prior row +
-     * throws here. Only `status='applied'` is treated as a hard duplicate;
-     * a prior `status='parsed'` row (uploaded but not yet applied) is NOT
-     * a duplicate per D-22 — the operator can re-upload to refresh the
-     * preview. The final commit is gated by the UNIQUE index, which
-     * prevents two `parsed` rows with the same number from co-existing.
+     * upload blocks until the first commits, then sees the prior row.
+     *
+     * Two outcomes per prior status:
+     *   - `applied` → throw `DuplicateInvoiceException` (hard reject).
+     *     Operator must use the override-and-reimport flow if reapply
+     *     is intended (D-16 / D-17).
+     *   - `parsed`  → delete prior in-place (cascade clears lines via FK,
+     *     `system_files` via `Invoice::beforeDelete`), then continue with
+     *     fresh parse. Treats re-upload as "operator wants to refresh the
+     *     preview" — UAT 2026-05-05: the prior reject path blocked
+     *     re-upload after modal close, leaving an unreachable parsed
+     *     orphan.
+     *
+     * Both happen INSIDE the orchestrator's transaction, so a failure
+     * later in the same `runWithStrategy` rolls back the prior delete
+     * along with the new parse. Replacement is atomic.
      *
      * @throws DuplicateInvoiceException
      */
@@ -241,7 +251,10 @@ class ParseAndPersistOrchestrator
         if (! $obPrior instanceof Invoice) {
             return;
         }
-        if ((string) $obPrior->status !== Invoice::STATUS_APPLIED) {
+
+        if ((string) $obPrior->status === Invoice::STATUS_PARSED) {
+            $obPrior->delete();
+
             return;
         }
 

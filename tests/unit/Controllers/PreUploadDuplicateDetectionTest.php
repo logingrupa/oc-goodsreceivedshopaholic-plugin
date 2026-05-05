@@ -138,13 +138,13 @@ it('short-circuits parse when prior applied invoice exists (UI-09 happy path)', 
     @unlink($arStaged['path']);
 });
 
-it('short-circuits with parsed_pending reason when prior status is parsed (Option B)', function (): void {
-    // Seed prior with status='parsed' — the parsed-status duplicate hole.
-    // Pre-fix: gate did NOT short-circuit; orchestrator hit the UNIQUE index
-    // and raw QueryException (with SQL fragments) leaked to the UI flash.
-    // Post-fix (Option B): the gate short-circuits with reject_reason
-    // `parsed_pending_apply` so the operator gets a friendly "apply or
-    // discard before re-upload" panel and zero exception bubble-up.
+it('replaces prior parsed invoice on re-upload (UAT 2026-05-05 — orphan-after-modal-close fix)', function (): void {
+    // Seed prior with status='parsed' — UAT scenario: operator uploaded
+    // file, opened modal, then closed without applying. Prior row was an
+    // unreachable orphan that blocked re-upload via the parsed-pending
+    // reject path. Post-fix: the orchestrator's duplicate gate deletes
+    // the prior parsed row inside the transaction and lets the re-parse
+    // proceed normally. Operator gets a fresh preview every time.
     $obPrior = new Invoice();
     $obPrior->invoice_number = 'PRO033328';
     $obPrior->status = Invoice::STATUS_PARSED;
@@ -156,19 +156,19 @@ it('short-circuits with parsed_pending reason when prior status is parsed (Optio
     $obPrior->parsed_at = Carbon::now()->subHour();
     $obPrior->saveQuietly();
 
+    $iPriorId = (int) $obPrior->id;
+
     $arStaged = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
     $obController = makeTestController(bHasPermission: true, arFiles: [$arStaged['file']]);
     $obController->onUpload();
 
-    // Orchestrator was NEVER resolved — the gate now short-circuits parsed
-    // rows the same way it short-circuits applied ones. Counter pin proves
-    // zero parser invocations, zero file reads, zero transaction overhead
-    // and (the actual bug fix) zero QueryException bubble-up to the UI.
-    expect($obController->iOrchestratorResolvedCount)->toBe(0);
+    // Orchestrator MUST have run — fresh parse for the re-upload.
+    expect($obController->iOrchestratorResolvedCount)->toBe(1);
 
-    // Reject partial received exactly one entry with the parsed_pending
-    // discriminator and the prior invoice id wired through for the
-    // "Open existing parse" link in `_reject.htm`.
+    // Reject partial may render with an EMPTY rejects array (the controller
+    // always renders the slot wrapper) — the contract is that no reject
+    // entries are produced. Parsed-prior is no longer a rejection case;
+    // the operator just sees the new modal preview.
     $arRejectCall = null;
     foreach ($obController->arPartialCalls as $arCall) {
         if ($arCall['name'] === '_partials/reject') {
@@ -176,17 +176,21 @@ it('short-circuits with parsed_pending reason when prior status is parsed (Optio
             break;
         }
     }
-    expect($arRejectCall)->not->toBeNull();
-    $arRejects = $arRejectCall['data']['rejects'];
-    expect($arRejects)->toBeArray();
-    expect(count($arRejects))->toBe(1);
-    expect((string) $arRejects[0]['reject_reason'])->toBe(Invoices::REJECT_REASON_PARSED_PENDING);
-    expect((string) $arRejects[0]['invoice_number'])->toBe('PRO033328');
-    expect((int) $arRejects[0]['prior_invoice_id'])->toBe((int) $obPrior->id);
+    if ($arRejectCall !== null) {
+        expect($arRejectCall['data']['rejects'])->toBe([]);
+    }
 
-    // Only the seeded prior persists; gate prevented any new write.
-    expect(Invoice::count())->toBe(1);
-    expect(InvoiceLine::count())->toBe(0);
+    // Old parsed row deleted, new row replaces it — exactly one Invoice
+    // exists with that number after re-upload. Storage-engine id-reuse
+    // semantics differ (SQLite recycles, MySQL does not), so we pin the
+    // contract via line content: the new row's lines were freshly
+    // generated, while the prior had no lines seeded. Either way, the
+    // re-upload must have parsed + persisted lines under the new row id.
+    expect(Invoice::where('invoice_number', 'PRO033328')->count())->toBe(1);
+    $obNew = Invoice::where('invoice_number', 'PRO033328')->first();
+    expect($obNew)->not->toBeNull();
+    expect(InvoiceLine::where('invoice_id', $obNew->id)->count())->toBeGreaterThan(0);
+    unset($iPriorId);
 
     @unlink($arStaged['path']);
 });

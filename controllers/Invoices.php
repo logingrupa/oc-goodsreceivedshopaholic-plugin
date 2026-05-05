@@ -27,6 +27,7 @@ use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Lovata\Shopaholic\Models\Offer;
 use Lovata\Shopaholic\Models\Product;
 use October\Rain\Exception\AjaxException;
+use Redirect;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Throwable;
 
@@ -149,6 +150,50 @@ class Invoices extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Lovata.Shopaholic', 'shopaholic-menu-main', 'goodsreceived');
+    }
+
+    /**
+     * Override the FormController `update` page action so a missing Invoice
+     * row redirects back to the list with a flash message instead of
+     * rendering the half-initialized form (which throws "Form behavior has
+     * not been initialized" inside `formRender()` because `initForm()` was
+     * never called).
+     *
+     * Reproduction: `/back/.../invoices/update/2` after invoice id=2 was
+     * deleted. The default FormController::update wraps `formFindModelObject`
+     * in a try/catch and on miss calls `handleError($ex)` — which flashes
+     * the model-not-found message but does NOT short-circuit the response.
+     * The action returns void, the view template runs, the partials call
+     * `formRender()`, that throws because `formWidget` is null. Operator
+     * sees the raw stack trace.
+     *
+     * Behavior here: catch the not-found case, flash the lang message, and
+     * return a redirect Response object. October's controller dispatcher
+     * honors a Response return from a page action — the view template is
+     * skipped entirely, no half-initialized form is rendered.
+     *
+     * @param  int|string|null  $recordId
+     * @param  string|null  $context
+     * @return mixed
+     */
+    public function update($recordId = null, $context = null)
+    {
+        $iId = $this->scalarToInt($recordId);
+        if ($iId <= 0 || ! Invoice::where('id', $iId)->exists()) {
+            Flash::error((string) Lang::get(
+                'logingrupa.goodsreceivedshopaholic::lang.apply.invoice_not_found',
+                ['id' => $iId],
+            ));
+
+            return Redirect::to(Backend::url('logingrupa/goodsreceivedshopaholic/invoices'));
+        }
+
+        $obFormController = $this->asExtension('FormController');
+        if ($obFormController instanceof \Backend\Behaviors\FormController) {
+            $obFormController->update($iId, $context);
+        }
+
+        return null;
     }
 
     /**
@@ -1530,16 +1575,20 @@ class Invoices extends Controller
         try {
             $this->assertHtmFile($obFile);
 
+            // Pre-parse short-circuit: ONLY the applied-prior case rejects
+            // here. A prior `status='parsed'` row is treated as "operator
+            // re-uploading to refresh the preview" — we let the orchestrator
+            // run, delete the prior parsed row inside its transaction, and
+            // return a fresh preview. UAT 2026-05-05: the prior reject path
+            // for parsed-pending blocked re-upload after the operator
+            // closed the modal, leaving an unreachable orphan invoice row.
             $sNumber = $this->extractInvoiceNumberFromFilename($sFilename);
             if ($sNumber !== null) {
                 $obPrior = Invoice::where('invoice_number', $sNumber)
-                    ->whereIn('status', [Invoice::STATUS_APPLIED, Invoice::STATUS_PARSED])
+                    ->where('status', Invoice::STATUS_APPLIED)
                     ->first();
                 if ($obPrior instanceof Invoice) {
-                    $sReason = ((string) $obPrior->status === Invoice::STATUS_PARSED)
-                        ? self::REJECT_REASON_PARSED_PENDING
-                        : self::REJECT_REASON_DUPLICATE_APPLIED;
-                    $arRejects[] = $this->buildRejectPayload($obPrior, $sReason);
+                    $arRejects[] = $this->buildRejectPayload($obPrior, self::REJECT_REASON_DUPLICATE_APPLIED);
 
                     return;
                 }
@@ -1589,11 +1638,19 @@ class Invoices extends Controller
      * relationship saves the row with the right attachment_type +
      * attachment_id pointer.
      *
-     * Idempotent: if a prior call already attached a file (e.g., during an
-     * earlier override-reimport that ran through the same handler), the
-     * second call is a no-op. October's `attachOne` allows only one file
-     * per relation; calling `add()` again would overwrite — we guard against
-     * that by checking the current relation value first.
+     * Replace-stale semantics (BUG fix — file/metadata divergence):
+     *   The old idempotent guard (`return early if original_file !== null`)
+     *   was unsafe. After a backend cleanup that deleted invoice rows but
+     *   did not cascade to `system_files`, a freshly created Invoice could
+     *   inherit an orphan attachment whose attachment_id was reused by
+     *   auto-increment. The early-return then preserved the orphan file
+     *   and the new file was silently dropped, so the Invoice metadata
+     *   (invoice_number, source_filename, lines) referenced one HTM while
+     *   the download button served a different one. Replace-on-attach
+     *   eliminates that divergence: any pre-existing attachment is
+     *   detached + deleted FIRST, then the freshly uploaded file is
+     *   attached. The detach is logged so post-mortem audit can trace
+     *   which orphan was reaped.
      *
      * Boundary placement: attach happens AFTER ParseAndPersistOrchestrator's
      * `DB::transaction` returns (orchestrator owns DB write atomicity for
@@ -1609,13 +1666,46 @@ class Invoices extends Controller
      */
     protected function attachOriginalFile(Invoice $obInvoice, UploadedFile $obFile): void
     {
-        if ($obInvoice->original_file !== null) {
-            return;
-        }
+        $this->detachExistingOriginalFile($obInvoice);
 
         $obSystemFile = new \System\Models\File();
         $obSystemFile->fromPost($obFile);
         $obInvoice->original_file()->add($obSystemFile);
+    }
+
+    /**
+     * Detach + delete any pre-existing `original_file` row attached to the
+     * given Invoice so a re-attach never produces stale-file divergence.
+     *
+     * Logged at warning level when something is actually reaped; silent
+     * no-op when the relation is null. The relation is refreshed after
+     * delete so a subsequent `original_file()->add(...)` call sees a clean
+     * slot (October caches eager-loaded morph relations on the model
+     * instance).
+     *
+     * Visibility: protected so a focused unit test can drive it via
+     * Reflection without depending on the disk-write side of `fromPost`.
+     */
+    protected function detachExistingOriginalFile(Invoice $obInvoice): void
+    {
+        $obExisting = $obInvoice->original_file;
+        if ($obExisting === null) {
+            return;
+        }
+
+        $mDisk = $obExisting->getAttribute('disk_name');
+        $mName = $obExisting->getAttribute('file_name');
+        \Log::warning(
+            'logingrupa.goodsreceivedshopaholic: replacing stale original_file before attach',
+            [
+                'invoice_id'    => $this->scalarToInt($obInvoice->id),
+                'old_disk_name' => is_scalar($mDisk) ? (string) $mDisk : '',
+                'old_file_name' => is_scalar($mName) ? (string) $mName : '',
+            ],
+        );
+
+        $obExisting->delete();
+        $obInvoice->reloadRelations('original_file');
     }
 
     /**

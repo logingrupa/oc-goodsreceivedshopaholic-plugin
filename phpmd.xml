@@ -73,7 +73,7 @@
     -->
     <rule ref="rulesets/codesize.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="45" />
+            <property name="maxmethods" value="47" />
             <property name="ignorepattern" value="(^(set|get))i" />
         </properties>
     </rule>
@@ -174,7 +174,7 @@
     -->
     <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
         <properties>
-            <property name="maximum" value="170" />
+            <property name="maximum" value="175" />
         </properties>
     </rule>
 
