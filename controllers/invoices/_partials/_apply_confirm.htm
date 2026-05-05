@@ -38,10 +38,9 @@ $iUnmatchedCount = (int) ($unmatched_count ?? 0);
             class="btn btn-primary"
             data-request="onApply"
             data-request-data="invoice_id: <?= $iInvoiceId ?>"
-            data-request-loading=".applying-spinner"
-            data-popup-load-indicator>
+            data-attach-loading
+            data-request-success="$(this).trigger('close.oc.popup'); window.location.reload();">
         <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
     </button>
     <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-    <span class="applying-spinner" style="display:none;"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?></span>
 </div>

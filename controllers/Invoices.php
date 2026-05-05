@@ -722,6 +722,7 @@ class Invoices extends Controller
         $iUserId = $this->resolveBackendUserId();
 
         $arParsedIds = $this->fetchParsedInvoiceIds($arCheckedIds);
+        $arInvoicePayloads = $this->normalizeBulkInvoicePayload(Input::get('invoice'));
 
         $iApplied = 0;
         $iSkipped = count($arCheckedIds) - count($arParsedIds);
@@ -730,6 +731,16 @@ class Invoices extends Controller
         $iTotalUnits = 0;
 
         foreach ($arParsedIds as $iInvoiceId) {
+            // Persist per-invoice modal edits (override_qty + notes) BEFORE
+            // taking the lock — same rationale as `onApply`: the lock guards
+            // the orchestrator's idempotency contract, not the metadata
+            // edits. Empty payload is a no-op (operator unchecked the row OR
+            // never edited anything).
+            $arSlice = $arInvoicePayloads[$iInvoiceId] ?? null;
+            if (is_array($arSlice)) {
+                $this->persistApplyModalEditsFromBulkPayload($iInvoiceId, $arSlice);
+            }
+
             $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
             if (! $obLock->get()) {
                 $iFailed++;
@@ -829,6 +840,34 @@ class Invoices extends Controller
         }
 
         return array_values(array_unique($arOut));
+    }
+
+    /**
+     * Coerce the raw `invoice[<id>][...]` POST payload into a typed
+     * `array<int, array<string, mixed>>` keyed by invoice id. Non-array
+     * input or non-integer keys are clamped out — same defensive pattern
+     * as `normalizeCheckedIds`. The caller iterates parsed invoice ids and
+     * grabs `$arOut[$iId]` (or null when missing — indicates the operator
+     * did not touch that invoice's edits, NOT an error).
+     *
+     * @return array<int, array<mixed>>
+     */
+    private function normalizeBulkInvoicePayload(mixed $mPayload): array
+    {
+        if (! is_array($mPayload)) {
+            return [];
+        }
+
+        $arOut = [];
+        foreach ($mPayload as $mKey => $mValue) {
+            $iId = (int) $mKey;
+            if ($iId <= 0 || ! is_array($mValue)) {
+                continue;
+            }
+            $arOut[$iId] = $mValue;
+        }
+
+        return $arOut;
     }
 
     /**
@@ -984,19 +1023,37 @@ class Invoices extends Controller
      */
     protected function persistApplyModalEdits(int $iInvoiceId): void
     {
-        $this->persistOverrideQtyEdits($iInvoiceId);
-        $this->persistNotesEdit($iInvoiceId);
+        $this->persistOverrideQtyForInvoice($iInvoiceId, Input::get('override_qty'));
+        if (Input::has('notes')) {
+            $this->persistNotesForInvoice($iInvoiceId, Input::get('notes'));
+        }
     }
 
     /**
-     * Per-line `override_qty[<lineId>]` POST array → InvoiceLine.override_qty
+     * Bulk variant — read per-invoice edit payload from the namespaced
+     * `invoice[<id>][override_qty]` + `invoice[<id>][notes]` POST shape used
+     * by the single-form bulk apply modal. Same persist semantics as
+     * `persistApplyModalEdits`, just sourced from the nested payload instead
+     * of the flat per-form keys.
+     *
+     * @param  array<mixed>  $arInvoicePayload  the `invoice[<id>]` slice
+     */
+    protected function persistApplyModalEditsFromBulkPayload(int $iInvoiceId, array $arInvoicePayload): void
+    {
+        $this->persistOverrideQtyForInvoice($iInvoiceId, $arInvoicePayload['override_qty'] ?? null);
+        if (array_key_exists('notes', $arInvoicePayload)) {
+            $this->persistNotesForInvoice($iInvoiceId, $arInvoicePayload['notes']);
+        }
+    }
+
+    /**
+     * Per-line `override_qty[<lineId>]` payload → InvoiceLine.override_qty
      * column. Walks the array, validates each value, saves only the lines
      * that actually changed (saveQuietly avoids touching `updated_at` on
      * unchanged rows).
      */
-    private function persistOverrideQtyEdits(int $iInvoiceId): void
+    private function persistOverrideQtyForInvoice(int $iInvoiceId, mixed $mPayload): void
     {
-        $mPayload = Input::get('override_qty');
         if (! is_array($mPayload)) {
             return;
         }
@@ -1025,17 +1082,12 @@ class Invoices extends Controller
     }
 
     /**
-     * Single `notes` POST field → Invoice.notes column. Trims + treats empty
+     * Single `notes` value → Invoice.notes column. Trims + treats empty
      * as NULL (DB column is nullable per Phase 1 schema).
      */
-    private function persistNotesEdit(int $iInvoiceId): void
+    private function persistNotesForInvoice(int $iInvoiceId, mixed $mNotesValue): void
     {
-        if (! Input::has('notes')) {
-            return;
-        }
-
-        $mNotes = Input::get('notes');
-        $sNotes = is_scalar($mNotes) ? trim((string) $mNotes) : '';
+        $sNotes = is_scalar($mNotesValue) ? trim((string) $mNotesValue) : '';
         $mFinal = $sNotes !== '' ? $sNotes : null;
 
         $obInvoice = Invoice::find($iInvoiceId);

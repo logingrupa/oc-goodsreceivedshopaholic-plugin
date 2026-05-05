@@ -41,10 +41,10 @@ $iProductCount = (int) ($product_count ?? 0);
                 class="btn btn-danger"
                 data-request="onInitialResetConfirm"
                 data-request-files
-                data-request-loading=".reset-spinner">
+                data-attach-loading
+                data-request-success="$(this).trigger('close.oc.popup'); window.location.reload();">
             Run reset + apply
         </button>
         <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
-        <span class="reset-spinner" style="display:none;">Resetting and applying&hellip;</span>
     </div>
 <?= Form::close() ?>

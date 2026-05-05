@@ -1,40 +1,39 @@
 <?php
-/* UX redesign 2026-04-30 — single-page modal apply flow.
+/* UX redesign 2026-05-05 — single-form bulk-apply modal.
  *
- * Replaces the prior two-step _apply_confirm.htm flow with a single popup
- * modal that operators trigger directly after upload (no intermediate
- * "View details" detour). Modal carries:
- *   - invoice header (filename, summary counts)
- *   - editable lines table with per-row `override_qty` + LIVE "After import"
- *     column computed from current stock + override (or parsed) qty
- *   - editable notes textarea (in body)
- *   - Apply (commit) button per invoice in MODAL FOOTER + Cancel
+ * Replaces the prior "N stacked forms + N buttons" layout with one
+ * `<form>` wrapping every invoice section. Each section now leads with
+ * a checkbox (default checked) so operators select which parsed
+ * invoices to commit; the footer carries ONE "Apply selected" button
+ * that submits via `onApplyBulk`. Per-invoice override_qty + notes
+ * live under the namespaced `invoice[<id>][override_qty][<line_id>]`
+ * + `invoice[<id>][notes]` POST keys so the bulk handler can persist
+ * each checked invoice's edits before applying.
  *
- * Multi-file behavior: when onUpload parses N invoices, the body renders
- * N stacked sections; the footer renders N "Apply <filename>" buttons +
- * one Cancel. Each footer button is wired to its own form via
- * data-request-form so onApply receives the right invoice's payload.
+ * Canonical popup widget contract — header + body + footer ONLY (no
+ * outer modal-dialog/modal-content wrapper). October popup.js wraps
+ * externally via createPopupContainer (popup.js:206-229).
  *
- * Canonical popup widget contract — header + body + footer ONLY (no outer
- * modal-dialog/modal-content wrapper). October popup.js wraps externally
- * via createPopupContainer (popup.js:206-229). See README.md line 99-128.
- *
- * Expected vars:
+ * Expected vars (unchanged):
  *   - $invoices: list<array{
  *       invoice: Invoice,
  *       lines: October Collection<InvoiceLine>,
  *       total_units: int,
  *       matched_count: int,
  *       unmatched_count: int,
- *       current_qty_map: array<int, int>,  // matched_offer_id => current Offer.quantity
- *       matched_product_map: array<int, array{product_name:string,product_id:int,offer_id:int,strategy:string}>,  // line_id => matched offer/product
+ *       current_qty_map: array<int, int>,
+ *       matched_product_map: array<int, array{product_name:string,product_id:int,offer_id:int,strategy:string}>,
  *     }>
- *
- * The `data-request="onApply"` button POSTs `invoice_id` + `override_qty[]`
- * + `notes` to onApply. The form-files round-trip is NOT used here (file
- * already attached during onUpload via attachOriginalFile — Chunk B).
  */
 $arInvoices = $invoices ?? [];
+$iCount = count($arInvoices);
+$arInvoiceIds = [];
+foreach ($arInvoices as $arPreview) {
+    $obInvoice = $arPreview['invoice'] ?? null;
+    if ($obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice) {
+        $arInvoiceIds[] = (int) $obInvoice->id;
+    }
+}
 ?>
 <div class="modal-header" data-popup-size="huge">
     <h4 class="modal-title">
@@ -42,9 +41,20 @@ $arInvoices = $invoices ?? [];
     </h4>
     <button type="button" class="btn-close" data-dismiss="popup"></button>
 </div>
+<form id="gr-apply-bulk-form" data-request="onApplyBulk" data-attach-loading
+      data-request-success="$(this).trigger('close.oc.popup'); window.location.reload();">
 <div class="modal-body">
-    <?php if (count($arInvoices) === 0): ?>
+    <?php if ($iCount === 0): ?>
         <p class="alert alert-warning">No invoices to apply.</p>
+    <?php endif; ?>
+
+    <?php if ($iCount > 1): ?>
+        <p>
+            <label>
+                <input type="checkbox" id="gr-apply-bulk-toggle-all" checked>
+                <strong>Select / deselect all</strong>
+            </label>
+        </p>
     <?php endif; ?>
 
     <?php foreach ($arInvoices as $arPreview):
@@ -62,129 +72,146 @@ $arInvoices = $invoices ?? [];
         $arCurrentQtyMap = (array) ($arPreview['current_qty_map'] ?? []);
         $arMatchedProductMap = (array) ($arPreview['matched_product_map'] ?? []);
         $sNotes = (string) ($obInvoice->notes ?? '');
-        $sFormId = 'gr-apply-form-'.$iInvoiceId;
     ?>
         <section class="control-section invoice-apply-section" data-invoice-id="<?= $iInvoiceId ?>" style="margin-bottom: 1.5rem;">
             <h5>
-                <i class="icon-file"></i>
-                <strong><?= e($sFilename) ?></strong>
-                &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units total
+                <label style="font-weight: bold; cursor: pointer;">
+                    <input type="checkbox"
+                           class="gr-apply-bulk-checkbox"
+                           name="checked[]"
+                           value="<?= $iInvoiceId ?>"
+                           checked>
+                    <i class="icon-file"></i>
+                    <?= e($sFilename) ?>
+                </label>
+                <small class="text-muted">
+                    &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units total
+                </small>
             </h5>
 
-            <form id="<?= e($sFormId) ?>" data-request="onApply" data-request-loading=".applying-spinner-<?= $iInvoiceId ?>">
-                <input type="hidden" name="invoice_id" value="<?= $iInvoiceId ?>">
-
-                <table class="table table-condensed table-striped gr-apply-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 4%;">#</th>
-                            <th style="width: 16%;">EAN</th>
-                            <th>Product</th>
-                            <th style="width: 8%; text-align: right;">Parsed qty</th>
-                            <th style="width: 12%; text-align: right;">Override qty</th>
-                            <th style="width: 10%; text-align: right;">After import</th>
-                            <th style="width: 22%;">Matched Product</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($obLines as $obLine):
-                            $iLineId = (int) $obLine->id;
-                            $iRowIndex = (int) $obLine->row_index;
-                            $sEan = (string) ($obLine->ean ?? '');
-                            $sProductName = (string) ($obLine->product_name_raw ?? '');
-                            $iQty = (int) ($obLine->qty ?? 0);
-                            $mOverrideQty = $obLine->override_qty;
-                            $sOverrideValue = $mOverrideQty !== null ? (string) (int) $mOverrideQty : '';
-                            $sStrategy = (string) ($obLine->match_strategy ?? '');
-                            $bMatched = $sStrategy !== \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::MATCH_STRATEGY_NONE;
-                            $iMatchedOfferId = (int) ($obLine->matched_offer_id ?? 0);
-                            $iCurrentQty = $iMatchedOfferId > 0 && array_key_exists($iMatchedOfferId, $arCurrentQtyMap)
-                                ? (int) $arCurrentQtyMap[$iMatchedOfferId]
-                                : 0;
-                            $iEffectiveOverride = $sOverrideValue !== '' ? (int) $sOverrideValue : $iQty;
-                            $iAfterImport = $bMatched ? $iCurrentQty + $iEffectiveOverride : 0;
-                        ?>
-                            <tr class="<?= $bMatched ? '' : 'warning' ?>">
-                                <td><?= $iRowIndex ?></td>
-                                <td><code><?= e($sEan) ?></code></td>
-                                <td>
-                                    <?= e($sProductName) ?>
-                                    <?php if ($bMatched): ?>
-                                        <small class="text-muted">(<?= $iCurrentQty ?> pcs)</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td style="text-align: right;"><strong><?= $iQty ?></strong></td>
-                                <td>
-                                    <input type="number"
-                                           name="override_qty[<?= $iLineId ?>]"
-                                           value="<?= e($sOverrideValue) ?>"
-                                           min="0"
-                                           class="form-control input-sm gr-override-input"
-                                           placeholder="<?= $iQty ?>"
-                                           data-line-id="<?= $iLineId ?>"
-                                           data-parsed="<?= $iQty ?>"
-                                           data-current="<?= $iCurrentQty ?>"
-                                           data-matched="<?= $bMatched ? '1' : '0' ?>"
-                                           style="text-align: right;">
-                                </td>
-                                <td id="gr-after-<?= $iLineId ?>" style="text-align: right;">
-                                    <?php if ($bMatched): ?>
-                                        <strong><?= $iAfterImport ?></strong>
-                                    <?php else: ?>
-                                        <span class="text-muted">&mdash;</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    if (!$bMatched) {
-                                        echo '<span class="label label-warning">unmatched</span>';
+            <table class="table table-condensed table-striped gr-apply-table">
+                <thead>
+                    <tr>
+                        <th style="width: 4%;">#</th>
+                        <th style="width: 16%;">EAN</th>
+                        <th>Product</th>
+                        <th style="width: 8%; text-align: right;">Parsed qty</th>
+                        <th style="width: 12%; text-align: right;">Override qty</th>
+                        <th style="width: 10%; text-align: right;">After import</th>
+                        <th style="width: 22%;">Matched Product</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($obLines as $obLine):
+                        $iLineId = (int) $obLine->id;
+                        $iRowIndex = (int) $obLine->row_index;
+                        $sEan = (string) ($obLine->ean ?? '');
+                        $sProductName = (string) ($obLine->product_name_raw ?? '');
+                        $iQty = (int) ($obLine->qty ?? 0);
+                        $mOverrideQty = $obLine->override_qty;
+                        $sOverrideValue = $mOverrideQty !== null ? (string) (int) $mOverrideQty : '';
+                        $sStrategy = (string) ($obLine->match_strategy ?? '');
+                        $bMatched = $sStrategy !== \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::MATCH_STRATEGY_NONE;
+                        $iMatchedOfferId = (int) ($obLine->matched_offer_id ?? 0);
+                        $iCurrentQty = $iMatchedOfferId > 0 && array_key_exists($iMatchedOfferId, $arCurrentQtyMap)
+                            ? (int) $arCurrentQtyMap[$iMatchedOfferId]
+                            : 0;
+                        $iEffectiveOverride = $sOverrideValue !== '' ? (int) $sOverrideValue : $iQty;
+                        $iAfterImport = $bMatched ? $iCurrentQty + $iEffectiveOverride : 0;
+                    ?>
+                        <tr class="<?= $bMatched ? '' : 'warning' ?>">
+                            <td><?= $iRowIndex ?></td>
+                            <td><code><?= e($sEan) ?></code></td>
+                            <td>
+                                <?= e($sProductName) ?>
+                                <?php if ($bMatched): ?>
+                                    <small class="text-muted">(<?= $iCurrentQty ?> pcs)</small>
+                                <?php endif; ?>
+                            </td>
+                            <td style="text-align: right;"><strong><?= $iQty ?></strong></td>
+                            <td>
+                                <input type="number"
+                                       name="invoice[<?= $iInvoiceId ?>][override_qty][<?= $iLineId ?>]"
+                                       value="<?= e($sOverrideValue) ?>"
+                                       min="0"
+                                       class="form-control input-sm gr-override-input"
+                                       placeholder="<?= $iQty ?>"
+                                       data-line-id="<?= $iLineId ?>"
+                                       data-parsed="<?= $iQty ?>"
+                                       data-current="<?= $iCurrentQty ?>"
+                                       data-matched="<?= $bMatched ? '1' : '0' ?>"
+                                       style="text-align: right;">
+                            </td>
+                            <td id="gr-after-<?= $iLineId ?>" style="text-align: right;">
+                                <?php if ($bMatched): ?>
+                                    <strong><?= $iAfterImport ?></strong>
+                                <?php else: ?>
+                                    <span class="text-muted">&mdash;</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php
+                                if (!$bMatched) {
+                                    echo '<span class="label label-warning">unmatched</span>';
+                                } else {
+                                    $arMatched = $arMatchedProductMap[$iLineId] ?? null;
+                                    $sMatchedName = is_array($arMatched) ? (string) ($arMatched['product_name'] ?? '') : '';
+                                    $iMatchedProductId = is_array($arMatched) ? (int) ($arMatched['product_id'] ?? 0) : 0;
+                                    $iMatchedOfferIdLink = is_array($arMatched) ? (int) ($arMatched['offer_id'] ?? 0) : 0;
+                                    $sMatchUrl = $iMatchedProductId > 0
+                                        ? \Backend::url('lovata/shopaholic/products/update/'.$iMatchedProductId)
+                                        : ($iMatchedOfferIdLink > 0
+                                            ? \Backend::url('lovata/shopaholic/offers/update/'.$iMatchedOfferIdLink)
+                                            : null);
+                                    $bIsVariation = $sStrategy === 'variation';
+                                    $sLinkStyle = $bIsVariation ? ' style="color: orange"' : '';
+                                    $sAsterisk = $bIsVariation ? '*' : '';
+                                    $sTitle = $sProductName !== '' ? ' title="'.e($sProductName).'"' : '';
+                                    if ($sMatchUrl !== null && $sMatchedName !== '') {
+                                        echo '<a href="'.e($sMatchUrl).'" target="_blank" rel="noopener"'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</a>';
+                                    } elseif ($sMatchedName !== '') {
+                                        echo '<span'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</span>';
                                     } else {
-                                        $arMatched = $arMatchedProductMap[$iLineId] ?? null;
-                                        $sMatchedName = is_array($arMatched) ? (string) ($arMatched['product_name'] ?? '') : '';
-                                        $iMatchedProductId = is_array($arMatched) ? (int) ($arMatched['product_id'] ?? 0) : 0;
-                                        $iMatchedOfferIdLink = is_array($arMatched) ? (int) ($arMatched['offer_id'] ?? 0) : 0;
-                                        $sMatchUrl = $iMatchedProductId > 0
-                                            ? \Backend::url('lovata/shopaholic/products/update/'.$iMatchedProductId)
-                                            : ($iMatchedOfferIdLink > 0
-                                                ? \Backend::url('lovata/shopaholic/offers/update/'.$iMatchedOfferIdLink)
-                                                : null);
-                                        $bIsVariation = $sStrategy === 'variation';
-                                        $sLinkStyle = $bIsVariation ? ' style="color: orange"' : '';
-                                        $sAsterisk = $bIsVariation ? '*' : '';
-                                        $sTitle = $sProductName !== '' ? ' title="'.e($sProductName).'"' : '';
-                                        if ($sMatchUrl !== null && $sMatchedName !== '') {
-                                            echo '<a href="'.e($sMatchUrl).'" target="_blank" rel="noopener"'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</a>';
-                                        } elseif ($sMatchedName !== '') {
-                                            echo '<span'.$sLinkStyle.$sTitle.'>'.e($sMatchedName).$sAsterisk.'</span>';
-                                        } else {
-                                            echo '<span class="label label-success">matched</span>';
-                                        }
+                                        echo '<span class="label label-success">matched</span>';
                                     }
-                                    ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
 
-                <div class="form-group">
-                    <label for="gr-apply-notes-<?= $iInvoiceId ?>"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.column.notes')) ?></label>
-                    <textarea id="gr-apply-notes-<?= $iInvoiceId ?>"
-                              name="notes"
-                              class="form-control"
-                              rows="2"
-                              placeholder="Optional notes (operator commentary)"><?= e($sNotes) ?></textarea>
-                </div>
-            </form>
+            <div class="form-group gr-apply-notes-group">
+                <label for="gr-apply-notes-<?= $iInvoiceId ?>"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.column.notes')) ?></label>
+                <textarea id="gr-apply-notes-<?= $iInvoiceId ?>"
+                          name="invoice[<?= $iInvoiceId ?>][notes]"
+                          class="form-control"
+                          rows="2"
+                          placeholder="Optional notes (operator commentary)"><?= e($sNotes) ?></textarea>
+            </div>
         </section>
     <?php endforeach; ?>
 
+    <style>
+        .invoice-apply-section.is-collapsed .gr-apply-table,
+        .invoice-apply-section.is-collapsed .gr-apply-notes-group {
+            display: none;
+        }
+    </style>
     <script>
     (function () {
-        // Live "After import" recompute on override input change.
-        // Bound once globally via event delegation; idempotent across re-renders.
         if (window.__grApplyModalBound) { return; }
         window.__grApplyModalBound = true;
+
+        function applyCollapsedState(cb) {
+            var section = cb.closest('.invoice-apply-section');
+            if (!section) { return; }
+            section.classList.toggle('is-collapsed', !cb.checked);
+        }
+
+        // Live "After import" recompute on override input change. Bound once
+        // globally via event delegation; idempotent across re-renders.
         document.addEventListener('input', function (e) {
             var el = e.target;
             if (!el || !el.classList || !el.classList.contains('gr-override-input')) { return; }
@@ -197,35 +224,38 @@ $arInvoices = $invoices ?? [];
             var cell = document.getElementById('gr-after-' + el.dataset.lineId);
             if (cell) { cell.innerHTML = '<strong>' + (iCurrent + iInc) + '</strong>'; }
         });
+
+        document.addEventListener('change', function (e) {
+            if (!e.target) { return; }
+
+            // Per-invoice checkbox: collapse/expand its section's table + notes.
+            if (e.target.classList && e.target.classList.contains('gr-apply-bulk-checkbox')) {
+                applyCollapsedState(e.target);
+                return;
+            }
+
+            // Select/deselect-all checkbox toggle. Mirrors state into every
+            // per-invoice checkbox in the modal AND triggers per-row collapse.
+            if (e.target.id === 'gr-apply-bulk-toggle-all') {
+                var bChecked = e.target.checked;
+                document.querySelectorAll('.gr-apply-bulk-checkbox').forEach(function (cb) {
+                    cb.checked = bChecked;
+                    applyCollapsedState(cb);
+                });
+            }
+        });
+
+        // Initial pass — honor any pre-rendered unchecked state (operator may
+        // re-open a previously partially-deselected modal).
+        document.querySelectorAll('.gr-apply-bulk-checkbox').forEach(applyCollapsedState);
     })();
     </script>
 </div>
 <div class="modal-footer">
-    <?php foreach ($arInvoices as $arPreview):
-        $obInvoice = $arPreview['invoice'] ?? null;
-        if (!($obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice)) {
-            continue;
-        }
-        $iInvoiceId = (int) $obInvoice->id;
-        $sFilename = (string) ($obInvoice->source_filename ?? '');
-        $sFormId = 'gr-apply-form-'.$iInvoiceId;
-        $sLabelSuffix = count($arInvoices) > 1 ? ' &mdash; '.e($sFilename) : '';
-        $sUpdateUrl = \Backend::url('logingrupa/goodsreceivedshopaholic/invoices/update/'.$iInvoiceId);
-    ?>
-        <button type="button"
-                class="btn btn-primary"
-                data-request="onApply"
-                data-request-form="#<?= e($sFormId) ?>"
-                data-request-loading=".applying-spinner-<?= $iInvoiceId ?>"
-                data-request-success="setTimeout(function(){ window.location.href = '<?= e($sUpdateUrl) ?>'; }, 50);"
-                data-popup-load-indicator>
-            <i class="icon-check"></i>
-            <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?><?= $sLabelSuffix ?>
-        </button>
-        <span class="applying-spinner-<?= $iInvoiceId ?> loading-indicator-container" style="display:none; margin-right: 0.5rem;">
-            <span class="loading-indicator size-small indicator-center"></span>
-            <span class="indicator-label"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.spinner')) ?></span>
-        </span>
-    <?php endforeach; ?>
+    <button type="submit" class="btn btn-primary">
+        <i class="icon-check"></i>
+        Apply selected
+    </button>
     <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
 </div>
+</form>
