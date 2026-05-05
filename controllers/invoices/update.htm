@@ -1,20 +1,28 @@
 <?php
-/* Apply button surfaces here when the invoice is in `parsed` status —
- * UAT 2026-05-05: operator uploaded multiple `.HTM` files at once,
- * applied one from the inline modal, then could not reach the
- * remaining parsed invoices' Apply buttons (the upload modal had
- * closed; re-upload was blocked by the parsed-pending duplicate gate
- * from commit 89e5197). The detail-page Apply button gives operators
- * a stable surface to apply each parsed invoice without depending on
- * the in-popup button list.
+/* Sticky-footer form layout — same pattern as
+ * `lovata/shopaholic/controllers/categories/update.htm`. October's
+ * `Form::open(['class' => 'layout'])` + the trailing
+ * `.form-buttons` div produce a fixed bottom toolbar that sticks
+ * to the viewport while the form scrolls. The Apply button surfaces
+ * here when status=parsed (UAT 2026-05-05) — same `onApplyShowConfirm`
+ * AJAX handler that the upload modal calls.
  *
- * Wires onApplyShowConfirm AJAX handler — same path used by the
- * upload modal's per-file Apply button (controllers/Invoices.php:529).
+ * Breadcrumb at top wires "Invoices" → current invoice number per
+ * the canonical October backend pattern.
  */
 $obInvoice = $this->formGetModel();
 $bIsParsed = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
     && (string) $obInvoice->status === \Logingrupa\GoodsReceivedShopaholic\Models\Invoice::STATUS_PARSED;
+$sListUrl = Backend::url('logingrupa/goodsreceivedshopaholic/invoices');
 ?>
+
+<?php Block::put('breadcrumb') ?>
+    <ul>
+        <li><a href="<?= $sListUrl ?>"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.controller.list_title')) ?></a></li>
+        <li><?= e($this->pageTitle) ?></li>
+    </ul>
+<?php Block::endPut() ?>
+
 <?= Form::open(['class' => 'layout']) ?>
     <div class="layout-row">
         <?= $this->formRender() ?>
@@ -23,17 +31,19 @@ $bIsParsed = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\In
         <?= $this->relationRender('lines') ?>
     </div>
     <div class="form-buttons">
-        <a href="<?= Backend::url('logingrupa/goodsreceivedshopaholic/invoices') ?>" class="btn btn-default oc-icon-arrow-left">
-            <?= e(trans('backend::lang.form.cancel')) ?>
-        </a>
-        <?php if ($bIsParsed): ?>
-            <button type="button"
-                    class="btn btn-primary oc-icon-check"
-                    data-control="popup"
-                    data-handler="onApplyShowConfirm"
-                    data-request-data="invoice_id: <?= (int) $obInvoice->id ?>">
-                <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
-            </button>
-        <?php endif; ?>
+        <div class="loading-indicator-container">
+            <?php if ($bIsParsed): ?>
+                <button type="button"
+                        class="btn btn-primary oc-icon-check"
+                        data-control="popup"
+                        data-handler="onApplyShowConfirm"
+                        data-request-data="invoice_id: <?= (int) $obInvoice->id ?>">
+                    <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
+                </button>
+            <?php endif; ?>
+            <span class="btn-text">
+                <a href="<?= $sListUrl ?>" class="oc-icon-arrow-left"><?= e(trans('backend::lang.form.return_to_list')) ?></a>
+            </span>
+        </div>
     </div>
 <?= Form::close() ?>
