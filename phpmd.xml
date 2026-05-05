@@ -134,10 +134,24 @@
        the error panel for details." flash gave operators no
        attribution to the failed file or visibility into whether the
        full Throwable was logged server-side.
+
+       135 → 140 (initial reset boundary sanitizer + reset-only path,
+       2026-05-05): the reset paths now sanitize Throwable bubble-up
+       (mirrors the upload boundary sanitizer from commit 913bc7e).
+       UAT triggered SQLSTATE[22003] from a negative offer.quantity
+       value that the snapshot column rejected — raw SQL/connection
+       details surfaced in the operator-visible flash. The new
+       catch(Throwable) arms in `runInitialResetOnly` and
+       `runInitialResetThenApply` log the full exception via
+       `Log::error('goodsreceived.initial_reset.unexpected', …)` and
+       throw a generic AjaxException carrying only the sentinel
+       invoice id. Net +2 branches (one catch arm per reset path)
+       plus the new `runInitialResetOnly` helper from commit b8d49cd
+       (file-less reset). Net +5.
     -->
     <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
         <properties>
-            <property name="maximum" value="135" />
+            <property name="maximum" value="140" />
         </properties>
     </rule>
 

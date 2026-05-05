@@ -44,6 +44,7 @@ return [
         'initial_reset_not_allowed'      => 'Initial reset is not allowed on this site (Settings.allow_initial_reset is off, or a prior reset has been recorded).',
         'operator_overrides_active_flag' => 'Skipping this offer because an operator manually set its active flag (active_managed_by=operator).',
         'malformed_htm'                  => 'The uploaded HTM file is malformed and cannot be parsed.',
+        'initial_reset_unexpected'       => 'Initial reset failed due to an unexpected error (marker invoice #:id). The full exception has been logged server-side (storage/logs/system.log, channel: goodsreceived.initial_reset.unexpected). Review the log and discard the marker invoice if rerun is intended.',
     ],
     'validation' => [
         'invoice_number_required'      => 'An invoice number is required.',

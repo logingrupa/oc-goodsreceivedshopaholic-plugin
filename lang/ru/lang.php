@@ -44,6 +44,7 @@ return [
         'initial_reset_not_allowed'      => 'Начальный сброс не разрешён на этом сайте (Settings.allow_initial_reset выключен или предыдущий сброс уже зарегистрирован).',
         'operator_overrides_active_flag' => 'Это предложение пропущено, так как оператор вручную установил его флаг активности (active_managed_by=operator).',
         'malformed_htm'                  => 'Загруженный HTM-файл повреждён и не может быть разобран.',
+        'initial_reset_unexpected'       => 'Начальный сброс не удался из-за непредвиденной ошибки (маркерный счёт #:id). Полное сообщение об ошибке записано в журнал на сервере (storage/logs/system.log, канал: goodsreceived.initial_reset.unexpected). Просмотрите журнал и удалите маркерный счёт, если требуется повторный запуск.',
     ],
     'validation' => [
         'invoice_number_required'      => 'Номер счёта обязателен.',

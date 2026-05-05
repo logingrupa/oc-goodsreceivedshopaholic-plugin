@@ -1037,6 +1037,18 @@ class Invoices extends Controller
                 'message' => $obException->getMessage(),
                 'reason' => $obException->arContext['reason'] ?? 'unknown',
             ]);
+        } catch (Throwable $obException) {
+            Log::error('goodsreceived.initial_reset.unexpected', [
+                'invoice_id' => (int) $obInvoice->id,
+                'filename'   => $sFilename,
+                'exception'  => (string) $obException,
+            ]);
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.exception.initial_reset_unexpected',
+                    ['id' => (int) $obInvoice->id],
+                ),
+            ]);
         }
 
         $obApply = $this->resolveApplyOrchestrator();
@@ -1102,6 +1114,24 @@ class Invoices extends Controller
             throw new AjaxException([
                 'message' => $obException->getMessage(),
                 'reason' => $obException->arContext['reason'] ?? 'unknown',
+            ]);
+        } catch (Throwable $obException) {
+            // Boundary sanitizer (same pattern as upload error path):
+            // any non-typed Throwable from the reset transaction (e.g.
+            // QueryException with bound SQL params) must NOT surface raw
+            // to the operator-visible flash. Log full exception for ops
+            // forensics; show a generic message + invoice id so the
+            // operator can correlate via the Invoices list.
+            Log::error('goodsreceived.initial_reset.unexpected', [
+                'invoice_id' => (int) $obInvoice->id,
+                'sentinel'   => $sSentinel,
+                'exception'  => (string) $obException,
+            ]);
+            throw new AjaxException([
+                'message' => (string) Lang::get(
+                    'logingrupa.goodsreceivedshopaholic::lang.exception.initial_reset_unexpected',
+                    ['id' => (int) $obInvoice->id],
+                ),
             ]);
         }
 
