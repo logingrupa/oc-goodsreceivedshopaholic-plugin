@@ -88,6 +88,7 @@ return [
         'apply_in_progress' => 'Piemērošana jau notiek šim rēķinam; lūdzu, uzgaidiet.',
         'apply_success'     => 'Rēķins #:id piemērots — pievienotas :units vienības :offers piedāvājumiem.',
         'apply_already_done' => 'Rēķins jau ir piemērots; nekas nav jādara.',
+        'initial_reset_only_success' => 'Sākotnējā atiestatīšana pabeigta — visi piedāvājumu daudzumi nullēti un visi produkti deaktivizēti. Rēķins netika importēts (marķieris #:id).',
         'forbidden'         => 'Jums nav atļaujas veikt šo darbību.',
         'upload_rejected_duplicate'      => 'Rēķina dublikāts noraidīts. Ja atkārtota piemērošana ir paredzēta, izmanto «Override and re-import» zemāk.',
         'upload_rejected_parsed_pending' => 'Rēķins jau ir apstrādāts — piemēro vai atmet esošo apstrādi pirms atkārtotas augšupielādes.',

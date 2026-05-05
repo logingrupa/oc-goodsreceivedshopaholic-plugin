@@ -88,6 +88,7 @@ return [
         'apply_in_progress' => 'En anvendelse pågår allerede for denne fakturaen; vennligst vent.',
         'apply_success'     => 'Faktura #:id anvendt — :units enheter lagt til på :offers tilbud.',
         'apply_already_done' => 'Fakturaen er allerede anvendt; ingenting å gjøre.',
+        'initial_reset_only_success' => 'Innledende tilbakestilling utført — alle tilbudsantall nullstilt og alle produkter deaktivert. Ingen faktura importert (markør #:id).',
         'forbidden'         => 'Du har ikke tillatelse til å utføre denne handlingen.',
         'upload_rejected_duplicate'      => 'Duplikatfaktura avvist. Bruk «Override and re-import» nedenfor hvis ny anvendelse er ønsket.',
         'upload_rejected_parsed_pending' => 'Fakturaen er allerede parset — anvend eller forkast den eksisterende parsingen før du laster opp på nytt.',

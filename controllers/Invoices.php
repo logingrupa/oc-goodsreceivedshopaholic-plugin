@@ -926,14 +926,21 @@ class Invoices extends Controller
             ]);
         }
 
-        $arFiles = $this->getUploadedFiles();
-        if ($arFiles === null || $arFiles === []) {
-            throw new AjaxException(['message' => 'No file provided for initial reset apply.']);
-        }
-        $obFile = $arFiles[0];
-
-        $this->assertHtmFile($obFile);
         $iUserId = $this->resolveBackendUserId();
+        $arFiles = $this->getUploadedFiles();
+
+        // No file → reset-only path (zero stock + deactivate products,
+        // no invoice import). The reset service still requires an Invoice
+        // row for the snapshot foreign key + the one-shot bit, so a
+        // sentinel marker invoice is created with status=applied and
+        // invoice_number=RESET_NO_INVOICE_<YmdHis_uniq>. The unique-index
+        // is honoured by the timestamp + 4-digit suffix.
+        if ($arFiles === null || $arFiles === []) {
+            return $this->runInitialResetOnly($iUserId);
+        }
+
+        $obFile = $arFiles[0];
+        $this->assertHtmFile($obFile);
         $sHtml = $this->readFileContents($obFile);
         $sFilename = (string) $obFile->getClientOriginalName();
 
@@ -1048,6 +1055,65 @@ class Invoices extends Controller
             '#applyResult' => $this->makePartial('_partials/apply_success', [
                 'invoice_id' => (int) $obInvoice->id,
                 'result'     => $obResult,
+            ]),
+        ];
+    }
+
+    /**
+     * File-less initial reset — zero stock + deactivate products, NO
+     * invoice import. Operator typed RESET but did not select a `.HTM`
+     * file, signaling "I want a clean baseline; the next upload will
+     * be the first stock event." The reset service requires an Invoice
+     * row for the snapshot foreign key + one-shot bit, so a sentinel
+     * marker invoice is created with status=applied and a synthetic
+     * invoice_number so the UNIQUE index is honoured.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws AjaxException
+     */
+    private function runInitialResetOnly(int $iUserId): array
+    {
+        $sNow = \Carbon\Carbon::now();
+        $sSentinel = sprintf(
+            'RESET_NO_INVOICE_%s_%04d',
+            $sNow->format('YmdHis'),
+            random_int(0, 9999),
+        );
+
+        $obInvoice = new Invoice();
+        $obInvoice->invoice_number = $sSentinel;
+        $obInvoice->status = Invoice::STATUS_APPLIED;
+        $obInvoice->total_lines = 0;
+        $obInvoice->matched_lines = 0;
+        $obInvoice->unmatched_lines = 0;
+        $obInvoice->stock_added_units = 0;
+        $obInvoice->parsed_at = $sNow;
+        $obInvoice->applied_at = $sNow;
+        $obInvoice->applied_by_user_id = $iUserId;
+        $obInvoice->initial_reset_applied = false;
+        $obInvoice->source_filename = $sSentinel;
+        $obInvoice->saveQuietly();
+
+        $obReset = $this->resolveInitialResetService();
+        try {
+            $obReset->reset($obInvoice);
+        } catch (InitialResetNotAllowedException $obException) {
+            throw new AjaxException([
+                'message' => $obException->getMessage(),
+                'reason' => $obException->arContext['reason'] ?? 'unknown',
+            ]);
+        }
+
+        Flash::success((string) Lang::get(
+            'logingrupa.goodsreceivedshopaholic::lang.flash.initial_reset_only_success',
+            ['id' => (int) $obInvoice->id],
+        ));
+
+        return [
+            '#applyResult' => $this->makePartial('_partials/apply_success', [
+                'invoice_id' => (int) $obInvoice->id,
+                'result'     => null,
             ]),
         ];
     }

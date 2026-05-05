@@ -88,6 +88,7 @@ return [
         'apply_in_progress' => 'Apply already in progress for this invoice; please wait.',
         'apply_success'     => 'Invoice #:id applied — :units units added across :offers offers.',
         'apply_already_done' => 'Invoice already applied; nothing to do.',
+        'initial_reset_only_success' => 'Initial reset done — all offer quantities zeroed and all products deactivated. No invoice imported (marker #:id).',
         'forbidden'         => 'You do not have permission to perform this action.',
         'upload_rejected_duplicate'      => 'Duplicate invoice rejected. Use Override and re-import below if reapply is intended.',
         'upload_rejected_parsed_pending' => 'Invoice already parsed — apply or discard the existing parse before re-uploading.',
