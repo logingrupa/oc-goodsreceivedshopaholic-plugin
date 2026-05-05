@@ -30,11 +30,23 @@ The plugin is operator-facing: a warehouse clerk uploads the distributor's `.HTM
 
 The plugin installs as a standard October CMS plugin via Composer. It is targeted at PHP `^8.3` (production runs 8.4) and depends on Lovata Toolbox + Lovata Shopaholic.
 
-```bash
-# 1. Pull the plugin into the project's composer.json
-composer require logingrupa/oc-goodsreceivedshopaholic-plugin
+**Recommended — `plugin:install` from the public GitHub repo (one-shot, no manual `composer.json` edit):**
 
-# 2. Run the plugin migrations (creates 3 tables + extends offers + extends products)
+```bash
+php artisan plugin:install Logingrupa.GoodsReceivedShopaholic \
+    --from=https://github.com/logingrupa/oc-goodsreceivedshopaholic-plugin.git \
+    --want=dev-master --oc
+
+# Run the plugin migrations (creates 3 tables + extends offers + extends products)
+php artisan october:up
+```
+
+October's CLI auto-registers the GitHub repo as a `vcs` repository in the root `composer.json`, runs `composer require logingrupa/oc-goodsreceivedshopaholic-plugin dev-master`, and installs to `plugins/logingrupa/goodsreceivedshopaholic/`. After a `v1.x.y` tag lands, swap `--want=dev-master` for `--want=^1.1` (or the desired constraint).
+
+**Alternative — manual Composer require (if the project already has the VCS repo registered):**
+
+```bash
+composer require logingrupa/oc-goodsreceivedshopaholic-plugin
 php artisan october:up
 ```
 
