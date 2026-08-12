@@ -14,7 +14,14 @@
  * outer modal-dialog/modal-content wrapper). October popup.js wraps
  * externally via createPopupContainer (popup.js:206-229).
  *
- * Expected vars (unchanged):
+ * Expected vars:
+ *   - $errors: list<array{filename: string, message: string}> — per-file
+ *     upload failures from the same batch (optional). Rendered at the top
+ *     of the body via `_upload_errors`; without this the operator never
+ *     sees them, because the upload popup that hosts the legacy
+ *     #invoiceUploadErrors panel closes when this modal opens.
+ *   - $rejects: list<array<string, mixed>> — duplicate rejects from the
+ *     same batch (optional). Rendered via `_reject` for the same reason.
  *   - $invoices: list<array{
  *       invoice: Invoice,
  *       lines: October Collection<InvoiceLine>,
@@ -41,9 +48,12 @@ foreach ($arInvoices as $arPreview) {
     </h4>
     <button type="button" class="btn-close" data-dismiss="popup"></button>
 </div>
-<form id="gr-apply-bulk-form" data-request="onApplyBulk" data-attach-loading
+<form id="gr-apply-bulk-form" data-request="onApplyBulk"
       data-request-success="$(this).trigger('close.oc.popup'); window.location.reload();">
 <div class="modal-body">
+    <?= $this->makePartial('_partials/upload_errors', ['errors' => $errors ?? []]) ?>
+    <?= $this->makePartial('_partials/reject', ['rejects' => $rejects ?? []]) ?>
+
     <?php if ($iCount === 0): ?>
         <p class="alert alert-warning">No invoices to apply.</p>
     <?php endif; ?>
@@ -252,7 +262,7 @@ foreach ($arInvoices as $arPreview) {
     </script>
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary" data-attach-loading>
         <i class="icon-check"></i>
         Apply selected
     </button>

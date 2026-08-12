@@ -365,8 +365,18 @@ class Invoices extends Controller
             $this->processSingleUpload($obFile, $iUserId, $arPreviews, $arRejects, $arErrors);
         }
 
+        // Errors + rejects are passed INTO the modal as well: when at least
+        // one file parses, the upload popup (which hosts the legacy
+        // #invoiceUploadErrors / #invoiceRejectWrap panels) closes before
+        // the apply modal opens, so panel patches land in a detached DOM
+        // node and per-file failures become invisible (UAT 2026-08-12 —
+        // missing-EAN reject in a mixed batch surfaced nowhere).
         $mModal = count($arPreviews) > 0
-            ? $this->makePartial('_partials/apply_modal', ['invoices' => $arPreviews])
+            ? $this->makePartial('_partials/apply_modal', [
+                'invoices' => $arPreviews,
+                'errors'   => $arErrors,
+                'rejects'  => $arRejects,
+            ])
             : '';
 
         $this->flashFailOnlyOutcome($arPreviews, $arRejects, $arErrors);

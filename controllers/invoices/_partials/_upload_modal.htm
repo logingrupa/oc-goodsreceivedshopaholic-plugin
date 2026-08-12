@@ -11,8 +11,16 @@
     <button type="button" class="btn-close" data-dismiss="popup"></button>
 </div>
 <div class="modal-body">
-    <?= $this->makePartial('_partials/upload_form') ?>
+    <?= $this->makePartial('_partials/upload_form', ['hide_reset_button' => true]) ?>
 </div>
 <div class="modal-footer">
+    <?php if ($this->shouldShowInitialReset()): ?>
+        <button type="button"
+                class="btn btn-danger"
+                data-control="popup"
+                data-handler="onInitialResetShowConfirm">
+            Configure initial reset
+        </button>
+    <?php endif; ?>
     <button type="button" class="btn btn-default" data-dismiss="popup">Close</button>
 </div>

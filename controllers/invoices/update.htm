@@ -19,6 +19,8 @@
 $obInvoice = $this->formGetModel();
 $bIsParsed = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
     && (string) $obInvoice->status === \Logingrupa\GoodsReceivedShopaholic\Models\Invoice::STATUS_PARSED;
+$bIsApplied = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+    && (string) $obInvoice->status === \Logingrupa\GoodsReceivedShopaholic\Models\Invoice::STATUS_APPLIED;
 $iInvoiceId = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
     ? (int) $obInvoice->id
     : 0;
@@ -51,12 +53,17 @@ $sListUrl = Backend::url('logingrupa/goodsreceivedshopaholic/invoices');
                 </button>
             <?php endif; ?>
             <?php if ($iInvoiceId > 0): ?>
+                <!-- Labeled (not icon-only) so the rollback semantics are
+                     discoverable — applied invoices reverse their stock
+                     writes and free the invoice number for re-import
+                     (UAT 2026-08-12). Same onDelete handler either way. -->
                 <button type="button"
-                        class="oc-icon-trash-o btn-icon danger pull-right"
+                        class="btn btn-danger oc-icon-trash-o pull-right"
                         data-request="onDelete"
                         data-request-data="invoice_id: <?= $iInvoiceId ?>"
                         data-request-confirm="<?= e(trans('logingrupa.goodsreceivedshopaholic::lang.flash.delete_confirm')) ?>"
                         data-load-indicator="<?= e(trans('backend::lang.form.deleting')) ?>">
+                    <?= $bIsApplied ? 'Rollback stock &amp; delete' : 'Delete' ?>
                 </button>
             <?php endif; ?>
             <span class="btn-text">

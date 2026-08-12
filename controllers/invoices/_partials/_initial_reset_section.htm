@@ -9,6 +9,8 @@
  * same gates (T-04-06-02 defense-in-depth) so a stale view cannot bypass.
  *
  * @var bool $show_initial_reset
+ * @var bool $hide_button  true in the upload-modal context — the button
+ *                         renders in the modal FOOTER instead (UAT 2026-08-12)
  */
 ?>
 <?php if (!empty($show_initial_reset)): ?>
@@ -18,11 +20,13 @@
         <p class="help-block">
             Tick this on your FIRST import to zero all offer quantities and deactivate all products before the new invoice's stock is added. This is one-shot; the catalog snapshot is preserved for audit / rollback.
         </p>
-        <button type="button"
-                class="btn btn-danger"
-                data-control="popup"
-                data-handler="onInitialResetShowConfirm">
-            Configure initial reset
-        </button>
+        <?php if (empty($hide_button)): ?>
+            <button type="button"
+                    class="btn btn-danger"
+                    data-control="popup"
+                    data-handler="onInitialResetShowConfirm">
+                Configure initial reset
+            </button>
+        <?php endif; ?>
     </div>
 <?php endif; ?>

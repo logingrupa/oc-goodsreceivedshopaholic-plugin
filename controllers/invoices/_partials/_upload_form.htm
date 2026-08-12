@@ -27,4 +27,7 @@ $bShowInitialReset = $this->shouldShowInitialReset();
     <?= Form::close() ?>
 </div>
 
-<?= $this->makePartial('_partials/initial_reset_section', ['show_initial_reset' => $bShowInitialReset]) ?>
+<?= $this->makePartial('_partials/initial_reset_section', [
+    'show_initial_reset' => $bShowInitialReset,
+    'hide_button'        => !empty($hide_reset_button),
+]) ?>

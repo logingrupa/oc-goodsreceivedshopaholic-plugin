@@ -165,6 +165,41 @@ it('iterates over multiple files and aggregates results (UI-02 multi-file)', fun
     @unlink($arStaged2['path']);
 });
 
+it('passes batch errors + rejects INTO the apply modal partial (mixed-batch visibility — UAT 2026-08-12)', function (): void {
+    // Mixed batch: one valid invoice + one no-EAN-column file. The apply
+    // modal opens for the valid one, which CLOSES the upload popup hosting
+    // the legacy #invoiceUploadErrors panel — so the per-file failure must
+    // travel INSIDE the modal markup or the operator never sees it.
+    $arStagedGood = stageFixtureUpload('Nr_PRO033328_no_13042026.HTM');
+    $arStagedNoEan = stageFixtureUpload('Nr_PRO034535_no_09072026.HTM', 'Nr_PRO034535_no_09072026.HTM');
+    $obController = makeTestController(
+        bHasPermission: true,
+        arFiles: [$arStagedGood['file'], $arStagedNoEan['file']],
+    );
+    $arResponse = $obController->onUpload();
+
+    expect((string) $arResponse['result'])->toContain('_partials/apply_modal');
+    expect(Invoice::count())->toBe(1);
+
+    $arModalCall = null;
+    foreach ($obController->arPartialCalls as $arCall) {
+        if ($arCall['name'] === '_partials/apply_modal') {
+            $arModalCall = $arCall;
+            break;
+        }
+    }
+    expect($arModalCall)->not->toBeNull();
+    expect(count($arModalCall['data']['invoices']))->toBe(1);
+    expect($arModalCall['data'])->toHaveKey('rejects');
+    $arModalErrors = $arModalCall['data']['errors'];
+    expect(count($arModalErrors))->toBe(1);
+    expect((string) $arModalErrors[0]['filename'])->toBe('Nr_PRO034535_no_09072026.HTM');
+    expect((string) $arModalErrors[0]['message'])->toContain('missing_ean_column');
+
+    @unlink($arStagedGood['path']);
+    @unlink($arStagedNoEan['path']);
+});
+
 it('returns empty result key when no invoices parsed (errors-only batch — UX redesign)', function (): void {
     // UX redesign 2026-04-30 — the `result` key carries the apply modal
     // markup ONLY when at least one invoice parsed successfully. An
