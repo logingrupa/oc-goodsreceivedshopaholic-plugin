@@ -42,20 +42,24 @@ final class InvoiceNumberResolver
     /**
      * Body-marker regex — matches the label-and-value pair after HTML tag
      * strip and entity decode. Covers EN ("Invoice No"), Norwegian
-     * ("Faktura Nr"), and German ("Rechnung Nr") variants. `[^\w\d]*` skips
+     * ("Faktura Nr"), German ("Rechnung Nr"), and Latvian ("Pavadzīme Nr."
+     * — the distributor's no-EAN print template, e.g.
+     * `Nr_PRO034535_no_09072026.HTM`) variants. `[^\w\d]*` skips
      * any colons, periods, or whitespace between label and value (including
      * decoded `&nbsp;` collapsed by `preg_replace('/\s+/u', ' ', ...)`).
      * `([A-Z]{0,4}\d{4,})` greedily captures `PRO033328`-style identifiers.
      * `u` flag enables Unicode-safe matching.
      */
-    private const BODY_MARKER_REGEX = '/(?:Invoice|Faktura|Rechnung)\s*(?:No|Nr|nr)[^\w\d]*([A-Z]{0,4}\d{4,})/iu';
+    private const BODY_MARKER_REGEX = '/(?:Invoice|Faktura|Rechnung|Pavadzīme)\s*(?:No|Nr|nr)[^\w\d]*([A-Z]{0,4}\d{4,})/iu';
 
     /**
      * Filename regex — anchored both ends. Captures (1) canonical
      * `PRO\d+` identifier, (2) two-or-three-letter country code, (3)
-     * eight-digit `DDMMYYYY` date string.
+     * eight-digit `DDMMYYYY` date string. The optional ` (N)` group before
+     * the extension tolerates browser duplicate-download suffixes
+     * (`Nr_PRO034535_no_09072026 (1).HTM`) — UAT 2026-08-12.
      */
-    private const FILENAME_REGEX = '/^Nr_(PRO\d+)_([A-Za-z]{2,3})_(\d{8})\.HTM$/i';
+    private const FILENAME_REGEX = '/^Nr_(PRO\d+)_([A-Za-z]{2,3})_(\d{8})\s*(?:\(\d+\))?\.HTM$/i';
 
     /**
      * Resolve the canonical invoice number, country code, and invoice date

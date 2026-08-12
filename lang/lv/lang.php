@@ -44,6 +44,7 @@ return [
         'initial_reset_not_allowed'      => 'Sākotnējā atiestatīšana nav atļauta šajā vietnē (Settings.allow_initial_reset ir izslēgts vai jau ir reģistrēta iepriekšēja atiestatīšana).',
         'operator_overrides_active_flag' => 'Šis piedāvājums tiek izlaists, jo operators manuāli iestatīja tā aktīvo karogu (active_managed_by=operator).',
         'malformed_htm'                  => 'Augšupielādētais HTM fails ir bojāts un to nevar apstrādāt.',
+        'missing_ean_column'             => 'Šajā HTM failā nav EAN (svītrkoda) kolonnas, tāpēc preces nevar sasaistīt. Lūdzu, palūdz naiskonsultants@gmail.com atsūtīt .HTM rēķinu ar iekļautu EAN (svītrkoda) kolonnu.',
         'initial_reset_unexpected'       => 'Sākotnējā atiestatīšana neizdevās negaidītas kļūdas dēļ (marķiera rēķins #:id). Pilna izņēmuma informācija ir reģistrēta servera žurnālā (storage/logs/system.log, kanāls: goodsreceived.initial_reset.unexpected). Pārbaudi žurnālu un atmet marķiera rēķinu, ja paredzēta atkārtota palaišana.',
         'delete_blocked_by_override'     => 'Nevar dzēst: šis rēķins ir pārrakstīts ar vēlāku piemērotu rēķinu. Vispirms dzēs pārrakstīšanu.',
     ],

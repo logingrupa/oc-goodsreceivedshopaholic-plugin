@@ -183,17 +183,81 @@ it('RejectsMalformedHtmTest — HTML without any R20/R21 rows throws MalformedHt
         ->toThrow(MalformedHtmException::class);
 });
 
-it('skips row with invalid 12-digit EAN without throwing (D-16 lenient)', function (): void {
+it('skips row with invalid EAN without throwing when other rows parse (D-16 lenient)', function (): void {
     $sHtml = buildSyntheticInvoiceHtml([
         ['class' => 'R20', 'ean' => '123', 'qty' => '5'],
+        ['class' => 'R20', 'ean' => '4752307000097', 'qty' => '2'],
     ]);
 
     $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO999999_no_01012026.HTM');
 
-    expect(count($obParsed->lines))->toBe(0);
+    expect(count($obParsed->lines))->toBe(1);
+    expect($obParsed->lines[0]->ean)->toBe('4752307000097');
     expect(count($obParsed->skipped_rows))->toBe(1);
     expect($obParsed->skipped_rows[0]['reason'])->toBe('invalid_ean');
     expect($obParsed->skipped_rows[0]['row_index'])->toBe(1);
+});
+
+it('throws missing-EAN-column MalformedHtmException when NO row yields a valid EAN (synthetic)', function (): void {
+    $sHtml = buildSyntheticInvoiceHtml([
+        ['class' => 'R20', 'ean' => '123', 'qty' => '5'],
+    ]);
+
+    try {
+        (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO999999_no_01012026.HTM');
+        $this->fail('Expected MalformedHtmException was not thrown.');
+    } catch (MalformedHtmException $obException) {
+        expect($obException->arContext['reason'])->toBe('no_valid_ean_lines');
+        expect($obException->arContext['skipped_row_count'])->toBe(1);
+    }
+});
+
+it('parses LV "Pavadzīme" template with R22 data rows and Svītrukods EAN column (UAT 2026-08-12)', function (): void {
+    // Second distributor template: header row R21, data rows R22, EAN in
+    // the "Svītrukods" column at position 2 — same column layout as the EN
+    // template. 23 R22 product rows: 22 carry valid EANs, the zPAK shipping
+    // row has an empty EAN cell; the R21 header + footer rows skip.
+    $sFixturePath = __DIR__.'/../../fixtures/invoices/Nr_PRO034535_no_09072026 (1).HTM';
+    $sHtml = file_get_contents($sFixturePath);
+
+    expect($sHtml)->not->toBeFalse();
+
+    /** @var string $sHtml */
+    $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO034535_no_09072026 (1).HTM');
+
+    expect($obParsed->invoice_number)->toBe('PRO034535');
+    expect(count($obParsed->lines))->toBe(22);
+    expect($obParsed->lines[0]->ean)->toBe('4752307000431');
+    expect($obParsed->lines[0]->qty)->toBe(5);
+    expect($obParsed->lines[0]->unit_price)->toBe(5.12);
+});
+
+it('throws missing-EAN-column MalformedHtmException on real no-EAN distributor template fixture', function (): void {
+    // Distributor's alternate print form: header row R21, data rows R22,
+    // no "Bar code" column at all (Nr_PRO034535_no_09072026.HTM). The row
+    // XPath matches only the R21 header, whose position-2 cell is a text
+    // label — zero valid EAN lines → whole-file reject with the operator
+    // message pointing at naiskonsultants@gmail.com.
+    $sFixturePath = __DIR__.'/../../fixtures/invoices/Nr_PRO034535_no_09072026.HTM';
+    $sHtml = file_get_contents($sFixturePath);
+
+    expect($sHtml)->not->toBeFalse();
+
+    try {
+        /** @var string $sHtml */
+        (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO034535_no_09072026.HTM');
+        $this->fail('Expected MalformedHtmException was not thrown.');
+    } catch (MalformedHtmException $obException) {
+        expect($obException->arContext['reason'])->toBe('no_valid_ean_lines');
+        // Harness runs with autoRegister=false, so the plugin lang namespace
+        // is not loaded and \Lang::get returns the raw key — assert the key
+        // is wired, then pin the operator-facing EN text (with the contact
+        // email) straight from the lang file.
+        expect($obException->getMessage())->toContain('missing_ean_column');
+
+        $arLangEn = require __DIR__.'/../../../lang/en/lang.php';
+        expect($arLangEn['exception']['missing_ean_column'])->toContain('naiskonsultants@gmail.com');
+    }
 });
 
 it('throws InvalidQuantityException on decimal qty in a row (T-02-05-05 bubble-through)', function (): void {

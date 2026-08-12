@@ -38,6 +38,7 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException;
  *   |----------------------------------------|------------------------------------|
  *   | libxml fatal error                     | throw `MalformedHtmException`      |
  *   | Zero R20/R21 rows extracted            | throw `MalformedHtmException`      |
+ *   | Rows extracted, ZERO valid EAN lines   | throw `MalformedHtmException` (`missing_ean_column` message — distributor's no-EAN print template) |
  *   | Invoice number missing (body+filename) | throw `InvoiceNumberMissingException` (bubbles from resolver) |
  *   | Decimal / zero / negative qty          | throw `InvalidQuantityException` (bubbles from QuantityNormalizer) |
  *   | Row has < 10 TDs                       | append to `skipped_rows`, continue |
@@ -71,9 +72,14 @@ final class HtmInvoiceParser
      * Case-insensitive XPath for data rows. `translate(@class,'r','R')` lifts
      * any lowercase `r` to uppercase before the `contains()` test, so future
      * fixtures with `<TR class="r20">` parse identically (defensive — current
-     * fixtures are uppercase).
+     * fixtures are uppercase). Two distributor templates share column
+     * positions (EAN@2, name@3, unit@4, qty@5, prices@6..9):
+     *   - EN "INVOICE":     header R19, data rows R20/R21.
+     *   - LV "Pavadzīme":   header R21, data rows R22 (UAT 2026-08-12,
+     *     `Nr_PRO034535_no_09072026 (1).HTM`). The R21 header falls through
+     *     as an invalid_ean row-skip.
      */
-    private const string ROW_XPATH = "//tr[contains(translate(@class,'r','R'),'R20') or contains(translate(@class,'r','R'),'R21')]";
+    private const string ROW_XPATH = "//tr[contains(translate(@class,'r','R'),'R20') or contains(translate(@class,'r','R'),'R21') or contains(translate(@class,'r','R'),'R22')]";
 
     /**
      * Parse distributor `.HTM` bytes into a typed `ParsedInvoice` DTO.
@@ -94,6 +100,24 @@ final class HtmInvoiceParser
                 (string) \Lang::get('logingrupa.goodsreceivedshopaholic::lang.exception.malformed_htm'),
                 [
                     'reason' => 'no_rows_extracted',
+                    'source_filename' => basename($sSourceFilename),
+                ],
+            );
+        }
+
+        // Rows matched but NOT ONE carried a valid 13-digit EAN — the
+        // distributor's no-EAN print template (header row R21, data rows
+        // R22, no "Bar code" column; e.g. Nr_PRO034535_no_09072026.HTM).
+        // Such a file can never match offers, so reject the whole upload
+        // with an actionable operator message instead of persisting a
+        // useless zero-line invoice. Row-level EAN leniency (D-16) still
+        // holds whenever at least one row parses.
+        if ($arResult['lines'] === []) {
+            throw new MalformedHtmException(
+                (string) \Lang::get('logingrupa.goodsreceivedshopaholic::lang.exception.missing_ean_column'),
+                [
+                    'reason' => 'no_valid_ean_lines',
+                    'skipped_row_count' => count($arResult['skipped']),
                     'source_filename' => basename($sSourceFilename),
                 ],
             );

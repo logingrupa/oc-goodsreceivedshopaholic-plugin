@@ -1,0 +1,827 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8"/>
+<TITLE></TITLE>
+<STYLE TYPE="text/css">
+body { background: #ffffff; margin: 0; font-family: Arial; font-size: 8pt; font-style: normal; }
+tr.R0{ height: 15px; }
+tr.R0 td.R0C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R0 td.R11C8{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R11C9{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R15C4{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R0 td.R18C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; border-top: #000000 1px solid; }
+tr.R0 td.R18C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #000000 1px solid; border-bottom: #ffffff 1px none; }
+tr.R0 td.R18C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #000000 1px solid; }
+tr.R0 td.R53C1{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R0 td.R53C2{ text-align: left; }
+tr.R0 td.R53C6{ text-align: left; }
+tr.R0 td.R54C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: bottom; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R1{ height: 19px; }
+tr.R1 td.R1C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R1 td.R1C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R1 td.R1C9{ font-family: Arial; font-size: 18pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: top; }
+tr.R12{ height: 29px; }
+tr.R12 td.R12C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R12 td.R12C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R12 td.R12C3{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R12 td.R12C9{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R2{ height: 20px; }
+tr.R2 td.R2C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R2 td.R2C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R2 td.R2C8{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: right; vertical-align: middle; }
+tr.R2 td.R2C9{ font-family: Arial; font-size: 11pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: middle; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R21{ height: 29px; }
+tr.R21 td.R21C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R21 td.R21C1{ font-family: Arial; font-size: 8pt; font-style: normal; background-color: #9ecf5d; text-align: center; vertical-align: middle; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R22{ height: 16px; }
+tr.R22 td.R22C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R22 td.R22C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: center; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R22 td.R22C2{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R22 td.R22C9{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: right; vertical-align: top; border-left: #000000 1px dotted; border-top: #000000 1px dotted; border-bottom: #000000 1px dotted; border-right: #000000 1px dotted; }
+tr.R22 td.R48C1{ text-align: left; overflow: visible;border-top: #ffffff 1px none; border-bottom: #000000 1px solid; }
+tr.R22 td.R48C9{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #ffffff 1px none; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R22 td.R49C1{ text-align: left; overflow: visible;border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000 2px solid; border-right: #ffffff 1px none; }
+tr.R22 td.R49C9{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: right; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #000000 2px solid; border-right: #ffffff 1px none; }
+tr.R22 td.R51C1{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: bottom; overflow: visible;border-bottom: #000000 1px solid; }
+tr.R46{ height: 15px; }
+tr.R46 td.R46C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R46 td.R46C1{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; }
+tr.R46 td.R46C2{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-top: #000000 2px solid; border-bottom: #ffffff 1px none; }
+tr.R46 td.R46C4{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; overflow: visible;border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R46 td.R46C5{ text-align: center; border-left: #000000 1px solid; border-top: #000000 2px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R46 td.R46C6{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: center; border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R46 td.R46C7{ text-align: center; vertical-align: top; border-left: #ffffff 1px none; border-top: #000000 2px solid; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R46 td.R46C9{ text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #000000 2px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R46 td.R47C1{ text-align: left; overflow: visible;border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R46 td.R47C2{ text-align: left; overflow: visible;border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R46 td.R47C7{ text-align: left; overflow: visible;border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R46 td.R47C8{ text-align: left; }
+tr.R46 td.R47C9{ text-align: right; vertical-align: top; border-left: #000000 1px solid; border-top: #000000 1px solid; border-bottom: #000000 1px solid; border-right: #000000 1px solid; }
+tr.R46 td.R50C9{ text-align: right; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; border-right: #ffffff 1px none; }
+tr.R5{ height: 16px; }
+tr.R5 td.R10C1{ font-family: Arial; font-size: 7pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; }
+tr.R5 td.R10C3{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; }
+tr.R5 td.R10C7{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; border-top: #ffffff 1px none; }
+tr.R5 td.R10C9{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; border-left: #ffffff 1px none; border-top: #ffffff 1px none; border-bottom: #ffffff 1px none; }
+tr.R5 td.R5C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R5 td.R5C1{ font-family: Arial; font-size: 9pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R5 td.R5C4{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; }
+tr.R5 td.R6C8{ font-family: Arial; font-size: 9pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R8{ height: 28px; }
+tr.R8 td.R8C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R9{ height: 17px; }
+tr.R9 td.R55C1{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; text-align: left; vertical-align: top; }
+tr.R9 td.R57C1{ font-family: Arial; font-size: 10pt; font-style: normal; text-align: center; }
+tr.R9 td.R9C0{ font-family: Arial; font-size: 8pt; font-style: normal; text-align: left; vertical-align: top; }
+tr.R9 td.R9C1{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; background-color: #9ecf5d; text-align: left; vertical-align: top; border-top: #000000 1px solid; }
+tr.R9 td.R9C8{ font-family: Arial; font-size: 10pt; font-style: normal; font-weight: bold; background-color: #9ecf5d; text-align: left; vertical-align: top; border-top: #000000 1px solid; border-bottom: #9ecf5d 1px none; }
+table {table-layout: fixed; padding: 0; padding-left: 2px; vertical-align:bottom; border-collapse:collapse;width: 100%; font-family: Arial; font-size: 8pt; font-style: normal; }
+td { padding: 0; padding-left: 2px; overflow:hidden; vertical-align: bottom;}
+</STYLE>
+</HEAD>
+<BODY STYLE="background: #ffffff; margin: 0; font-family: Arial; font-size: 8pt; font-style: normal; ">
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=66>
+<COL WIDTH=65>
+<COL WIDTH=132>
+<COL WIDTH=30>
+<COL WIDTH=31>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=227>
+<COL>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3 ROWSPAN=5 ALIGN=LEFT VALIGN=TOP STYLE="padding-left: 0"><IMG SRC = "v8_3D9E_168_files/image000.png" ALT = "" width = 156 height = 62 style = "margin-left:136pt;margin-top:10pt;"></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R1>
+<TD CLASS="R1C0"><DIV STYLE="position:relative; height:19px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R1C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">Tel.nr.&nbsp;+371&nbsp;20446646</SPAN></TD>
+<TD CLASS="R1C0"><DIV STYLE="position:relative; height:19px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:19px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="width:100%;height:19px;overflow:hidden;"></DIV></TD>
+</TR>
+<TR CLASS=R2>
+<TD CLASS="R2C0"><SPAN></SPAN></TD>
+<TD CLASS="R2C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">veikals@naiscosmetics.lv</SPAN></TD>
+<TD CLASS="R2C8"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R2>
+<TD CLASS="R2C0"><SPAN></SPAN></TD>
+<TD CLASS="R2C1" COLSPAN=7><SPAN STYLE="white-space:nowrap;max-width:0px;">naiscosmetics.lv</SPAN></TD>
+<TD CLASS="R2C8"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">Pavadzīme&nbsp;Nr.</SPAN></TD>
+<TD CLASS="R5C4" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">PRO034535</SPAN></TD>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Izrakstīšanas&nbsp;datums:</SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">09.07.2026</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=3><SPAN STYLE="white-space:nowrap;max-width:0px;">Dokements&nbsp;izdrukāts:</SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">12.08.2026&nbsp;14:15:30</SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R6C8" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Samaksāt&nbsp;līdz:</SPAN></TD>
+<TD CLASS="R6C8" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">09.07.2026</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=3><SPAN></SPAN></TD>
+<TD CLASS="R5C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Samaksas&nbsp;veids:</SPAN></TD>
+<TD CLASS="R5C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Pārskaitījums</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R8>
+<TD CLASS="R8C0"><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=2><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0"><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD CLASS="R8C0" COLSPAN=3><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="position:relative; height:28px;width: 100%; overflow:hidden;"><SPAN></SPAN></DIV></TD>
+<TD><DIV STYLE="width:100%;height:28px;overflow:hidden;">&nbsp;</DIV></TD>
+</TR>
+<TR CLASS=R9>
+<TD CLASS="R9C0"><SPAN></SPAN></TD>
+<TD CLASS="R9C1" COLSPAN=6><SPAN STYLE="white-space:nowrap;max-width:0px;">NOSŪTĪTĀJS</SPAN></TD>
+<TD CLASS="R9C0"><SPAN></SPAN></TD>
+<TD CLASS="R9C8" COLSPAN=4><SPAN STYLE="white-space:nowrap;max-width:0px;">SAŅĒMĒJS</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R5>
+<TD CLASS="R5C0"><SPAN></SPAN></TD>
+<TD CLASS="R10C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Pārdevējs:</SPAN></TD>
+<TD CLASS="R10C3" COLSPAN=4>Prominence SIA</TD>
+<TD CLASS="R10C7"><SPAN></SPAN></TD>
+<TD CLASS="R10C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Pircējs</SPAN></TD>
+<TD CLASS="R10C9" COLSPAN=3>Agnese Kraveca Studio</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Adrese:</SPAN></TD>
+<TD CLASS="R11C3" COLSPAN=4>Baldones iela 34b, Ogre, LV-5001, Latvija</TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C8">Adrese:</TD>
+<TD CLASS="R11C9" COLSPAN=3>Norvēģija, Norway Kongens gate 28, 1530 Moss, +4796859499</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R12>
+<TD CLASS="R12C0"><SPAN></SPAN></TD>
+<TD CLASS="R12C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Adrese:</SPAN></TD>
+<TD CLASS="R12C3" COLSPAN=4>Mālkalnes prospekts 27-48, Ogre, Ogres novads, LV-5001, Latvija</TD>
+<TD CLASS="R12C0"><SPAN></SPAN></TD>
+<TD CLASS="R12C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Adrese:</SPAN></TD>
+<TD CLASS="R12C9" COLSPAN=3>Norway Kongens gate 28, 1530 Moss</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Reģ.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C3" COLSPAN=4>40103186559</TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Reģ.nr.:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3>893342052</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">PVN&nbsp;reģ.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C3" COLSPAN=4>LV40103186559</TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">PVN&nbsp;reģ.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3>893342052</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Banka:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3>Luminor Bank AS (DNB), swift: RIKOLV2X   </TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Konta&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3>LV37RIKO0000082814159, EUR</TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Izsn.&nbsp;vieta:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=2><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Saņ.&nbsp;vieta:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3>Norvēģija, Norway Kongens gate 28, 1530 Moss</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R18C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Pārvadātājs:</SPAN></TD>
+<TD CLASS="R18C3" COLSPAN=2>Nav</TD>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R18C6" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R18C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Transp.&nbsp;līdzeklis:</SPAN></TD>
+<TD CLASS="R18C3" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1" COLSPAN=2><SPAN STYLE="white-space:nowrap;max-width:0px;">Reģ.&nbsp;nr.:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=2><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN STYLE="white-space:nowrap;max-width:0px;">Vadītājs:</SPAN></TD>
+<TD CLASS="R11C9" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=2><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R0C0" COLSPAN=3><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=38>
+<COL WIDTH=118>
+<COL WIDTH=322>
+<COL WIDTH=36>
+<COL WIDTH=48>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=96>
+<COL>
+<TR CLASS=R21>
+<TD CLASS="R21C0"><SPAN></SPAN></TD>
+<TD CLASS="R21C1">Nr.</TD>
+<TD CLASS="R21C1">Svītrukods</TD>
+<TD CLASS="R21C1">Preces nosaukums</TD>
+<TD CLASS="R21C1">Mērv.</TD>
+<TD CLASS="R21C1">Daudz.</TD>
+<TD CLASS="R21C1">Cena/gab., EUR</TD>
+<TD CLASS="R21C1">Atlaide,%</TD>
+<TD CLASS="R21C1">Cena/gab. ar atlaidi, EUR</TD>
+<TD CLASS="R21C1">Summa, EUR</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">1</TD>
+<TD CLASS="R22C2">4752307000431</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Fairy Pearl</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">2</TD>
+<TD CLASS="R22C2">4752307000448</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Flirt</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">3</TD>
+<TD CLASS="R22C2">4752307000455</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Lavender Milk</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">4</TD>
+<TD CLASS="R22C2">4752307000462</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Moon Peony</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C2">4752307000479</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Peach Glaze</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">6</TD>
+<TD CLASS="R22C2">4752307000486</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Pink Whisper</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">7</TD>
+<TD CLASS="R22C2">4752307000493</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Soft Kiss</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">8</TD>
+<TD CLASS="R22C2">4752307000509</TD>
+<TD CLASS="R22C2">Bottle Gel UV/LED 15ml, Vanilla Silk</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,12</TD>
+<TD CLASS="R22C9">25,60</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">9</TD>
+<TD CLASS="R22C2">4751039484427</TD>
+<TD CLASS="R22C2">MILKY Builder Base UV/LED gels, 15ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">5,88</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">5,88</TD>
+<TD CLASS="R22C9">29,40</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C2">4751039489224</TD>
+<TD CLASS="R22C2">Quick French White Line UV/LED gels, 8ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">20</TD>
+<TD CLASS="R22C1">2,70</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">2,70</TD>
+<TD CLASS="R22C9">54,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">11</TD>
+<TD CLASS="R22C2">4751039483093</TD>
+<TD CLASS="R22C2">Quick Crystal Shine Tops bez lipīgā slāņa UV/LED, 8ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">20</TD>
+<TD CLASS="R22C1">3,10</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">3,10</TD>
+<TD CLASS="R22C9">62,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">12</TD>
+<TD CLASS="R22C2">4751039483802</TD>
+<TD CLASS="R22C2">Blooming Base UV/LED, 8ml bāze gellakas pludināšanai</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">3,62</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">3,62</TD>
+<TD CLASS="R22C9">18,10</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">13</TD>
+<TD CLASS="R22C2">4751039484670</TD>
+<TD CLASS="R22C2">Dizaina gels Liner Art Gel UV/LED, 6ml, White</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">4</TD>
+<TD CLASS="R22C1">4,43</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">4,43</TD>
+<TD CLASS="R22C9">17,72</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">14</TD>
+<TD CLASS="R22C2">4751039484359</TD>
+<TD CLASS="R22C2">Kutikulu eļļa, 15ml, Banana</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C9">17,90</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">15</TD>
+<TD CLASS="R22C2">4751039484403</TD>
+<TD CLASS="R22C2">Kutikulu eļļa, 15ml, Blueberry</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C9">17,90</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">16</TD>
+<TD CLASS="R22C2">4751039484366</TD>
+<TD CLASS="R22C2">Kutikulu eļļa, 15ml, Rose</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">1,79</TD>
+<TD CLASS="R22C9">17,90</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">17</TD>
+<TD CLASS="R22C2">4751039484489</TD>
+<TD CLASS="R22C2">WANTED Q5 UV/LED Builder Gel, 30ml, Pale Pink</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C1">9,60</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">9,60</TD>
+<TD CLASS="R22C9">96,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">18</TD>
+<TD CLASS="R22C2">4751039483376</TD>
+<TD CLASS="R22C2">WANTED Q5 UV/LED Builder Gel, 30ml, Bubble Gum</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">10</TD>
+<TD CLASS="R22C1">9,60</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">9,60</TD>
+<TD CLASS="R22C9">96,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">19</TD>
+<TD CLASS="R22C2">4752307000745</TD>
+<TD CLASS="R22C2">Reflectix Builder Gel UV/LED, Champagne 30ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C9">50,25</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">20</TD>
+<TD CLASS="R22C2">4752307000769</TD>
+<TD CLASS="R22C2">Reflectix Builder Gel UV/LED, Frozen Rose 30ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C9">50,25</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">21</TD>
+<TD CLASS="R22C2">4752307000783</TD>
+<TD CLASS="R22C2">Reflectix Builder Gel UV/LED, Peach Kiss 30ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C9">50,25</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">22</TD>
+<TD CLASS="R22C2">4752307000806</TD>
+<TD CLASS="R22C2">Reflectix Builder Gel UV/LED, Rosy Ice 30ml</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">5</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">10,05</TD>
+<TD CLASS="R22C9">50,25</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R22C1">23</TD>
+<TD CLASS="R22C2"><SPAN></SPAN></TD>
+<TD CLASS="R22C2">zPAK - Shipping cost</TD>
+<TD CLASS="R22C1">gab</TD>
+<TD CLASS="R22C1">1</TD>
+<TD CLASS="R22C1">130,00</TD>
+<TD CLASS="R22C1">0,00</TD>
+<TD CLASS="R22C1">130,00</TD>
+<TD CLASS="R22C9">130,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=66>
+<COL WIDTH=65>
+<COL WIDTH=132>
+<COL WIDTH=30>
+<COL WIDTH=31>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=227>
+<COL>
+<TR>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=38>
+<COL WIDTH=118>
+<COL WIDTH=322>
+<COL WIDTH=36>
+<COL WIDTH=48>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=70>
+<COL WIDTH=96>
+<COL>
+<TR CLASS=R46>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C1" COLSPAN=4 STYLE="border-right: #ffffff 1px none; "><SPAN STYLE="white-space:nowrap;max-width:0px;">Kopā:</SPAN></TD>
+<TD CLASS="R46C5">165</TD>
+<TD CLASS="R46C6"><SPAN></SPAN></TD>
+<TD CLASS="R46C7"><SPAN></SPAN></TD>
+<TD CLASS="R46C7"><SPAN></SPAN></TD>
+<TD CLASS="R46C9">962,72</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R46>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R47C1" COLSPAN=7 STYLE="border-right: #ffffff 1px none; "><SPAN STYLE="white-space:nowrap;max-width:0px;">Pievienotās&nbsp;vērtības&nbsp;nodoklis&nbsp;0%:</SPAN></TD>
+<TD CLASS="R47C8"><SPAN></SPAN></TD>
+<TD CLASS="R47C9">0,00</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R48C1" COLSPAN=8><SPAN STYLE="white-space:nowrap;max-width:0px;">Pavisam&nbsp;pēc&nbsp;dokumenta:</SPAN></TD>
+<TD CLASS="R48C9">962,72 EUR</TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R49C1" COLSPAN=10><SPAN STYLE="white-space:nowrap;max-width:0px;">Parāds&nbsp;(+)/pārmaksa&nbsp;(-)&nbsp;uz&nbsp;09.07.2026:&nbsp;0.00</SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R46>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R46C0"><SPAN></SPAN></TD>
+<TD CLASS="R47C8"><SPAN></SPAN></TD>
+<TD CLASS="R47C8"><SPAN></SPAN></TD>
+<TD CLASS="R47C8"><SPAN></SPAN></TD>
+<TD CLASS="R50C9"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R22>
+<TD CLASS="R22C0"><SPAN></SPAN></TD>
+<TD CLASS="R51C1" COLSPAN=9><SPAN STYLE="white-space:nowrap;max-width:0px;">Deviņi&nbsp;simti&nbsp;sešdesmit&nbsp;divi&nbsp;eiro,&nbsp;72&nbsp;cent.</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=46>
+<COL WIDTH=45>
+<COL WIDTH=66>
+<COL WIDTH=65>
+<COL WIDTH=132>
+<COL WIDTH=30>
+<COL WIDTH=31>
+<COL WIDTH=91>
+<COL WIDTH=68>
+<COL WIDTH=68>
+<COL WIDTH=227>
+<COL>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD COLSPAN=4><SPAN></SPAN></TD>
+<TD COLSPAN=2><SPAN></SPAN></TD>
+<TD COLSPAN=4><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R0>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R53C1" COLSPAN=5>Uzkrāto bonusu atlikums: 239,87</TD>
+<TD CLASS="R53C6"><SPAN></SPAN></TD>
+<TD COLSPAN=4><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+<TABLE style="width:100%; height:0px; " CELLSPACING=0>
+<COL WIDTH=7>
+<COL WIDTH=97>
+<COL WIDTH=257>
+<COL WIDTH=17>
+<COL WIDTH=50>
+<COL WIDTH=84>
+<COL WIDTH=231>
+<COL>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R54C2"><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R54C2"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R9>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R55C1" COLSPAN=6><SPAN STYLE="white-space:nowrap;max-width:0px;">Piezīmes.&nbsp;Lūdzam&nbsp;bankas&nbsp;maksājuma&nbsp;uzdevumā&nbsp;norādīt&nbsp;rēķina/pavadzīmes&nbsp;numuru:&nbsp;PRO034535&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+<TR CLASS=R0>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R54C2"><SPAN></SPAN></TD>
+<TD CLASS="R0C0"><SPAN></SPAN></TD>
+<TD CLASS="R11C1"><SPAN></SPAN></TD>
+<TD CLASS="R54C2"><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD>&nbsp;</TD>
+</TR>
+<TR CLASS=R9>
+<TD><SPAN></SPAN></TD>
+<TD CLASS="R57C1" COLSPAN=6><SPAN STYLE="white-space:nowrap;max-width:0px;">Šis&nbsp;dokuments&nbsp;ir&nbsp;sagatavots&nbsp;elektroniski&nbsp;un&nbsp;ir&nbsp;derīgs&nbsp;bez&nbsp;paraksta&nbsp;atbilstoši&nbsp;Likumam&nbsp;"Par&nbsp;grāmatvedību",&nbsp;7.1.&nbsp;pantam.</SPAN></TD>
+<TD><SPAN></SPAN></TD>
+<TD></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

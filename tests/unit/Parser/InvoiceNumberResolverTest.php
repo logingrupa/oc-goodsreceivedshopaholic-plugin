@@ -71,6 +71,33 @@ it('populates country_code and invoice_date from filename even when body wins', 
     expect($arResult['invoice_date']->format('Y-m-d'))->toBe('2026-04-13');
 });
 
+it('extracts number from Latvian "Pavadzīme Nr." body label (no-EAN template — UAT 2026-08-12)', function (): void {
+    $sFixturePath = __DIR__.'/../../fixtures/invoices/Nr_PRO034535_no_09072026.HTM';
+    $sHtml = file_get_contents($sFixturePath);
+
+    expect($sHtml)->not->toBeFalse();
+
+    // Empty filename forces body-only resolution — pins the Pavadzīme label.
+    /** @var string $sHtml */
+    $arResult = InvoiceNumberResolver::resolve($sHtml, '');
+
+    expect($arResult['invoice_number'])->toBe('PRO034535');
+    expect($arResult['resolved_via'])->toBe('body');
+});
+
+it('tolerates browser duplicate-download suffix " (1)" in filename fallback (UAT 2026-08-12)', function (): void {
+    $arResult = InvoiceNumberResolver::resolve(
+        '<html><body>no marker here</body></html>',
+        'Nr_PRO034535_no_09072026 (1).HTM',
+    );
+
+    expect($arResult['resolved_via'])->toBe('filename');
+    expect($arResult['invoice_number'])->toBe('PRO034535');
+    expect($arResult['country_code'])->toBe('no');
+    expect($arResult['invoice_date'])->not->toBeNull();
+    expect($arResult['invoice_date']->format('Y-m-d'))->toBe('2026-07-09');
+});
+
 it('falls back to filename when body has no marker', function (): void {
     $arResult = InvoiceNumberResolver::resolve(
         '<html><body>no marker here</body></html>',

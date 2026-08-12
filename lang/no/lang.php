@@ -44,6 +44,7 @@ return [
         'initial_reset_not_allowed'      => 'Innledende tilbakestilling er ikke tillatt på dette nettstedet (Settings.allow_initial_reset er av, eller en tidligere tilbakestilling er allerede registrert).',
         'operator_overrides_active_flag' => 'Hopper over dette tilbudet fordi en operatør manuelt satte aktiv-flagget (active_managed_by=operator).',
         'malformed_htm'                  => 'Den opplastede HTM-filen er feilformatert og kan ikke parses.',
+        'missing_ean_column'             => 'Denne HTM-filen mangler EAN-kolonnen (strekkode), så produktene kan ikke matches. Be naiskonsultants@gmail.com om å sende .HTM-fakturaen med EAN-kolonnen (strekkode) inkludert.',
         'initial_reset_unexpected'       => 'Innledende tilbakestilling feilet på grunn av en uventet feil (markørfaktura #:id). Hele unntaket er logget på serveren (storage/logs/system.log, kanal: goodsreceived.initial_reset.unexpected). Gjennomgå loggen og forkast markørfakturaen hvis ny kjøring er ønsket.',
         'delete_blocked_by_override'     => 'Kan ikke slette: denne fakturaen er overstyrt av en senere anvendt faktura. Slett overstyringen først.',
     ],
