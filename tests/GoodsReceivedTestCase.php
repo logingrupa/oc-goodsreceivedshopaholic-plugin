@@ -52,7 +52,12 @@ abstract class GoodsReceivedTestCase extends TestCase
             $this->migrateCurrentPlugin();
         }
 
-        \Mail::pretend();
+        // No \Mail::pretend() here: since October CMS 4.3.4 resolving
+        // 'mail.manager' triggers MailSetting::isConfigured(), which reads
+        // `system_settings` — a table that does not exist on the unmigrated
+        // in-memory SQLite DB (autoMigrate=false). Outbound mail is neutered
+        // via MAIL_MAILER=array in phpunit.xml instead; no test in this
+        // plugin sends mail, so mail.manager is never resolved.
     }
 
     protected function tearDown(): void
