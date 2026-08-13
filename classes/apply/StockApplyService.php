@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Logingrupa\GoodsReceivedShopaholic\Classes\Apply;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ApplyResult;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
@@ -162,6 +163,32 @@ final class StockApplyService
         foreach ($arOfferIds as $iOfferId) {
             OfferItem::clearCache($iOfferId);
         }
+
+        $this->rotateOfferSheetCacheEpoch();
+    }
+
+    /**
+     * Rotate the Logingrupa.StoreExtender offer sheet cache epoch: the stock
+     * this apply just changed is rendered into cached sheet/strip HTML and
+     * into client localStorage stores keyed by the epoch token. The epoch
+     * value is folded into every one of those cache keys
+     * (OfferSheet::getRenderContextKeyParts), so forgetting the ONE key
+     * invalidates server rows and clients together.
+     *
+     * Soft dependency: this plugin does not require StoreExtender, so the
+     * class is referenced by name only (October's plugin class loader, not
+     * composer, autoloads it) and absence degrades to a no-op.
+     */
+    private function rotateOfferSheetCacheEpoch(): void
+    {
+        $sOfferSheetClass = 'Logingrupa\StoreExtender\Components\OfferSheet';
+        if (! class_exists($sOfferSheetClass)) {
+            return;
+        }
+
+        /** @var string $sEpochCacheKey */
+        $sEpochCacheKey = constant($sOfferSheetClass.'::CACHE_KEY_EPOCH');
+        Cache::forget($sEpochCacheKey);
     }
 
     /**
