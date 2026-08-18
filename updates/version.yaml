@@ -7,3 +7,5 @@
     - update_lovata_shopaholic_offers_add_active_managed_by.php
 "1.0.2":
     - "LV Pavadzime template import (R22 rows, Svitrukods EAN), missing-EAN-column reject with contact message, duplicate-download filename tolerance, in-modal upload errors, footer reset button, button spinner, labeled rollback button."
+"1.0.3":
+    - "Recompute CLI fixes: new --site option pins which site's settings row is read, the run now prints the resolved site and both toggles, offer and product caches are flushed after the pass, and reconcileAll reactivates parent products like the invoice path already did."

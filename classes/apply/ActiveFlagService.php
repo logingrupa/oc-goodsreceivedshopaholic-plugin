@@ -91,39 +91,60 @@ class ActiveFlagService
         /** @var DbCollection<int, Offer> $obOffers */
         $obOffers = Offer::whereIn('id', $arOfferIds)->get();
 
-        $arActivatedProductIds = $this->reconcileOfferBatch($obOffers, $bAutoDeactivate, $bAutoActivate);
+        $arTouched = ['offers' => [], 'products' => []];
+        $this->reconcileOfferBatch($obOffers, $bAutoDeactivate, $bAutoActivate, $arTouched);
 
-        if ($bAutoActivate && $arActivatedProductIds !== []) {
-            $this->reactivateInactiveProducts($arActivatedProductIds);
+        if ($bAutoActivate && $arTouched['products'] !== []) {
+            $this->reactivateInactiveProducts($arTouched['products']);
         }
     }
 
     /**
-     * Iterate the offer batch through `reconcileSingleOffer`, collecting
-     * parent product ids of offers that flipped to active=true. Extracted
-     * from `reconcile()` so the caller stays under the cyclomatic
-     * threshold — the symmetric apply-after-reset case (D-19) requires
-     * the parent-product activation pass to live alongside the offer
+     * Iterate the offer batch through `reconcileSingleOffer`, accumulating
+     * touched offer ids and the parent product ids of offers that flipped to
+     * active=true. Extracted from `reconcile()` so the caller stays under the
+     * cyclomatic threshold — the symmetric apply-after-reset case (D-19)
+     * requires the parent-product activation pass to live alongside the offer
      * loop, but inlining tripped the gate.
      *
-     * @param  DbCollection<int, Offer>  $obOffers
-     * @return list<int>  Distinct product ids whose offers just flipped active=true.
+     * Accumulates by reference rather than returning, because `reconcileAll()`
+     * calls it once per chunk and must aggregate across every chunk. Product
+     * ids are collected in a map first so `array_keys` yields them distinct.
+     *
+     * Typed `iterable` rather than a concrete collection: `reconcile()` passes
+     * October's `Database\Collection` (which carries no generic template, so
+     * PHPStan cannot narrow it to `EloquentCollection<int, Offer>`) while
+     * `reconcileAllDetailed()` passes a filtered Eloquent collection. The method
+     * only ever iterates, so `iterable` is the honest contract for both.
+     *
+     * @param  iterable<int, Offer>  $obOffers
+     * @param  array{offers: list<int>, products: list<int>}  $arTouched
      */
-    private function reconcileOfferBatch(DbCollection $obOffers, bool $bAutoDeactivate, bool $bAutoActivate): array
-    {
-        $arActivatedProductIds = [];
+    private function reconcileOfferBatch(
+        iterable $obOffers,
+        bool $bAutoDeactivate,
+        bool $bAutoActivate,
+        array &$arTouched
+    ): void {
+        $arProductIdMap = array_fill_keys($arTouched['products'], true);
+
         foreach ($obOffers as $obOffer) {
-            $bActivated = $this->reconcileSingleOffer($obOffer, $bAutoDeactivate, $bAutoActivate);
-            if (! $bActivated || (bool) $obOffer->active !== true) {
+            if (! $this->reconcileSingleOffer($obOffer, $bAutoDeactivate, $bAutoActivate)) {
+                continue;
+            }
+
+            $arTouched['offers'][] = (int) $obOffer->id;
+
+            if ((bool) $obOffer->active !== true) {
                 continue;
             }
             $iProductId = (int) $obOffer->product_id;
             if ($iProductId > 0) {
-                $arActivatedProductIds[$iProductId] = true;
+                $arProductIdMap[$iProductId] = true;
             }
         }
 
-        return array_keys($arActivatedProductIds);
+        $arTouched['products'] = array_keys($arProductIdMap);
     }
 
     /**
@@ -169,32 +190,54 @@ class ActiveFlagService
      */
     public function reconcileAll(int $iChunkSize = 500): int
     {
+        return count($this->reconcileAllDetailed($iChunkSize)['offers']);
+    }
+
+    /**
+     * Same pass as `reconcileAll()`, but reports WHICH rows moved.
+     *
+     * The CLI needs the ids for two things `reconcileAll()`'s bare count cannot
+     * supply: parent-product reactivation used to be reachable only from
+     * `reconcile()` (the invoice path), and cache invalidation is the caller's
+     * job by this class's contract — writes go through `saveQuietly()`, so
+     * nothing downstream of a CLI run invalidated `OfferItem` / the list stores
+     * and a recompute was invisible on the storefront.
+     *
+     * Product ids are the reactivation CANDIDATES, not only the rows that
+     * changed: `reactivateInactiveProducts()` filters to `active=false` inside
+     * a single UPDATE and reports no count. Over-reporting here costs the
+     * caller a few redundant cache clears and never misses a real change.
+     *
+     * @return array{offers: list<int>, products: list<int>}
+     */
+    public function reconcileAllDetailed(int $iChunkSize = 500): array
+    {
         $bAutoDeactivate = SettingsAccessor::autoDeactivateOnZero();
         $bAutoActivate = SettingsAccessor::autoActivateOnStock();
 
+        $arTouched = ['offers' => [], 'products' => []];
+
         if (! $bAutoDeactivate && ! $bAutoActivate) {
-            return 0;
+            return $arTouched;
         }
 
-        $iTouched = 0;
         Offer::where('active_managed_by', '!=', self::PROVENANCE_OPERATOR)
-            ->chunkById($iChunkSize, function (EloquentCollection $obChunk) use (&$iTouched, $bAutoDeactivate, $bAutoActivate): void {
-                foreach ($obChunk as $obModel) {
-                    if (! $obModel instanceof Offer) {
-                        // Defensive narrowing: chunkById's PHPStan closure
-                        // signature declares the parameter as Eloquent\Model
-                        // (the base type for Builder<Model>). The WHERE clause
-                        // guarantees Offer rows at runtime; instanceof gives
-                        // PHPStan L10 the typed narrowing into reconcileSingleOffer.
-                        continue;
-                    }
-                    if ($this->reconcileSingleOffer($obModel, $bAutoDeactivate, $bAutoActivate)) {
-                        $iTouched++;
-                    }
-                }
+            ->chunkById($iChunkSize, function (EloquentCollection $obChunk) use (&$arTouched, $bAutoDeactivate, $bAutoActivate): void {
+                // Defensive narrowing: chunkById's PHPStan closure signature
+                // declares Eloquent\Model (the base type for Builder<Model>).
+                // The WHERE clause guarantees Offer rows at runtime; the filter
+                // gives PHPStan L10 the typed narrowing into reconcileOfferBatch.
+                /** @var EloquentCollection<int, Offer> $obOffers */
+                $obOffers = $obChunk->filter(static fn ($obModel): bool => $obModel instanceof Offer);
+
+                $this->reconcileOfferBatch($obOffers, $bAutoDeactivate, $bAutoActivate, $arTouched);
             });
 
-        return $iTouched;
+        if ($bAutoActivate && $arTouched['products'] !== []) {
+            $this->reactivateInactiveProducts($arTouched['products']);
+        }
+
+        return $arTouched;
     }
 
     /**

@@ -7,6 +7,7 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor;
 use Logingrupa\GoodsReceivedShopaholic\Console\RecomputeActiveFromStock;
 use Logingrupa\GoodsReceivedShopaholic\Models\Settings;
 use Lovata\Shopaholic\Models\Offer;
+use Lovata\Shopaholic\Models\Product;
 
 require_once __DIR__.'/../Apply/ApplyTestCase.php';
 
@@ -124,11 +125,51 @@ it('honors the --chunk option (large dataset, small chunk)', function (): void {
     expect($sOutput)->toContain('chunk=5');
 });
 
+it('reactivates the parent product of an offer it activates', function (): void {
+    // The .no recovery case: a reset left every product inactive, stock came
+    // back, and the CLI flipped offers to active while every parent product
+    // stayed inactive — so ProductActiveListStore kept the catalog empty.
+    // reconcile() (the invoice path) always did this; reconcileAll() did not.
+    applyAutoFlagSettings(bDeactivate: false, bActivate: true);
+
+    $obProduct = seedApplyProduct('PROD-CMD4', 'prod-cmd4');
+    $obProduct->active = false;
+    $obProduct->saveQuietly();
+
+    $obOffer = seedApplyOffer($obProduct->id, '4752307400001', iQuantity: 7, bActive: false);
+
+    $iExitCode = \Artisan::call('goodsreceived:recompute_active_from_stock');
+
+    expect($iExitCode)->toBe(0);
+    expect(\Artisan::output())->toContain('Reconciled 1 offers');
+
+    $obOfferRefreshed = Offer::find((int) $obOffer->id);
+    expect($obOfferRefreshed)->not->toBeNull();
+    expect((bool) $obOfferRefreshed->active)->toBeTrue();
+
+    $obProductRefreshed = Product::find((int) $obProduct->id);
+    expect($obProductRefreshed)->not->toBeNull();
+    expect((bool) $obProductRefreshed->active)->toBeTrue();
+});
+
+it('reports the resolved site context and the toggles it read', function (): void {
+    // A run against the wrong site's settings row was indistinguishable from a
+    // correct one — that is what produced "95 activated, 0 deactivated" on .no.
+    applyAutoFlagSettings(bDeactivate: true, bActivate: false);
+
+    \Artisan::call('goodsreceived:recompute_active_from_stock');
+
+    expect(\Artisan::output())
+        ->toContain('Site context:')
+        ->toContain('auto_deactivate_on_zero=true')
+        ->toContain('auto_activate_on_stock=false');
+});
+
 it('returns exit 1 and prints error when ActiveFlagService throws', function (): void {
     // Bind a failing fake service into the container so handle() catches it.
     $this->app->bind(ActiveFlagService::class, fn (): ActiveFlagService => new class () extends ActiveFlagService {
         #[\Override]
-        public function reconcileAll(int $iChunkSize = 500): int
+        public function reconcileAllDetailed(int $iChunkSize = 500): array
         {
             throw new \RuntimeException('forced failure for test');
         }

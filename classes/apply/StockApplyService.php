@@ -10,6 +10,7 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ApplyResult;
 use Logingrupa\GoodsReceivedShopaholic\Models\Invoice;
 use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Lovata\Shopaholic\Classes\Item\OfferItem;
+use Lovata\Shopaholic\Classes\Item\ProductItem;
 use Lovata\Shopaholic\Classes\Store\Offer\ActiveListStore as OfferActiveListStore;
 use Lovata\Shopaholic\Classes\Store\Offer\SortingListStore as OfferSortingListStore;
 use Lovata\Shopaholic\Classes\Store\OfferListStore;
@@ -134,9 +135,20 @@ final class StockApplyService
      *
      * @param  list<int>  $arOfferIds  De-duplicated offer ids from
      *                                 `StockApplyOutcome::$affected_offer_ids`.
+     * @param  list<int>  $arProductIds  De-duplicated parent product ids whose
+     *                                   `active` flag may have moved.
+     *                                   `ProductActiveListStore` alone is not
+     *                                   enough — `ProductItem` caches `active`
+     *                                   per id, and `reactivateInactiveProducts()`
+     *                                   writes via a mass UPDATE that fires no
+     *                                   model events.
      */
-    public function flushAffectedCaches(array $arOfferIds): void
+    public function flushAffectedCaches(array $arOfferIds, array $arProductIds = []): void
     {
+        foreach ($arProductIds as $iProductId) {
+            ProductItem::clearCache($iProductId);
+        }
+
         if ($arOfferIds === []) {
             return;
         }
