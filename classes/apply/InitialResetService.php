@@ -21,7 +21,9 @@ use Lovata\Shopaholic\Models\Product;
  * Two-gate guard:
  *   1. `SettingsAccessor::allowInitialReset()` MUST be true. The Settings
  *      toggle is the operator-explicit consent — a misconfigured prod site can
- *      never trigger reset by accident.
+ *      never trigger reset by accident. A successful reset withdraws the
+ *      consent itself (step 4), so the destructive path does not stay open
+ *      until an operator remembers to untick it.
  *   2. No prior `Invoice` with `initial_reset_applied=true` may exist. Even
  *      with the toggle on, reset is one-shot — repeated resets would erase
  *      apply-history snapshots and corrupt the audit trail.
@@ -31,6 +33,11 @@ use Lovata\Shopaholic\Models\Product;
  *      active_managed_by='plugin' via saveQuietly per row.
  *   2. Deactivate products: chunk-of-500 → active=false via saveQuietly.
  *   3. Mark Invoice.initial_reset_applied=true (saveQuietly).
+ *   4. Turn Settings.allow_initial_reset back off.
+ *
+ * Step 4 is belt-and-braces, not the one-shot mechanism: gate 2 is what makes
+ * reset one-shot, and gate 2 re-opens if the reset invoice is ever deleted.
+ * Closing gate 1 means a deleted invoice alone cannot re-arm the reset.
  *
  * Caller controls the DB::transaction boundary — this service does NOT wrap
  * itself, so the controller can compose reset() with other operations.
@@ -64,6 +71,7 @@ final class InitialResetService
         $this->zeroAllOffers();
         $this->deactivateAllProducts();
         $this->markInvoiceReset($obInvoice);
+        SettingsAccessor::disableInitialReset();
     }
 
     /**

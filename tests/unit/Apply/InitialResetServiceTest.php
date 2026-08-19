@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\InitialResetService;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InitialResetNotAllowedException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Support\SettingsAccessor;
@@ -161,4 +162,52 @@ it('zeroes every offer + deactivates every product + flips invoice one-shot bit 
     expect((bool) $obProduct1->active)->toBeFalse();
     expect((bool) $obProduct2->active)->toBeFalse();
     expect((bool) $obInvoice->initial_reset_applied)->toBeTrue();
+});
+
+/**
+ * Read the persisted toggle straight from system_settings - what the NEXT
+ * request sees. Settings::clearInternalCache() is not usable for a re-read
+ * here: it drops the instance cache but the settings record's own query
+ * cache survives, so the model then reads an empty instance.
+ */
+function readPersistedAllowInitialReset(): ?bool
+{
+    $sValue = DB::table('system_settings')
+        ->where('item', Settings::SETTINGS_CODE)
+        ->value('value');
+
+    $arValueList = json_decode((string) $sValue, true);
+
+    return is_array($arValueList) && array_key_exists('allow_initial_reset', $arValueList)
+        ? (bool) $arValueList['allow_initial_reset']
+        : null;
+}
+
+it('withdraws allow_initial_reset after a successful reset', function (): void {
+    resetSettings(bAllow: true);
+
+    $obService = new InitialResetService();
+    $obService->reset(makeResetInvoice('PRO-SELF-CLEAR'));
+
+    expect(SettingsAccessor::allowInitialReset())->toBeFalse();
+    expect(readPersistedAllowInitialReset())->toBeFalse();
+});
+
+it('leaves allow_initial_reset on when the one-shot guard rejects the reset', function (): void {
+    resetSettings(bAllow: true);
+
+    makeResetInvoice('PRO-SELF-CLEAR-PRIOR', bResetApplied: true);
+
+    $obService = new InitialResetService();
+
+    try {
+        $obService->reset(makeResetInvoice('PRO-SELF-CLEAR-NEW'));
+    } catch (InitialResetNotAllowedException) {
+        // the assertions below are the point - a refused reset must not consume
+        // the consent the operator will still need for the real run
+    }
+
+    SettingsAccessor::flush();
+    expect(SettingsAccessor::allowInitialReset())->toBeTrue();
+    expect(readPersistedAllowInitialReset())->toBeTrue();
 });

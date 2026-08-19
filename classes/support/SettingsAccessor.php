@@ -67,11 +67,30 @@ final class SettingsAccessor
     }
 
     /**
+     * Withdraw the one-shot reset consent, then drop the memo so a later
+     * read in the same request sees the new value.
+     *
+     * Written in the active site's context, exactly like an operator
+     * unticking the checkbox on the backend Settings form. On a deployment
+     * whose active site has no own settings record, StoreExtender's
+     * site-fallback has already filled the in-memory instance with a sister
+     * site's values, so the row this creates is a complete override rather
+     * than a partial one.
+     */
+    public static function disableInitialReset(): void
+    {
+        Settings::set(self::KEY_ALLOW_RESET, false);
+
+        self::flush();
+    }
+
+    /**
      * Drop the in-memory cache. Called from
      * GoodsReceivedTestCase::flushPluginSingletons() between tests (D-03), and
      * available to operational code that legitimately needs to re-read after a
-     * settings save (currently none — SettingModel save flow handles its own
-     * cache, this is the request-level memo on top of it).
+     * settings save — SettingModel's save flow handles its own cache, this is
+     * the request-level memo on top of it (disableInitialReset() is the one
+     * in-plugin caller).
      */
     public static function flush(): void
     {
