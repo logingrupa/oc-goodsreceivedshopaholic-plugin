@@ -173,18 +173,37 @@ it('enforces DRY invariant: regex literal /^(.+),\s+([^,]+)$/u appears EXACTLY O
 
     expect($sPluginRoot)->not->toBeFalse();
 
-    // Grep across the production-code surface — classes/ + models/ — for the
-    // regex literal. Acceptance: exactly 1 hit (only classes/support/VariationExtractor.php).
-    $sCommand = sprintf(
-        'grep -RFn -- %s %s %s 2>/dev/null',
-        escapeshellarg('/^(.+),\s+([^,]+)$/u'),
-        escapeshellarg($sPluginRoot.'/classes'),
-        escapeshellarg($sPluginRoot.'/models'),
-    );
+    // Scan the production-code surface - classes/ + models/ - for the regex
+    // literal. Acceptance: exactly 1 hit (only classes/support/VariationExtractor.php).
+    // Scanned in PHP rather than shelled out to grep, because the shell form is
+    // not portable: cmd.exe cannot parse the 2>/dev/null redirect.
+    // Every file type is scanned, not just .php - the invariant exists to stop
+    // models/invoiceline/_column_product_name.htm re-implementing the regex.
+    $sLiteral = '/^(.+),\s+([^,]+)$/u';
+    $arHits = [];
 
-    $sOutput = (string) shell_exec($sCommand);
-    $arHits = $sOutput === '' ? [] : array_filter(explode("\n", trim($sOutput)));
+    foreach (['classes', 'models'] as $sDirectory) {
+        $sPath = $sPluginRoot.DIRECTORY_SEPARATOR.$sDirectory;
+
+        if (!is_dir($sPath)) {
+            continue;
+        }
+
+        $obFileList = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($sPath, FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($obFileList as $obFile) {
+            if (!$obFile->isFile()) {
+                continue;
+            }
+
+            if (str_contains((string) file_get_contents($obFile->getPathname()), $sLiteral)) {
+                $arHits[] = str_replace('\\', '/', $obFile->getPathname());
+            }
+        }
+    }
 
     expect($arHits)->toHaveCount(1);
-    expect($arHits[array_key_first($arHits)])->toContain('classes/support/VariationExtractor.php');
+    expect($arHits[0])->toContain('classes/support/VariationExtractor.php');
 });
