@@ -238,7 +238,7 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-09-08
-Stopped at: Quick tasks 260908-lk6 (EAN-8/UPC-A, v1.0.7, f0ecb01) and 260908-lql (duplicate offer codes: ambiguous strategy, active-rule pick, operator select in both apply modals, v1.0.8, 81d8d3b) COMPLETE. Both committed locally on master, not pushed, not shipped. Next: push plugin repo and run /nc-ship for 1.0.7 + 1.0.8 on .no/.lv/.lt; browser-verify the apply modal select on an invoice with duplicate live offers.
+Stopped at: Quick tasks 260908-lk6 (EAN-8/UPC-A, v1.0.7, f0ecb01) and 260908-lql (duplicate offer codes: ambiguous strategy, active-rule pick, operator select in both apply modals, v1.0.8, 81d8d3b) COMPLETE. Shipped 2026-09-08: plugin f801c1e, root 23fe53e (1.5.143) hash-verified on .lv, .lt and .no. Next: browser-verify the apply modal select on an invoice with duplicate live offers.
 Resume file: `.planning/quick/260908-lql-duplicate-offer-codes-resolved-by-active/260908-lql-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
