@@ -227,6 +227,7 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260908-lk6 | EAN-8 and UPC-A accepted like EAN-13 (v1.0.7) | 2026-09-08 | f0ecb01 | [260908-lk6-ean-8-and-upc-a-accepted-like-ean-13](./quick/260908-lk6-ean-8-and-upc-a-accepted-like-ean-13/) |
+| 260908-lql | Duplicate offer codes resolved by active rule or operator choice (v1.0.8) | 2026-09-08 | 81d8d3b | [260908-lql-duplicate-offer-codes-resolved-by-active](./quick/260908-lql-duplicate-offer-codes-resolved-by-active/) |
 
 ## Deferred Items
 
@@ -237,8 +238,8 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 ## Session Continuity
 
 Last session: 2026-09-08
-Stopped at: Quick task 260908-lk6 COMPLETE (EAN-8 and UPC-A accepted like EAN-13, v1.0.7, commit f0ecb01). Next: quick task for duplicate offer code resolution (ambiguous strategy, single-active auto-pick, operator select in the apply modal).
-Resume file: `.planning/quick/260908-lk6-ean-8-and-upc-a-accepted-like-ean-13/260908-lk6-SUMMARY.md`
+Stopped at: Quick tasks 260908-lk6 (EAN-8/UPC-A, v1.0.7, f0ecb01) and 260908-lql (duplicate offer codes: ambiguous strategy, active-rule pick, operator select in both apply modals, v1.0.8, 81d8d3b) COMPLETE. Both committed locally on master, not pushed, not shipped. Next: push plugin repo and run /nc-ship for 1.0.7 + 1.0.8 on .no/.lv/.lt; browser-verify the apply modal select on an invoice with duplicate live offers.
+Resume file: `.planning/quick/260908-lql-duplicate-offer-codes-resolved-by-active/260908-lql-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
 
