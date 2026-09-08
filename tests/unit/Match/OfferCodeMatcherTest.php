@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\MatchedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ParsedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Match\OfferCodeMatcher;
+use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Logingrupa\GoodsReceivedShopaholic\Tests\GoodsReceivedTestCase;
 use Lovata\Shopaholic\Models\Offer;
 use Lovata\Shopaholic\Models\Product;
@@ -84,13 +85,13 @@ function ocm_seedProduct(string $sCode, string $sSlug): Product
     return $obProduct;
 }
 
-function ocm_seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer'): Offer
+function ocm_seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer', bool $bActive = true): Offer
 {
     $obOffer = new Offer();
     $obOffer->product_id = $iProductId;
     $obOffer->name = $sName;
     $obOffer->code = $sCode;
-    $obOffer->active = true;
+    $obOffer->active = $bActive;
     $obOffer->saveQuietly();
 
     return $obOffer;
@@ -170,6 +171,46 @@ it('issues EXACTLY 1 query for non-empty input (D-25 query budget)', function ()
     \DB::disableQueryLog();
 
     expect($iQueryCount)->toBe(1);
+});
+
+it('emits ambiguous with null offer id when two ACTIVE offers share the code (duplicate codes, 2026-09-08)', function (): void {
+    $obProduct = ocm_seedProduct('PROD-DUP-A', 'prod-dup-a');
+    ocm_seedOffer($obProduct->id, '40092454', 'Dup A');
+    ocm_seedOffer($obProduct->id, '40092454', 'Dup B');
+
+    $obLine = ocm_makeLine('40092454');
+
+    $arResult = (new OfferCodeMatcher())->match([$obLine]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->line)->toBe($obLine);
+    expect($arResult[0]->matched_offer_id)->toBeNull();
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_AMBIGUOUS);
+});
+
+it('picks the single ACTIVE offer of a duplicate group as offer_code_active', function (): void {
+    $obProduct = ocm_seedProduct('PROD-DUP-B', 'prod-dup-b');
+    ocm_seedOffer($obProduct->id, '40092454', 'Old inactive', bActive: false);
+    $obActive = ocm_seedOffer($obProduct->id, '40092454', 'Current active');
+    ocm_seedOffer($obProduct->id, '40092454', 'Older inactive', bActive: false);
+
+    $arResult = (new OfferCodeMatcher())->match([ocm_makeLine('40092454')]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->matched_offer_id)->toBe((int) $obActive->id);
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_OFFER_CODE_ACTIVE);
+});
+
+it('emits ambiguous when no offer of a duplicate group is active', function (): void {
+    $obProduct = ocm_seedProduct('PROD-DUP-C', 'prod-dup-c');
+    ocm_seedOffer($obProduct->id, '40092454', 'Dead A', bActive: false);
+    ocm_seedOffer($obProduct->id, '40092454', 'Dead B', bActive: false);
+
+    $arResult = (new OfferCodeMatcher())->match([ocm_makeLine('40092454')]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->matched_offer_id)->toBeNull();
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_AMBIGUOUS);
 });
 
 it('returns empty list for empty input with ZERO queries (short-circuit)', function (): void {

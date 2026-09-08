@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\MatchedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Dto\ParsedLine;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Match\ProductCodeSingleOfferMatcher;
+use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 use Logingrupa\GoodsReceivedShopaholic\Tests\GoodsReceivedTestCase;
 use Lovata\Shopaholic\Models\Offer;
 use Lovata\Shopaholic\Models\Product;
@@ -85,13 +86,13 @@ function pcsom_seedProduct(string $sCode, string $sSlug): Product
     return $obProduct;
 }
 
-function pcsom_seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer'): Offer
+function pcsom_seedOffer(int $iProductId, string $sCode, string $sName = 'Seeded Offer', bool $bActive = true): Offer
 {
     $obOffer = new Offer();
     $obOffer->product_id = $iProductId;
     $obOffer->name = $sName;
     $obOffer->code = $sCode;
-    $obOffer->active = true;
+    $obOffer->active = $bActive;
     $obOffer->saveQuietly();
 
     return $obOffer;
@@ -166,6 +167,48 @@ it('issues EXACTLY 1 query for non-empty input — correlated addSelect is in sa
     \DB::disableQueryLog();
 
     expect($iQueryCount)->toBe(1);
+});
+
+it('emits ambiguous when two single-offer products share the code and both offers are active (duplicate codes, 2026-09-08)', function (): void {
+    $obProductA = pcsom_seedProduct('40092454', 'prod-dup-a');
+    pcsom_seedOffer($obProductA->id, 'INNER-A');
+    $obProductB = pcsom_seedProduct('40092454', 'prod-dup-b');
+    pcsom_seedOffer($obProductB->id, 'INNER-B');
+
+    $obLine = pcsom_makeLine('40092454');
+
+    $arResult = (new ProductCodeSingleOfferMatcher())->match([$obLine]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->line)->toBe($obLine);
+    expect($arResult[0]->matched_offer_id)->toBeNull();
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_AMBIGUOUS);
+});
+
+it('picks the single ACTIVE offer among duplicate single-offer products as offer_code_active', function (): void {
+    $obProductA = pcsom_seedProduct('40092454', 'prod-dup-a');
+    pcsom_seedOffer($obProductA->id, 'INNER-A', bActive: false);
+    $obProductB = pcsom_seedProduct('40092454', 'prod-dup-b');
+    $obActive = pcsom_seedOffer($obProductB->id, 'INNER-B');
+
+    $arResult = (new ProductCodeSingleOfferMatcher())->match([pcsom_makeLine('40092454')]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->matched_offer_id)->toBe((int) $obActive->id);
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_OFFER_CODE_ACTIVE);
+});
+
+it('emits ambiguous when no offer among duplicate single-offer products is active', function (): void {
+    $obProductA = pcsom_seedProduct('40092454', 'prod-dup-a');
+    pcsom_seedOffer($obProductA->id, 'INNER-A', bActive: false);
+    $obProductB = pcsom_seedProduct('40092454', 'prod-dup-b');
+    pcsom_seedOffer($obProductB->id, 'INNER-B', bActive: false);
+
+    $arResult = (new ProductCodeSingleOfferMatcher())->match([pcsom_makeLine('40092454')]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->matched_offer_id)->toBeNull();
+    expect($arResult[0]->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_AMBIGUOUS);
 });
 
 it('returns empty list for empty input with ZERO queries (short-circuit)', function (): void {

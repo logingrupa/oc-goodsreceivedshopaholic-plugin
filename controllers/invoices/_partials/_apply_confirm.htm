@@ -7,6 +7,15 @@
  * here would double-nest the modal markup, breaking centering + close-button
  * bindings. See modules/backend/assets/foundation/controls/popup/README.md
  * (line 99-128) for the canonical structure.
+ *
+ * Body and footer sit inside one <form> so the Apply button's data-request
+ * also posts the `offer_choice[<line_id>]` selects rendered for
+ * `ambiguous` lines (2026-09-08). The button stays disabled until every
+ * select has a value; the server re-checks in LineResolutionService.
+ *
+ * Expected vars: $invoice, $total_units, $offer_count, $unmatched_count,
+ * $unmatched_lines, $ambiguous_lines (list<InvoiceLine>), $candidates
+ * (line id => candidate list from LineResolutionService::candidatesFor()).
  */
 $obInvoice = $invoice ?? null;
 $iInvoiceId = (int) ($obInvoice?->id ?? 0);
@@ -15,11 +24,18 @@ $mOverrideOf = $obInvoice?->override_of_invoice_id;
 $iTotalUnits = (int) ($total_units ?? 0);
 $iOfferCount = (int) ($offer_count ?? 0);
 $iUnmatchedCount = (int) ($unmatched_count ?? 0);
+$arAmbiguousLines = [];
+foreach ($ambiguous_lines ?? [] as $obAmbiguousLine) {
+    $arAmbiguousLines[] = $obAmbiguousLine;
+}
+$arCandidates = (array) ($candidates ?? []);
 ?>
 <div class="modal-header">
     <h4 class="modal-title"><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.confirm_title')) ?></h4>
     <button type="button" class="btn-close" data-dismiss="popup"></button>
 </div>
+<form id="gr-apply-confirm-form">
+<input type="hidden" name="invoice_id" value="<?= $iInvoiceId ?>">
 <div class="modal-body">
     <p>You are about to apply invoice <strong>#<?= e($sInvoiceNumber) ?></strong> to live stock.</p>
     <ul>
@@ -28,6 +44,29 @@ $iUnmatchedCount = (int) ($unmatched_count ?? 0);
         <li>Unmatched lines: <strong><?= $iUnmatchedCount ?></strong></li>
     </ul>
     <?= $this->makePartial('_partials/unmatched_lines', ['lines' => $unmatched_lines ?? []]) ?>
+    <?php if ($arAmbiguousLines !== []): ?>
+        <div class="alert alert-warning gr-ambiguous-lines">
+            <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.ambiguous_heading', ['count' => count($arAmbiguousLines)])) ?></strong>
+        </div>
+        <table class="table table-condensed table-striped gr-ambiguous-table">
+            <tbody>
+                <?php foreach ($arAmbiguousLines as $obLine): $iLineId = (int) $obLine->id; ?>
+                    <tr class="warning">
+                        <td style="width: 4%;"><?= (int) $obLine->row_index ?></td>
+                        <td style="width: 16%;"><code><?= e((string) $obLine->ean) ?></code></td>
+                        <td><?= e((string) $obLine->product_name_raw) ?> <strong>(<?= (int) $obLine->qty ?>)</strong></td>
+                        <td style="width: 40%;">
+                            <?= $this->makePartial('_partials/offer_choice', [
+                                'line'       => $obLine,
+                                'candidates' => $arCandidates[$iLineId] ?? [],
+                                'name'       => 'offer_choice['.$iLineId.']',
+                            ]) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
     <?php if ($mOverrideOf !== null): ?>
         <p class="alert alert-warning">
             <strong>Override mode:</strong> this re-applies the invoice ADDITIVELY on top of prior apply #<?= (int) $mOverrideOf ?>. Stock will be incremented again, NOT replaced.
@@ -40,8 +79,12 @@ $iUnmatchedCount = (int) ($unmatched_count ?? 0);
             data-request="onApply"
             data-request-data="invoice_id: <?= $iInvoiceId ?>"
             data-attach-loading
+            data-gr-choice-gate
+            <?= $arAmbiguousLines !== [] ? 'disabled' : '' ?>
             data-request-success="$(this).trigger('close.oc.popup'); window.location.reload();">
         <?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.button_now')) ?>
     </button>
     <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
 </div>
+</form>
+<?= $this->makePartial('_partials/offer_choice_guard') ?>

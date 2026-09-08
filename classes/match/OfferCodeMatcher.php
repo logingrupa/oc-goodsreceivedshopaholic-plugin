@@ -16,7 +16,12 @@ use Lovata\Shopaholic\Models\Offer;
  * part of Phase 6 / D-25-update (chain runner refactor).
  *
  * Issues EXACTLY ONE query regardless of input size:
- *   `Offer::whereIn('code', $arUnique)->get(['id', 'code'])`
+ *   `Offer::whereIn('code', $arUnique)->get(['id', 'code', 'active'])`
+ *
+ * A code carried by 2+ live offers is decided by DuplicateCodeResolver on
+ * the rows of that same query: exactly one active offer is picked as
+ * `offer_code_active`, otherwise the line is emitted as `ambiguous` with
+ * no offer id, which ends the chain for that line so the operator picks.
  *
  * Returns MatchedLine instances ONLY for ParsedLines whose EAN was found.
  * Unmatched ParsedLines are omitted — the chain runner forwards them to
@@ -36,17 +41,20 @@ final class OfferCodeMatcher implements MatchStrategy
             $arUnmatched,
         )));
 
-        $arOfferMap = $this->lookupOffersByCode($arEans);
+        $arDecisions = DuplicateCodeResolver::resolveByCode(
+            $this->lookupOffersByCode($arEans),
+            'offer_code',
+        );
 
         $arResult = [];
         foreach ($arUnmatched as $obLine) {
-            if (! isset($arOfferMap[$obLine->ean])) {
+            if (! isset($arDecisions[$obLine->ean])) {
                 continue;
             }
             $arResult[] = new MatchedLine(
                 line: $obLine,
-                matched_offer_id: $arOfferMap[$obLine->ean],
-                match_strategy: 'offer_code',
+                matched_offer_id: $arDecisions[$obLine->ean]['offer_id'],
+                match_strategy: $arDecisions[$obLine->ean]['strategy'],
             );
         }
 
@@ -55,21 +63,24 @@ final class OfferCodeMatcher implements MatchStrategy
 
     /**
      * @param  list<string>  $arEans
-     * @return array<string, int>
+     * @return list<array{code: string, offer_id: int, active: bool}>
      */
     private function lookupOffersByCode(array $arEans): array
     {
-        $arOfferMap = [];
-        $obRows = Offer::whereIn('code', $arEans)->get(['id', 'code']);
+        $arCandidates = [];
+        $obRows = Offer::whereIn('code', $arEans)->get(['id', 'code', 'active']);
 
         foreach ($obRows as $obRow) {
-            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $sCode = (string) $obRow->code;
-            /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $iOfferId = (int) $obRow->id;
-            $arOfferMap[$sCode] = $iOfferId;
+            $arCandidates[] = [
+                /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
+                'code' => (string) $obRow->code,
+                /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
+                'offer_id' => (int) $obRow->id,
+                /** @phpstan-ignore-next-line property.notFound — Lovata Offer lacks IDE-helper PHPDoc; columns verified at DB layer */
+                'active' => (bool) $obRow->active,
+            ];
         }
 
-        return $arOfferMap;
+        return $arCandidates;
     }
 }

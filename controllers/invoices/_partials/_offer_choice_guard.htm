@@ -1,0 +1,42 @@
+<?php
+/* Client-side half of the apply gate: a button carrying `data-gr-choice-gate`
+ * stays disabled while any `.gr-offer-choice` select in the same form is
+ * empty. Selects inside a collapsed (unchecked) bulk section do not count,
+ * that invoice is not going to be applied. The server re-checks in
+ * LineResolutionService::resolve(); this is UX only.
+ *
+ * Bound once per page; every render still runs a refresh so a re-opened
+ * modal starts in the right state.
+ */
+?>
+<script>
+(function () {
+    function grRefreshChoiceGates() {
+        document.querySelectorAll('[data-gr-choice-gate]').forEach(function (btn) {
+            var form = btn.closest('form');
+            if (!form) { return; }
+            var open = Array.prototype.some.call(form.querySelectorAll('select.gr-offer-choice'), function (sel) {
+                var section = sel.closest('.invoice-apply-section');
+                if (section && section.classList.contains('is-collapsed')) { return false; }
+                return sel.value === '';
+            });
+            btn.disabled = open;
+        });
+    }
+
+    if (!window.__grOfferChoiceGateBound) {
+        window.__grOfferChoiceGateBound = true;
+        document.addEventListener('change', function (e) {
+            var el = e.target;
+            if (!el || !el.classList) { return; }
+            if (el.classList.contains('gr-offer-choice')
+                || el.classList.contains('gr-apply-bulk-checkbox')
+                || el.id === 'gr-apply-bulk-toggle-all') {
+                window.setTimeout(grRefreshChoiceGates, 0);
+            }
+        });
+    }
+
+    grRefreshChoiceGates();
+})();
+</script>

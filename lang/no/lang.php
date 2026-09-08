@@ -75,6 +75,7 @@ return [
         'stock_after'       => 'Lager etter import',
         'match_strategy'    => 'Treffstrategi',
         'applied'           => 'Anvendt',
+        'ambiguous_label'   => 'tvetydig - velg vare før anvend',
     ],
     'tab' => [
         'summary' => 'Sammendrag',
@@ -121,6 +122,13 @@ return [
         'bulk_confirm'        => 'Anvend alle valgte parsede fakturaer på lager? Allerede anvendte rader hoppes over.',
         'bulk_no_selection'   => 'Ingen rader valgt. Kryss av minst én parset faktura før du klikker «Anvend valgte».',
         'unmatched_heading'   => ':count linje(r) uten treff - ingen vare har denne EAN-koden, lager legges ikke til:',
+        'ambiguous_heading'   => ':count linje(r) treffer mer enn én vare. Velg varen før anvend:',
+        'ambiguous_unresolved' => 'Faktura :number: :count linje(r) mangler fortsatt et varevalg før anvend: :rows',
+        'offer_choice_invalid' => 'Vare #:offer_id er ikke en kandidat for rad #:row (EAN :ean).',
+        'offer_choice_placeholder' => 'Velg vare',
+        'offer_choice_option' => '#:id :offer / :product (:state, :quantity stk)',
+        'offer_active'        => 'aktiv',
+        'offer_inactive'      => 'inaktiv',
     ],
     'override' => [
         'title'      => 'Overstyr og importer på nytt — bekreft',

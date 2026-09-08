@@ -104,8 +104,15 @@ $sStatusBadge = match ($sStatus) {
         <dd><code><?= e($sSourceFilename) ?></code></dd>
     </div>
 </div>
+<?php $bIsInvoice = $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice; ?>
 <?= $this->makePartial('$/logingrupa/goodsreceivedshopaholic/controllers/invoices/_partials/_unmatched_lines.htm', [
-    'lines' => $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+    'lines' => $bIsInvoice
         ? \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::unmatchedFor((int) $obInvoice->id)
         : [],
+]) ?>
+<?= $this->makePartial('$/logingrupa/goodsreceivedshopaholic/controllers/invoices/_partials/_unmatched_lines.htm', [
+    'lines' => $bIsInvoice
+        ? \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::ambiguousFor((int) $obInvoice->id)
+        : [],
+    'heading' => 'logingrupa.goodsreceivedshopaholic::lang.apply.ambiguous_heading',
 ]) ?>

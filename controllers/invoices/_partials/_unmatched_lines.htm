@@ -1,23 +1,25 @@
 <?php
-/* Unmatched-line callout shared by the upload apply modal, the apply
- * confirm modal and the invoice summary block. Names every line whose
- * EAN resolved to no offer so the operator sees WHAT will not be stocked,
- * not only how many lines (UAT 2026-09-08: one unmatched row among 45
- * was invisible in the table).
+/* Line callout shared by the upload apply modal, the apply confirm modal
+ * and the invoice summary block. Names every listed line so the operator
+ * sees WHAT will not be stocked, not only how many lines (UAT 2026-09-08:
+ * one unmatched row among 45 was invisible in the table).
  *
  * Renders nothing when the list is empty.
  *
  * Expected vars:
- *   - $lines: iterable<InvoiceLine> already filtered by InvoiceLine::scopeUnmatched().
+ *   - $lines: iterable<InvoiceLine>, e.g. InvoiceLine::unmatchedFor() or
+ *     InvoiceLine::ambiguousFor().
+ *   - $heading: lang key taking `:count`; defaults to the unmatched heading.
  */
 $arLines = [];
 foreach ($lines ?? [] as $obLine) {
     $arLines[] = $obLine;
 }
+$sHeading = (string) ($heading ?? 'logingrupa.goodsreceivedshopaholic::lang.apply.unmatched_heading');
 ?>
 <?php if ($arLines !== []): ?>
     <div class="alert alert-warning gr-unmatched-lines">
-        <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.unmatched_heading', ['count' => count($arLines)])) ?></strong>
+        <strong><?= e(trans($sHeading, ['count' => count($arLines)])) ?></strong>
         <ul style="margin: 0.4rem 0 0; padding-left: 1.2rem;">
             <?php foreach ($arLines as $obLine): ?>
                 <li>

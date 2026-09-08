@@ -168,6 +168,43 @@ it('renders variation branch defensively when name has no comma (orange + asteri
     expect($sOutput)->toContain('href="/back/lovata/shopaholic/products/update/11"');
 });
 
+it('renders ambiguous as plain name + variation + yellow label from lang, no anchor (duplicate codes, 2026-09-08)', function (): void {
+    $obLine = new InvoiceLine();
+    $obLine->product_name_raw = 'Gel, 12ml, 1081';
+    $obLine->match_strategy = InvoiceLine::MATCH_STRATEGY_AMBIGUOUS;
+
+    $sOutput = rcpn_renderPartial($obLine);
+
+    expect($sOutput)->not->toContain('<a ');
+    expect($sOutput)->toContain('Gel, 12ml (1081)');
+    expect($sOutput)->toContain('class="label label-warning"');
+    // Harness runs with autoRegister=false: trans() returns the raw lang key.
+    expect($sOutput)->toContain('column.ambiguous_label');
+    expect($sOutput)->not->toContain('*');
+});
+
+it('renders offer_code_active and offer_code_operator IDENTICAL byte-for-byte to offer_code', function (): void {
+    $obOffer = (object) ['id' => 42, 'product_id' => 10];
+
+    $arOutputs = [];
+    foreach ([
+        InvoiceLine::MATCH_STRATEGY_OFFER_CODE,
+        InvoiceLine::MATCH_STRATEGY_OFFER_CODE_ACTIVE,
+        InvoiceLine::MATCH_STRATEGY_OFFER_CODE_OPERATOR,
+    ] as $sStrategy) {
+        $obLine = new InvoiceLine();
+        $obLine->product_name_raw = 'Gel, 12ml, 1081';
+        $obLine->match_strategy = $sStrategy;
+        $obLine->setRelation('matched_offer', $obOffer);
+        $arOutputs[$sStrategy] = rcpn_renderPartial($obLine);
+    }
+
+    expect($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE_ACTIVE])->toBe($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE]);
+    expect($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE_OPERATOR])->toBe($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE]);
+    expect($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE])->toContain('href="/back/lovata/shopaholic/offers/update/42"');
+    expect($arOutputs[InvoiceLine::MATCH_STRATEGY_OFFER_CODE])->not->toContain('orange');
+});
+
 it('enforces DRY invariant: regex literal /^(.+),\s+([^,]+)$/u appears EXACTLY ONCE plugin-wide (only in VariationExtractor)', function (): void {
     $sPluginRoot = realpath(__DIR__.'/../../..');
 

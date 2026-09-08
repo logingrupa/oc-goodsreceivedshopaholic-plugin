@@ -75,6 +75,7 @@ return [
         'stock_after'       => 'Krājums pēc importa',
         'match_strategy'    => 'Saskaņošanas stratēģija',
         'applied'           => 'Piemērots',
+        'ambiguous_label'   => 'neskaidrs - pirms piemērošanas izvēlies piedāvājumu',
     ],
     'tab' => [
         'summary' => 'Kopsavilkums',
@@ -121,6 +122,13 @@ return [
         'bulk_confirm'        => 'Piemērot visus atlasītos apstrādātos rēķinus krājumiem? Jau piemērotās rindas tiek izlaistas.',
         'bulk_no_selection'   => 'Nav atlasītu rindu. Atzīmē vismaz vienu apstrādātu rēķinu, pirms klikšķini «Piemērot atlasītos».',
         'unmatched_heading'   => ':count rinda(s) nav saskaņota(s) - nevienam piedāvājumam nav šī EAN, krājums netiks pievienots:',
+        'ambiguous_heading'   => ':count rinda(s) atbilst vairākiem piedāvājumiem. Pirms piemērošanas izvēlies piedāvājumu:',
+        'ambiguous_unresolved' => 'Rēķins :number: :count rindai(-ām) pirms piemērošanas vēl jāizvēlas piedāvājums: :rows',
+        'offer_choice_invalid' => 'Piedāvājums #:offer_id nav kandidāts rindai #:row (EAN :ean).',
+        'offer_choice_placeholder' => 'Izvēlies piedāvājumu',
+        'offer_choice_option' => '#:id :offer / :product (:state, :quantity gab.)',
+        'offer_active'        => 'aktīvs',
+        'offer_inactive'      => 'neaktīvs',
     ],
     'override' => [
         'title'      => 'Pārrakstīt un atkārtoti importēt — apstiprināt',

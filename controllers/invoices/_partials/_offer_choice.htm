@@ -1,0 +1,33 @@
+<?php
+/* The one place that renders a candidate offer list for an `ambiguous`
+ * invoice line. Shared by the bulk apply modal and the apply confirm
+ * modal; candidates come from LineResolutionService::candidatesFor().
+ *
+ * Expected vars:
+ *   - $line: InvoiceLine (ambiguous, or already picked once by an operator)
+ *   - $candidates: list<array{offer_id:int, offer_name:string, product_name:string, active:bool, quantity:int}>
+ *   - $name: POST field name, e.g. `invoice[3][offer_choice][17]` or `offer_choice[17]`
+ */
+$obLine = $line ?? null;
+$arCandidates = $candidates ?? [];
+$sName = (string) ($name ?? '');
+$iPicked = (int) ($obLine?->matched_offer_id ?? 0);
+?>
+<select name="<?= e($sName) ?>" class="form-control input-sm gr-offer-choice">
+    <option value=""><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.offer_choice_placeholder')) ?></option>
+    <?php foreach ($arCandidates as $arCandidate):
+        $iOfferId = (int) $arCandidate['offer_id'];
+        $sState = trans($arCandidate['active']
+            ? 'logingrupa.goodsreceivedshopaholic::lang.apply.offer_active'
+            : 'logingrupa.goodsreceivedshopaholic::lang.apply.offer_inactive');
+        $sLabel = trans('logingrupa.goodsreceivedshopaholic::lang.apply.offer_choice_option', [
+            'id'       => $iOfferId,
+            'offer'    => (string) $arCandidate['offer_name'],
+            'product'  => (string) $arCandidate['product_name'],
+            'state'    => $sState,
+            'quantity' => (int) $arCandidate['quantity'],
+        ]);
+    ?>
+        <option value="<?= $iOfferId ?>"<?= $iOfferId === $iPicked ? ' selected' : '' ?>><?= e($sLabel) ?></option>
+    <?php endforeach; ?>
+</select>

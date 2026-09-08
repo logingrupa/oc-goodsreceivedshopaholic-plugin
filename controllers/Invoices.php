@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Input;
 use Lang;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\InitialResetService;
+use Logingrupa\GoodsReceivedShopaholic\Classes\Apply\LineResolutionService;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\ApplyAlreadyDoneException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\GoodsReceivedException;
 use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InitialResetNotAllowedException;
@@ -596,12 +597,15 @@ class Invoices extends Controller
             ]);
         }
 
+        $arAmbiguousLines = InvoiceLine::ambiguousFor($iInvoiceId);
         $mPartial = $this->makePartial('_partials/apply_confirm', [
             'invoice'         => $obInvoice,
             'total_units'     => InvoiceLine::unitsToApplyFor($iInvoiceId),
             'offer_count'     => (int) $obInvoice->matched_lines,
             'unmatched_count' => (int) $obInvoice->unmatched_lines,
             'unmatched_lines' => InvoiceLine::unmatchedFor($iInvoiceId),
+            'ambiguous_lines' => $arAmbiguousLines,
+            'candidates'      => (new LineResolutionService())->candidatesFor($arAmbiguousLines),
         ]);
 
         return [
@@ -665,6 +669,7 @@ class Invoices extends Controller
         // edits. A partial-save scenario (override saved, lock not acquired)
         // is fine — the next click re-issues the same edits + acquires.
         $this->persistApplyModalEdits($iInvoiceId);
+        (new LineResolutionService())->resolve($iInvoiceId, Input::get('offer_choice'));
 
         $obLock = Cache::lock(sprintf('apply-invoice-%d', $iInvoiceId), self::APPLY_LOCK_TTL_SECONDS);
         if (! $obLock->get()) {
@@ -730,6 +735,14 @@ class Invoices extends Controller
 
         $arParsedIds = $this->fetchParsedInvoiceIds($arCheckedIds);
         $arInvoicePayloads = $this->normalizeBulkInvoicePayload(Input::get('invoice'));
+
+        // Operator picks for `ambiguous` lines are persisted and checked for
+        // EVERY selected invoice before the first apply, so an unresolved
+        // line aborts the whole batch instead of leaving it half applied.
+        $obResolution = new LineResolutionService();
+        foreach ($arParsedIds as $iInvoiceId) {
+            $obResolution->resolve($iInvoiceId, $arInvoicePayloads[$iInvoiceId]['offer_choice'] ?? null);
+        }
 
         $iApplied = 0;
         $iSkipped = count($arCheckedIds) - count($arParsedIds);
@@ -1987,6 +2000,8 @@ class Invoices extends Controller
             ? Offer::whereIn('id', $arOfferIds)->pluck('quantity', 'id')->all()
             : [];
 
+        $arAmbiguousLines = InvoiceLine::ambiguousFor($iInvoiceId);
+
         return [
             'invoice'             => $obInvoice,
             'lines'               => $obLines,
@@ -1994,6 +2009,8 @@ class Invoices extends Controller
             'matched_count'       => (int) $obInvoice->matched_lines,
             'unmatched_count'     => (int) $obInvoice->unmatched_lines,
             'unmatched_lines'     => InvoiceLine::unmatchedFor($iInvoiceId),
+            'ambiguous_lines'     => $arAmbiguousLines,
+            'candidates'          => (new LineResolutionService())->candidatesFor($arAmbiguousLines),
             'current_qty_map'     => $arCurrentQtyMap,
             'matched_product_map' => $this->buildMatchedProductMap($obLines, $arOfferIds),
         ];

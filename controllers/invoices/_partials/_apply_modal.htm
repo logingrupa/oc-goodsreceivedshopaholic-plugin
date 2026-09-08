@@ -30,16 +30,25 @@
  *       unmatched_count: int,
  *       current_qty_map: array<int, int>,
  *       matched_product_map: array<int, array{product_name:string,product_id:int,offer_id:int,strategy:string}>,
+ *       ambiguous_lines: list<InvoiceLine>,
+ *       candidates: array<int, list<array{offer_id:int, offer_name:string, product_name:string, active:bool, quantity:int}>>,
  *     }>
+ *
+ * `ambiguous` lines (EAN on 2+ live offers, 2026-09-08) render a
+ * `<select name="invoice[<id>][offer_choice][<line_id>]">` in the Matched
+ * Product column via `_offer_choice`; the Apply button is gated until
+ * every select in a checked section has a value.
  */
 $arInvoices = $invoices ?? [];
 $iCount = count($arInvoices);
 $arInvoiceIds = [];
+$iAmbiguousTotal = 0;
 foreach ($arInvoices as $arPreview) {
     $obInvoice = $arPreview['invoice'] ?? null;
     if ($obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice) {
         $arInvoiceIds[] = (int) $obInvoice->id;
     }
+    $iAmbiguousTotal += count((array) ($arPreview['ambiguous_lines'] ?? []));
 }
 ?>
 <div class="modal-header" data-popup-size="huge">
@@ -81,6 +90,8 @@ foreach ($arInvoices as $arPreview) {
         $obLines = $arPreview['lines'] ?? [];
         $arCurrentQtyMap = (array) ($arPreview['current_qty_map'] ?? []);
         $arMatchedProductMap = (array) ($arPreview['matched_product_map'] ?? []);
+        $arCandidates = (array) ($arPreview['candidates'] ?? []);
+        $iAmbiguousCount = count((array) ($arPreview['ambiguous_lines'] ?? []));
         $sNotes = (string) ($obInvoice->notes ?? '');
     ?>
         <section class="control-section invoice-apply-section" data-invoice-id="<?= $iInvoiceId ?>" style="margin-bottom: 1.5rem;">
@@ -95,7 +106,7 @@ foreach ($arInvoices as $arPreview) {
                     <?= e($sFilename) ?>
                 </label>
                 <small class="text-muted">
-                    &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units to add
+                    &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched<?= $iAmbiguousCount > 0 ? ', '.$iAmbiguousCount.' need a choice' : '' ?>), <?= $iTotalUnits ?> units to add
                 </small>
             </h5>
             <?= $this->makePartial('_partials/unmatched_lines', ['lines' => $arPreview['unmatched_lines'] ?? []]) ?>
@@ -122,8 +133,9 @@ foreach ($arInvoices as $arPreview) {
                         $mOverrideQty = $obLine->override_qty;
                         $sOverrideValue = $mOverrideQty !== null ? (string) (int) $mOverrideQty : '';
                         $sStrategy = (string) ($obLine->match_strategy ?? '');
-                        $bMatched = $sStrategy !== \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::MATCH_STRATEGY_NONE;
                         $iMatchedOfferId = (int) ($obLine->matched_offer_id ?? 0);
+                        $bMatched = $iMatchedOfferId > 0;
+                        $bAmbiguous = $sStrategy === \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::MATCH_STRATEGY_AMBIGUOUS;
                         $iCurrentQty = $iMatchedOfferId > 0 && array_key_exists($iMatchedOfferId, $arCurrentQtyMap)
                             ? (int) $arCurrentQtyMap[$iMatchedOfferId]
                             : 0;
@@ -162,7 +174,13 @@ foreach ($arInvoices as $arPreview) {
                             </td>
                             <td>
                                 <?php
-                                if (!$bMatched) {
+                                if ($bAmbiguous) {
+                                    echo $this->makePartial('_partials/offer_choice', [
+                                        'line'       => $obLine,
+                                        'candidates' => $arCandidates[$iLineId] ?? [],
+                                        'name'       => 'invoice['.$iInvoiceId.'][offer_choice]['.$iLineId.']',
+                                    ]);
+                                } elseif (!$bMatched) {
                                     echo '<span class="label label-warning">unmatched</span>';
                                 } else {
                                     $arMatched = $arMatchedProductMap[$iLineId] ?? null;
@@ -263,10 +281,11 @@ foreach ($arInvoices as $arPreview) {
     </script>
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary" data-attach-loading>
+    <button type="submit" class="btn btn-primary" data-attach-loading data-gr-choice-gate <?= $iAmbiguousTotal > 0 ? 'disabled' : '' ?>>
         <i class="icon-check"></i>
         Apply selected
     </button>
     <button type="button" class="btn btn-default" data-dismiss="popup">Cancel</button>
 </div>
 </form>
+<?= $this->makePartial('_partials/offer_choice_guard') ?>

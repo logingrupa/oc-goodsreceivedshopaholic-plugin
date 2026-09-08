@@ -1,26 +1,29 @@
 <?php
 /**
  * Partial column: product_name_raw rendered as deep-links into the
- * upstream Lovata Shopaholic backend pages, with a 4-branch dispatch
- * on $record->match_strategy.
+ * upstream Lovata Shopaholic backend pages, dispatched by a renderer map
+ * keyed on $record->match_strategy.
  *
- *   - 'offer_code' / 'product_code_single_offer' (matched):
+ *   - 'offer_code' / 'product_code_single_offer' /
+ *     'offer_code_active' / 'offer_code_operator' (matched):
  *       black/normal product-update link + offer-update link in parens.
  *   - 'variation' (Pass 3 matched, Phase 6):
  *       ORANGE product link + asterisk + offer-update link in parens.
  *       Visual signal that match resolved via the offer-name variation
  *       token, not directly via offer.code or product.code.
+ *   - 'ambiguous' (EAN on 2+ live offers, waiting for the operator):
+ *       plain text + yellow label, no anchor (there is no offer yet).
  *   - 'none' (unmatched):
  *       plain text + asterisk after variation token (no anchor tags).
+ *
+ * A matched strategy whose offer relation is gone (offer deleted after
+ * apply) degrades to the unmatched render.
  *
  * Variation extraction is delegated to VariationExtractor (DRY: the
  * variation regex literal appears EXACTLY ONCE in the plugin — in
  * classes/support/VariationExtractor.php, used here AND by the Pass 3
- * chain stage VariationMatcher).
- *
- * The cleaned name is derived by string slice on the LAST ", " using
- * `strrpos`, consistent with the regex semantics. NOT a regex
- * re-implementation — pure substring math.
+ * chain stage VariationMatcher). The cleaned name is a string slice on
+ * the LAST ", " using `strrpos`, NOT a regex re-implementation.
  *
  * October passes the row's model as $record. The matched_offer relation
  * is eager-loaded by the stock_after column (relation:matched_offer +
@@ -31,13 +34,13 @@
  */
 
 use Logingrupa\GoodsReceivedShopaholic\Classes\Support\VariationExtractor;
+use Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine;
 
 $sName = (string) ($record->product_name_raw ?? '');
-$sStrategy = (string) ($record->match_strategy ?? 'none');
+$sStrategy = (string) ($record->match_strategy ?? InvoiceLine::MATCH_STRATEGY_NONE);
 $obOffer = $record->matched_offer ?? null;
 $bMatched = $obOffer !== null && (int) $obOffer->id > 0;
 
-// Derive (cleanName, variation) using the SOLE regex source (Plan 01).
 $sVariation = VariationExtractor::extract($sName);
 $sCleanName = $sName;
 if ($sVariation !== null) {
@@ -46,46 +49,56 @@ if ($sVariation !== null) {
         $sCleanName = trim(substr($sName, 0, $iLastCommaPos));
     }
 }
+$bHasVariation = $sVariation !== null && $sVariation !== '';
 
-// Branch 1: unmatched ('none').
-if (! $bMatched) {
+$fnUnmatched = static function () use ($sCleanName, $sVariation, $bHasVariation): void {
     echo e($sCleanName);
-    if ($sVariation !== null && $sVariation !== '') {
+    if ($bHasVariation) {
         echo ' ('.e($sVariation).'*)';
     }
-    return;
-}
+};
 
-$iOfferId = (int) $obOffer->id;
-$iProductId = (int) ($obOffer->product_id ?? 0);
-$sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.$iOfferId);
-$sProductUrl = $iProductId > 0
-    ? Backend::url('lovata/shopaholic/products/update/'.$iProductId)
-    : null;
+$fnAmbiguous = static function () use ($sCleanName, $sVariation, $bHasVariation): void {
+    echo e($sCleanName);
+    if ($bHasVariation) {
+        echo ' ('.e($sVariation).')';
+    }
+    echo ' <span class="label label-warning">'
+        .e(trans('logingrupa.goodsreceivedshopaholic::lang.column.ambiguous_label'))
+        .'</span>';
+};
 
-// Branch 2: matched via Pass 3 ('variation') — ORANGE + asterisk.
-if ($sStrategy === 'variation') {
-    ?>
-    <?php if ($sProductUrl !== null): ?>
-        <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener" style="color: orange"><?= e($sCleanName) ?>*</a>
-    <?php else: ?>
-        <span style="color: orange"><?= e($sCleanName) ?>*</span>
-    <?php endif; ?>
-    <?php if ($sVariation !== null && $sVariation !== ''): ?>
-        (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener" style="color: orange"><?= e($sVariation) ?></a>)
-    <?php endif; ?>
-    <?php
-    return;
-}
+$fnLinked = static function (string $sStyle, string $sMark) use ($obOffer, $sCleanName, $sVariation, $bHasVariation): void {
+    $iProductId = (int) ($obOffer->product_id ?? 0);
+    if ($iProductId > 0) {
+        $sProductUrl = Backend::url('lovata/shopaholic/products/update/'.$iProductId);
+        echo '<a href="'.e($sProductUrl).'" target="_blank" rel="noopener"'.$sStyle.'>'.e($sCleanName).$sMark.'</a>';
+    } else {
+        echo $sMark !== '' ? '<span'.$sStyle.'>'.e($sCleanName).$sMark.'</span>' : e($sCleanName);
+    }
+    if ($bHasVariation) {
+        $sOfferUrl = Backend::url('lovata/shopaholic/offers/update/'.(int) $obOffer->id);
+        echo ' (<a href="'.e($sOfferUrl).'" target="_blank" rel="noopener"'.$sStyle.'>'.e($sVariation).'</a>)';
+    }
+};
 
-// Branch 3 + 4: matched via 'offer_code' or 'product_code_single_offer'
-// — black/normal links (BYTE-FOR-BYTE preserved from pre-Plan-06).
-?>
-<?php if ($sProductUrl !== null): ?>
-    <a href="<?= e($sProductUrl) ?>" target="_blank" rel="noopener"><?= e($sCleanName) ?></a>
-<?php else: ?>
-    <?= e($sCleanName) ?>
-<?php endif; ?>
-<?php if ($sVariation !== null && $sVariation !== ''): ?>
-    (<a href="<?= e($sOfferUrl) ?>" target="_blank" rel="noopener"><?= e($sVariation) ?></a>)
-<?php endif; ?>
+$fnPlain = static function () use ($fnLinked): void {
+    $fnLinked('', '');
+};
+$fnOrange = static function () use ($fnLinked): void {
+    $fnLinked(' style="color: orange"', '*');
+};
+
+$arRenderers = [
+    InvoiceLine::MATCH_STRATEGY_NONE                      => $fnUnmatched,
+    InvoiceLine::MATCH_STRATEGY_AMBIGUOUS                 => $fnAmbiguous,
+    'variation'                                           => $fnOrange,
+    InvoiceLine::MATCH_STRATEGY_OFFER_CODE                => $fnPlain,
+    InvoiceLine::MATCH_STRATEGY_PRODUCT_CODE_SINGLE_OFFER => $fnPlain,
+    InvoiceLine::MATCH_STRATEGY_OFFER_CODE_ACTIVE         => $fnPlain,
+    InvoiceLine::MATCH_STRATEGY_OFFER_CODE_OPERATOR       => $fnPlain,
+];
+
+$bNeedsOffer = $sStrategy !== InvoiceLine::MATCH_STRATEGY_NONE && $sStrategy !== InvoiceLine::MATCH_STRATEGY_AMBIGUOUS;
+$fnRender = ($bNeedsOffer && ! $bMatched) ? $fnUnmatched : ($arRenderers[$sStrategy] ?? $fnUnmatched);
+$fnRender();

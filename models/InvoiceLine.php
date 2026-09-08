@@ -57,6 +57,15 @@ class InvoiceLine extends Model
 
     public const MATCH_STRATEGY_NONE = 'none';
 
+    /** The EAN belongs to 2+ live offers and the active rule could not pick one; the operator must. */
+    final public const string MATCH_STRATEGY_AMBIGUOUS = 'ambiguous';
+
+    /** Duplicate code, exactly one active offer in the group, picked by rule. */
+    final public const string MATCH_STRATEGY_OFFER_CODE_ACTIVE = 'offer_code_active';
+
+    /** Duplicate code resolved by an operator choice in the apply modal. */
+    final public const string MATCH_STRATEGY_OFFER_CODE_OPERATOR = 'offer_code_operator';
+
     /** @var string */
     public $table = 'logingrupa_goods_received_invoice_lines';
 
@@ -109,17 +118,38 @@ class InvoiceLine extends Model
     /**
      * Lines of one invoice whose EAN resolved to no offer, in document
      * order. Sole definition of "unmatched" for the upload apply modal, the
-     * apply confirm modal and the invoice summary block. The instanceof
-     * loop narrows October's untyped Builder rows for PHPStan L10 (same
-     * pattern as ApplyOrchestrator::loadMatchedLines).
+     * apply confirm modal and the invoice summary block.
      *
      * @return list<self>
      */
     public static function unmatchedFor(int $iInvoiceId): array
     {
+        return self::linesWithStrategy($iInvoiceId, self::MATCH_STRATEGY_NONE);
+    }
+
+    /**
+     * Lines of one invoice whose EAN belongs to 2+ live offers and still
+     * waits for an operator choice, in document order. Apply is blocked
+     * while this list is non-empty (LineResolutionService::resolve).
+     *
+     * @return list<self>
+     */
+    public static function ambiguousFor(int $iInvoiceId): array
+    {
+        return self::linesWithStrategy($iInvoiceId, self::MATCH_STRATEGY_AMBIGUOUS);
+    }
+
+    /**
+     * The instanceof loop narrows October's untyped Builder rows for PHPStan
+     * L10 (same pattern as ApplyOrchestrator::loadMatchedLines).
+     *
+     * @return list<self>
+     */
+    private static function linesWithStrategy(int $iInvoiceId, string $sStrategy): array
+    {
         $arLines = [];
         foreach (self::where('invoice_id', $iInvoiceId)
-            ->where('match_strategy', self::MATCH_STRATEGY_NONE)
+            ->where('match_strategy', $sStrategy)
             ->orderBy('row_index')
             ->get() as $obLine) {
             if ($obLine instanceof self) {

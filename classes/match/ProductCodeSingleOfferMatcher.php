@@ -18,9 +18,13 @@ use Lovata\Shopaholic\Models\Product;
  *
  * Issues EXACTLY ONE query — `has('offer', '=', 1)` is a correlated COUNT
  * in the WHERE clause; `addSelect(...subquery...)` inlines the sole offer
- * id via a correlated SELECT subquery. Same SQL statement, NOT a second
- * round-trip. `->limit(1)` defense-in-depth keeps the subquery
- * deterministic if the WHERE guard ever drifts.
+ * id and its active flag via correlated SELECT subqueries. Same SQL
+ * statement, NOT a second round-trip. `->limit(1)` defense-in-depth keeps
+ * the subqueries deterministic if the WHERE guard ever drifts.
+ *
+ * A code carried by 2+ products (each with its single offer) is decided by
+ * DuplicateCodeResolver on those rows: exactly one active offer is picked
+ * as `offer_code_active`, otherwise the line is emitted as `ambiguous`.
  */
 final class ProductCodeSingleOfferMatcher implements MatchStrategy
 {
@@ -36,17 +40,20 @@ final class ProductCodeSingleOfferMatcher implements MatchStrategy
             $arUnmatched,
         )));
 
-        $arProductMap = $this->lookupProductsWithSingleOffer($arEans);
+        $arDecisions = DuplicateCodeResolver::resolveByCode(
+            $this->lookupProductsWithSingleOffer($arEans),
+            'product_code_single_offer',
+        );
 
         $arResult = [];
         foreach ($arUnmatched as $obLine) {
-            if (! isset($arProductMap[$obLine->ean])) {
+            if (! isset($arDecisions[$obLine->ean])) {
                 continue;
             }
             $arResult[] = new MatchedLine(
                 line: $obLine,
-                matched_offer_id: $arProductMap[$obLine->ean],
-                match_strategy: 'product_code_single_offer',
+                matched_offer_id: $arDecisions[$obLine->ean]['offer_id'],
+                match_strategy: $arDecisions[$obLine->ean]['strategy'],
             );
         }
 
@@ -55,16 +62,19 @@ final class ProductCodeSingleOfferMatcher implements MatchStrategy
 
     /**
      * @param  list<string>  $arEans
-     * @return array<string, int>
+     * @return list<array{code: string, offer_id: int, active: bool}>
      */
     private function lookupProductsWithSingleOffer(array $arEans): array
     {
-        $arProductMap = [];
+        $arCandidates = [];
         $obRows = Product::whereIn('code', $arEans)
             ->has('offer', '=', 1)
             ->select(['id', 'code'])
             ->addSelect([
                 'matched_offer_id' => Offer::select('id')
+                    ->whereColumn('product_id', 'lovata_shopaholic_products.id')
+                    ->limit(1),
+                'matched_offer_active' => Offer::select('active')
                     ->whereColumn('product_id', 'lovata_shopaholic_products.id')
                     ->limit(1),
             ])
@@ -76,11 +86,15 @@ final class ProductCodeSingleOfferMatcher implements MatchStrategy
             if (! is_numeric($mOfferId)) {
                 continue;
             }
-            /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc; columns verified at DB layer */
-            $sCode = (string) $obRow->code;
-            $arProductMap[$sCode] = (int) $mOfferId;
+            $arCandidates[] = [
+                /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc; columns verified at DB layer */
+                'code' => (string) $obRow->code,
+                'offer_id' => (int) $mOfferId,
+                /** @phpstan-ignore-next-line property.notFound — Lovata Product lacks IDE-helper PHPDoc; correlated `addSelect` exposes `matched_offer_active` at runtime */
+                'active' => (bool) $obRow->matched_offer_active,
+            ];
         }
 
-        return $arProductMap;
+        return $arCandidates;
     }
 }

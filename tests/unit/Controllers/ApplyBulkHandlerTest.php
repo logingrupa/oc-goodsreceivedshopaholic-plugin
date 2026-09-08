@@ -223,6 +223,70 @@ it('does not touch an invoice the operator did not check', function (): void {
     expect(Invoice::find($obB->id)->notes)->toBeNull();
 });
 
+it('refuses the whole batch while an ambiguous line has no pick: AjaxException, no apply, Offer.quantity unchanged', function (): void {
+    $obProduct = seedApplyProduct('PROD-AMB', 'bulk-amb');
+    $obOfferA = seedApplyOffer((int) $obProduct->id, '40092454', iQuantity: 10);
+    $obOfferB = seedApplyOffer((int) $obProduct->id, '40092454', iQuantity: 20);
+
+    $obInvoice = seedBulkInvoice('BULK-AMB-001');
+    $obLine = seedBulkLine((int) $obInvoice->id, '40092454', 5);
+    $obLine->matched_offer_id = null;
+    $obLine->match_strategy = InvoiceLine::MATCH_STRATEGY_AMBIGUOUS;
+    $obLine->saveQuietly();
+
+    \Input::merge([
+        'checked' => [(string) $obInvoice->id],
+        'invoice' => [(string) $obInvoice->id => ['offer_choice' => [(string) $obLine->id => '']]],
+    ]);
+
+    $obTracker = newBulkTracker();
+    $obController = makeTestController(bHasPermission: true, arFiles: null);
+    $obController->obApplyOrchestratorResolver = fn () => makeBulkOrchestrator($obTracker);
+
+    $obCaught = null;
+    try {
+        $obController->onApplyBulk();
+    } catch (\October\Rain\Exception\AjaxException $obException) {
+        $obCaught = $obException;
+    }
+
+    expect($obCaught)->not->toBeNull();
+    expect((string) $obCaught->getMessage())->toContain('ambiguous_unresolved');
+    expect((int) $obTracker->iCalls)->toBe(0);
+    expect((int) \Lovata\Shopaholic\Models\Offer::find($obOfferA->id)->quantity)->toBe(10);
+    expect((int) \Lovata\Shopaholic\Models\Offer::find($obOfferB->id)->quantity)->toBe(20);
+    expect((string) Invoice::find($obInvoice->id)->status)->toBe(Invoice::STATUS_PARSED);
+});
+
+it('applies through the real orchestrator once the ambiguous line is picked, adding qty to the chosen offer only', function (): void {
+    $obProduct = seedApplyProduct('PROD-PICK', 'bulk-pick');
+    $obOfferA = seedApplyOffer((int) $obProduct->id, '40092454', iQuantity: 10);
+    $obOfferB = seedApplyOffer((int) $obProduct->id, '40092454', iQuantity: 20);
+
+    $obInvoice = seedBulkInvoice('BULK-PICK-001');
+    $obLine = seedBulkLine((int) $obInvoice->id, '40092454', 5);
+    $obLine->matched_offer_id = null;
+    $obLine->match_strategy = InvoiceLine::MATCH_STRATEGY_AMBIGUOUS;
+    $obLine->saveQuietly();
+
+    \Input::merge([
+        'checked' => [(string) $obInvoice->id],
+        'invoice' => [(string) $obInvoice->id => ['offer_choice' => [(string) $obLine->id => (string) $obOfferB->id]]],
+    ]);
+
+    $obController = makeTestController(bHasPermission: true, arFiles: null);
+    $obController->onApplyBulk();
+
+    expect((int) \Lovata\Shopaholic\Models\Offer::find($obOfferA->id)->quantity)->toBe(10);
+    expect((int) \Lovata\Shopaholic\Models\Offer::find($obOfferB->id)->quantity)->toBe(25);
+
+    $obLine->refresh();
+    expect((int) $obLine->matched_offer_id)->toBe((int) $obOfferB->id);
+    expect((string) $obLine->match_strategy)->toBe(InvoiceLine::MATCH_STRATEGY_OFFER_CODE_OPERATOR);
+    expect((bool) $obLine->applied)->toBeTrue();
+    expect((string) Invoice::find($obInvoice->id)->status)->toBe(Invoice::STATUS_APPLIED);
+});
+
 it('handles missing invoice payload gracefully (apply runs, no edit-side persist)', function (): void {
     $obA = seedBulkInvoice('BULK-NOEDITS-001');
     seedBulkLine((int) $obA->id, '4752307NN0001', 5);

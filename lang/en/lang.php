@@ -75,6 +75,7 @@ return [
         'stock_after'       => 'Stock after import',
         'match_strategy'    => 'Match strategy',
         'applied'           => 'Applied',
+        'ambiguous_label'   => 'ambiguous - pick an offer before apply',
     ],
     'tab' => [
         'summary' => 'Summary',
@@ -121,6 +122,13 @@ return [
         'bulk_confirm'         => 'Apply all selected parsed invoices to live stock? Already-applied rows are skipped.',
         'bulk_no_selection'    => 'No rows selected. Tick at least one parsed invoice before clicking Apply selected.',
         'unmatched_heading'    => ':count line(s) not matched - no offer carries this EAN, stock will not be added:',
+        'ambiguous_heading'    => ':count line(s) match more than one offer. Pick the offer before apply:',
+        'ambiguous_unresolved' => 'Invoice :number: :count line(s) still need an offer choice before apply: :rows',
+        'offer_choice_invalid' => 'Offer #:offer_id is not a candidate for row #:row (EAN :ean).',
+        'offer_choice_placeholder' => 'Pick an offer',
+        'offer_choice_option'  => '#:id :offer / :product (:state, :quantity pcs)',
+        'offer_active'         => 'active',
+        'offer_inactive'       => 'inactive',
     ],
     'override' => [
         'title'      => 'Override and re-import — Confirm',
