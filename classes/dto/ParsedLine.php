@@ -14,8 +14,9 @@ namespace Logingrupa\GoodsReceivedShopaholic\Classes\Dto;
  * plan 02-03). EAN is preserved as STRING so leading zeros survive (D-27).
  *
  * Field names `ean` and `qty` are canonical domain terms from the distributor
- * invoice schema (PROJECT.md / captures) — EAN is the GS1 industry standard
- * for the 13-digit barcode; qty matches Shopaholic `offers.quantity` semantics.
+ * invoice schema (PROJECT.md / captures) — EAN is the GS1 barcode family
+ * (EAN-8, UPC-A or EAN-13, i.e. 8, 12 or 13 digits, stored exactly as
+ * printed); qty matches Shopaholic `offers.quantity` semantics.
  * Renaming is rejected: `ean` → `code` would collide with `offers.code` (the
  * product SKU), and `qty` → `quantity` is verbose without disambiguation gain.
  *

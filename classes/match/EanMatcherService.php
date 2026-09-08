@@ -27,10 +27,9 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InvalidEanException;
  * / D-25-update is a post-v1 internal refactor with a single caller
  * (`ParseAndPersistOrchestrator`). No back-compat shim per the locked spec.
  *
- * Defense-in-depth: every input EAN is regex-validated against /^\d{13}$/
- * BEFORE any DB query (T-02-06-01 mitigation; preserved verbatim from Phase 2
- * plan 02-06; pinned by EanMatcherServiceTest "InvalidEanException BEFORE any
- * DB query").
+ * Defense-in-depth: every input EAN is regex-validated as EAN-8, UPC-A (12)
+ * or EAN-13 BEFORE any DB query (T-02-06-01 mitigation; pinned by
+ * EanMatcherServiceTest "InvalidEanException BEFORE any DB query").
  *
  * Threat coverage (plan 06-05 register):
  *   - T-06-05-01 Tampering — defense-in-depth EAN regex preserved at chain
@@ -47,12 +46,13 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\InvalidEanException;
 final class EanMatcherService
 {
     /**
-     * Strict 13-digit EAN regex. Defense-in-depth check at the chain runner
-     * boundary — the parser already filters non-13-digit rows (D-16 lenient
-     * skip). If a bug ever lets a malformed EAN through, this assertion
-     * raises `InvalidEanException` BEFORE any DB query.
+     * Accepted barcode shapes: EAN-8, UPC-A (12) and EAN-13, exact string
+     * compare, no zero-padding. Defense-in-depth check at the chain runner
+     * boundary — the parser already skips rows of any other shape (D-16
+     * lenient skip). If a bug ever lets a malformed EAN through, this
+     * assertion raises `InvalidEanException` BEFORE any DB query.
      */
-    private const string EAN_REGEX = '/^\d{13}$/';
+    private const string EAN_REGEX = '/^(\d{8}|\d{12}|\d{13})$/';
 
     /**
      * Chain stages in deterministic execution order. Stage[i] receives only
@@ -87,7 +87,7 @@ final class EanMatcherService
      * @param  list<ParsedLine>  $arLines
      * @return list<MatchedLine>
      *
-     * @throws InvalidEanException  on any input line whose EAN is not exactly 13 digits
+     * @throws InvalidEanException  on any input line whose EAN is not 8, 12 or 13 digits
      */
     public function matchLines(array $arLines): array
     {
@@ -154,7 +154,7 @@ final class EanMatcherService
 
             throw new InvalidEanException(
                 (string) \Lang::get('logingrupa.goodsreceivedshopaholic::lang.exception.invalid_ean'),
-                ['raw' => $sEan, 'expected_format' => '13 digits'],
+                ['raw' => $sEan, 'expected_format' => '8, 12 or 13 digits'],
             );
         }
     }

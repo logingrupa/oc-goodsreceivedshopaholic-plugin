@@ -20,7 +20,7 @@ uses(\Logingrupa\GoodsReceivedShopaholic\Tests\GoodsReceivedTestCase::class);
  *   - RejectsMalformedHtmTest        — zero-rows / libxml-fatal → MalformedHtmException
  *
  * Plus two non-QA-01 invariants that round out coverage:
- *   - Invalid 13-digit EAN guard      — D-16 lenient: skip + record, never throw
+ *   - Invalid EAN guard (8/12/13)     — D-16 lenient: skip + record, never throw
  *   - Decimal qty bubble through      — QuantityNormalizer throws propagate, parser
  *                                       does not catch (T-02-05-05 mitigation proof)
  *
@@ -150,11 +150,12 @@ it('HandlesBothR20AndR21RowsTest — real fixture with mixed R20/R21 yields comb
     $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO026712_no_28112024.HTM');
 
     // Real fixture mixes 147 R20 + 7 R21 rows; 150 of them are structural
-    // data rows (numeric Nr., 10+ TDs). 135 are valid product lines
-    // (13-digit EANs), 15 are skipped (non-13-digit internal codes like
-    // '40092454'). Sum lines + skipped == 150 — pin invariant.
+    // data rows (numeric Nr., 10+ TDs). 141 are valid product lines
+    // (135 EAN-13 + 6 EAN-8 such as '40092454'), 9 are skipped (empty or
+    // non-numeric barcode cells). Sum lines + skipped == 150 — pin invariant.
     expect(count($obParsed->lines) + count($obParsed->skipped_rows))->toBe(150);
-    expect(count($obParsed->lines))->toBe(135);
+    expect(count($obParsed->lines))->toBe(141);
+    expect(count($obParsed->skipped_rows))->toBe(9);
     expect($obParsed->invoice_number)->toBe('PRO026712');
 });
 
@@ -196,6 +197,26 @@ it('skips row with invalid EAN without throwing when other rows parse (D-16 leni
     expect(count($obParsed->skipped_rows))->toBe(1);
     expect($obParsed->skipped_rows[0]['reason'])->toBe('invalid_ean');
     expect($obParsed->skipped_rows[0]['row_index'])->toBe(1);
+});
+
+it('accepts EAN-8 and UPC-A rows as-is and skips a 10-digit code (catalog is mostly EAN-8, 2026-09-08)', function (): void {
+    $sHtml = buildSyntheticInvoiceHtml([
+        ['class' => 'R20', 'ean' => '40092454', 'qty' => '2'],
+        ['class' => 'R20', 'ean' => '012345678905', 'qty' => '3'],
+        ['class' => 'R20', 'ean' => '4009245400', 'qty' => '4'],
+    ]);
+
+    $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO999999_no_01012026.HTM');
+
+    expect(count($obParsed->lines))->toBe(2);
+    expect($obParsed->lines[0]->ean)->toBe('40092454');
+    expect($obParsed->lines[0]->qty)->toBe(2);
+    // UPC-A keeps its 12 characters; no zero-padding to EAN-13.
+    expect($obParsed->lines[1]->ean)->toBe('012345678905');
+    expect($obParsed->lines[1]->qty)->toBe(3);
+    expect(count($obParsed->skipped_rows))->toBe(1);
+    expect($obParsed->skipped_rows[0]['reason'])->toBe('invalid_ean');
+    expect($obParsed->skipped_rows[0]['raw'])->toBe('4009245400');
 });
 
 it('throws missing-EAN-column MalformedHtmException when NO row yields a valid EAN (synthetic)', function (): void {

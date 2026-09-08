@@ -265,6 +265,37 @@ it('preserves leading-zero EAN as STRING through the chain (QA-02 / D-27)', func
     expect($arResult[0]->match_strategy)->toBe('offer_code');
 });
 
+it('matches an EAN-8 line against an 8-digit offer code as an exact string (catalog majority, 2026-09-08)', function (): void {
+    $obProduct = seedProduct('PROD-E8-CODE', 'prod-e8');
+    $obOffer = seedOffer($obProduct->id, '40092454');
+
+    $arResult = (new EanMatcherService())->matchLines([makeParsedLine('40092454', 'EAN-8 item', 1)]);
+
+    expect($arResult)->toHaveCount(1);
+    expect($arResult[0]->matched_offer_id)->toBe((int) $obOffer->id);
+    expect($arResult[0]->match_strategy)->toBe('offer_code');
+});
+
+it('throws InvalidEanException for a 10-digit code BEFORE any DB query (only 8, 12, 13 accepted)', function (): void {
+    \DB::flushQueryLog();
+    \DB::enableQueryLog();
+
+    $bThrew = false;
+    try {
+        (new EanMatcherService())->matchLines([makeParsedLine('4009245400', 'Ten-digit code', 1)]);
+    } catch (InvalidEanException $obException) {
+        $bThrew = true;
+        expect(count(\DB::getQueryLog()))->toBe(0);
+        expect($obException->arContext)->toMatchArray([
+            'raw' => '4009245400',
+            'expected_format' => '8, 12 or 13 digits',
+        ]);
+    }
+    \DB::disableQueryLog();
+
+    expect($bThrew)->toBeTrue();
+});
+
 it('throws InvalidEanException BEFORE any DB query (T-02-06-01 / T-06-05-01 defense-in-depth)', function (): void {
     \DB::flushQueryLog();
     \DB::enableQueryLog();

@@ -44,7 +44,7 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException;
  *   | Rows extracted, ZERO valid EAN lines   | throw `MalformedHtmException` (`missing_ean_column` message — distributor's no-EAN print template) |
  *   | Invoice number missing (body+filename) | throw `InvoiceNumberMissingException` (bubbles from resolver) |
  *   | Decimal / zero / negative qty          | throw `InvalidQuantityException` (bubbles from QuantityNormalizer) |
- *   | EAN not exactly 13 digits              | append to `skipped_rows`, continue |
+ *   | EAN not 8, 12 or 13 digits             | append to `skipped_rows`, continue |
  *   | Unparseable price cell                 | parsed line `unit_price=null` etc. |
  *
  * Threat-model coverage:
@@ -67,8 +67,13 @@ final class HtmInvoiceParser
     /** Minimum TD count for a usable data row (positions 0..9 populated). */
     private const int MIN_TD_COUNT = 10;
 
-    /** Strict 13-digit EAN validation regex (D-16). */
-    private const string EAN_REGEX = '/^\d{13}$/';
+    /**
+     * Accepted barcode shapes (D-16): EAN-8, UPC-A (12) and EAN-13, compared
+     * as exact strings against `offers.code`. UPC-A is NOT zero-padded to 13
+     * because the catalog stores it as a 12-character string. Any other
+     * length, and any non-digit content, is skipped at row level.
+     */
+    private const string EAN_REGEX = '/^(\d{8}|\d{12}|\d{13})$/';
 
     /**
      * Structural XPath for data rows: at least MIN_TD_COUNT cells AND a
@@ -108,7 +113,7 @@ final class HtmInvoiceParser
             );
         }
 
-        // Rows matched but NOT ONE carried a valid 13-digit EAN — the
+        // Rows matched but NOT ONE carried an EAN-8, UPC-A or EAN-13 — the
         // distributor's no-EAN print template (no "Bar code" column at all;
         // e.g. Nr_PRO034535_no_09072026.HTM).
         // Such a file can never match offers, so reject the whole upload
