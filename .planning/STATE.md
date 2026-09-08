@@ -222,6 +222,12 @@ None yet.
 
 None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260908-lk6 | EAN-8 and UPC-A accepted like EAN-13 (v1.0.7) | 2026-09-08 | f0ecb01 | [260908-lk6-ean-8-and-upc-a-accepted-like-ean-13](./quick/260908-lk6-ean-8-and-upc-a-accepted-like-ean-13/) |
+
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |
@@ -230,9 +236,9 @@ None. All 5 open questions (OQ1-OQ5) resolved during requirements phase.
 
 ## Session Continuity
 
-Last session: 2026-04-30
-Stopped at: Phase 5 plan 05-05 COMPLETE (139s). README.md (+74 lines) gains `## Publishing` section between `## Multi-site notes` and `## License` (composer.json field table reflecting D-04 verbatim + secret-leak pre-publish grep recipe `git ls-files | xargs grep -l -iE '(password|secret|api_key|aws_|stripe_|sendgrid_|_token)' || echo CLEAN` per T-05-05-01 + `gh repo create logingrupa/oc-goodsreceived-plugin --public` per D-05 + `git tag v1.0.0` + Packagist submission steps + non-Packagist VCS `repositories` fallback) AND `## Verification` section (composer require dry-run with `dev-master` + expected outcomes — 3 plugin tables + offers extension column + Settings page renders — + `.planning/UAT-CHECKLIST.md` cross-link + post-tag canonical pin `^1.0`). README H2 count 13 → 15. composer.json D-04 sanity check PASS verbatim — no edits (Tiger-Style: contract file, modify only on explicit operator review; D-05-05-02). `.planning/UAT-CHECKLIST.md` NEW (115 lines, 46 checkboxes) ships operator-printable manual runbook with A. single-site smoke on .no (5 subsections covering install + 4 split permissions + upload+apply happy path + override-and-reimport + destructive initial-reset) + B. multi-site verification (D-14's 7-step matrix split into deploy+migrate / settings isolation / stock-write isolation / permission isolation) + C. sign-off block with operator name + date + per-site pass/fail (T-05-05-02 + T-05-05-03 mitigations baked into format; D-05-05-04). All 7 README grep gates pass + all 5 UAT grep gates pass. `make all` still green: pint-test + lint-settings-accessor + analyse 33/33 + phpmd + pest 241/241 / 1666 assertions / 10.19s. phpstan-baseline.neon SHA UNCHANGED at `4b3227fab5b697264e8532b59f5cdd96c86a0ff1fa484cc1a869af36ae91530a`. OPS-03 marked PARTIAL in REQUIREMENTS.md (documentation shipped; `gh repo create --public` + `git tag v1.0.0` + Packagist submission + clean-install verify deferred to operator per D-05/D-15) + OPS-06 marked PARTIAL (UAT-CHECKLIST runbook shipped; multi-site execution + Section C sign-off deferred to operator per D-15) + traceability table rows OPS-03 + OPS-06 both Pending → Partial. ROADMAP.md plan 05-05 marked [x] with full closure annotation; Phase 5 progress 3/6 → 4/6. v1.0 milestone at 36/38 = 94%. 4 new D-05-05-* Decisions captured (section placement rationale, composer.json untouched per contract-file rule, secret-leak grep guard per T-05-05-01, UAT format + 4-threat mitigations baked in). Zero unforeseen deviations. 2 commits b2daa7e (`docs(05-05): append Publishing + Verification sections to README (OPS-03)`) + a4f1e32 (`docs(05-05): add UAT-CHECKLIST.md for OPS-06 multi-site + OPS-03 composer-require verification`). Next: plan 05-03 (PROJECT.md update — OPS-02) is the lightest-touch markdown-only next step; 05-06 (final QA gate including OPS-05 final closure: operator pcov install + re-measure + tune --min + wire `coverage` into `all:` + OPS-03 publish operator-action + OPS-06 UAT execution sign-off).
-Resume file: `.planning/phases/05-ops-lang-polish-public-release/05-05-SUMMARY.md`
+Last session: 2026-09-08
+Stopped at: Quick task 260908-lk6 COMPLETE (EAN-8 and UPC-A accepted like EAN-13, v1.0.7, commit f0ecb01). Next: quick task for duplicate offer code resolution (ambiguous strategy, single-active auto-pick, operator select in the apply modal).
+Resume file: `.planning/quick/260908-lk6-ean-8-and-upc-a-accepted-like-ean-13/260908-lk6-SUMMARY.md`
 
 ## UAT Items Pending (from Phase 1 — defer to milestone completion)
 
