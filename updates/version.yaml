@@ -13,3 +13,5 @@
     - "A successful initial reset now switches allow_initial_reset back off, so the destructive path closes itself instead of waiting for the operator to remember. A refused reset leaves the toggle alone."
 "1.0.5":
     - "The DRY invariant test scans the plugin in PHP instead of shelling out to grep. The old form redirected stderr to /dev/null, which cmd.exe cannot parse, so the command died and the test read zero hits and failed on every Windows checkout while passing on the servers. The scan still covers every file type rather than just PHP, because the invariant exists to stop the invoice line column partial re-implementing the variation regex."
+"1.0.6":
+    - "The parser now selects invoice data rows by structure (10+ cells and a numeric Nr. cell) instead of row CLASS names, so the two-line rows the distributor styles R23 are imported instead of silently dropped. Unmatched lines are listed by row, EAN and name in the upload modal, the apply confirm modal and the invoice summary. The upload modal unit total now counts matched lines only, the same number apply will add."

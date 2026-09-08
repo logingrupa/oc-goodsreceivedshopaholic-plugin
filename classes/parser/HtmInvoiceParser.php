@@ -24,24 +24,26 @@ use Logingrupa\GoodsReceivedShopaholic\Classes\Exception\MalformedHtmException;
  * `PriceNormalizer` (audit-only float prices), and `MalformedHtmException`
  * (whole-file failure).
  *
- * Real-fixture format anchors (verified against `Nr_PRO033328_no_13042026.HTM`):
+ * Real-fixture format anchors (verified against `Nr_PRO033328_no_13042026.HTM`
+ * and `Nr_PRO033436_no_07082026.HTM`):
  *   - UTF-8 BOM (\xEF\xBB\xBF) prefix — stripped before `loadHTML`.
  *   - HTML 4.0 Transitional doctype.
- *   - Data rows: `<TR CLASS=R20>` UPPERCASE UNQUOTED. `loadHTML` tolerates
- *     this natively, but the case-insensitive XPath translate() guards against
- *     distributor format drift to lowercase / mixed-case in future shipments.
- *   - Per row, 13 TD elements indexed by POSITION (not class — class names
+ *   - Rows carry `<TR CLASS=R20>` style UPPERCASE UNQUOTED attributes.
+ *     `loadHTML` tolerates this natively. The class index is a per-template
+ *     layout style (R20/R21 in the EN template, R22/R23 in the LV one, the
+ *     higher number being the taller two-line variant) and is NOT used for
+ *     row selection — see `ROW_XPATH`.
+ *   - Per row, 12-13 TD elements indexed by POSITION (not class — class names
  *     repeat: `R20C2` appears twice for EAN + name).
  *
  * Throw-vs-skip decision matrix (consumed by Phase 3 orchestrator):
  *   | Condition                              | Outcome                            |
  *   |----------------------------------------|------------------------------------|
  *   | libxml fatal error                     | throw `MalformedHtmException`      |
- *   | Zero R20/R21 rows extracted            | throw `MalformedHtmException`      |
+ *   | Zero data rows extracted               | throw `MalformedHtmException`      |
  *   | Rows extracted, ZERO valid EAN lines   | throw `MalformedHtmException` (`missing_ean_column` message — distributor's no-EAN print template) |
  *   | Invoice number missing (body+filename) | throw `InvoiceNumberMissingException` (bubbles from resolver) |
  *   | Decimal / zero / negative qty          | throw `InvalidQuantityException` (bubbles from QuantityNormalizer) |
- *   | Row has < 10 TDs                       | append to `skipped_rows`, continue |
  *   | EAN not exactly 13 digits              | append to `skipped_rows`, continue |
  *   | Unparseable price cell                 | parsed line `unit_price=null` etc. |
  *
@@ -69,17 +71,18 @@ final class HtmInvoiceParser
     private const string EAN_REGEX = '/^\d{13}$/';
 
     /**
-     * Case-insensitive XPath for data rows. `translate(@class,'r','R')` lifts
-     * any lowercase `r` to uppercase before the `contains()` test, so future
-     * fixtures with `<TR class="r20">` parse identically (defensive — current
-     * fixtures are uppercase). Two distributor templates share column
-     * positions (EAN@2, name@3, unit@4, qty@5, prices@6..9):
-     *   - EN "INVOICE":     header R19, data rows R20/R21.
-     *   - LV "Pavadzīme":   header R21, data rows R22 (UAT 2026-08-12,
-     *     `Nr_PRO034535_no_09072026 (1).HTM`). The R21 header falls through
-     *     as an invalid_ean row-skip.
+     * Structural XPath for data rows: at least MIN_TD_COUNT cells AND a
+     * purely numeric "Nr." cell at position 1 (XPath `td[2]`). Both
+     * distributor templates share column positions (Nr@1, EAN@2, name@3,
+     * unit@4, qty@5, prices@6..9). Header rows carry a text label in the
+     * Nr. cell and totals/footer rows span fewer cells, so neither is
+     * selected. Row CLASS names are deliberately ignored: they are layout
+     * style indices that change per template and per row height
+     * (`Nr_PRO033436_no_07082026.HTM` styles wrapped two-line rows R23
+     * next to single-line R22 rows).
      */
-    private const string ROW_XPATH = "//tr[contains(translate(@class,'r','R'),'R20') or contains(translate(@class,'r','R'),'R21') or contains(translate(@class,'r','R'),'R22')]";
+    private const string ROW_XPATH = '//tr[count(td) >= '.self::MIN_TD_COUNT
+        ." and normalize-space(td[2]) != '' and translate(normalize-space(td[2]), '0123456789', '') = '']";
 
     /**
      * Parse distributor `.HTM` bytes into a typed `ParsedInvoice` DTO.
@@ -106,8 +109,8 @@ final class HtmInvoiceParser
         }
 
         // Rows matched but NOT ONE carried a valid 13-digit EAN — the
-        // distributor's no-EAN print template (header row R21, data rows
-        // R22, no "Bar code" column; e.g. Nr_PRO034535_no_09072026.HTM).
+        // distributor's no-EAN print template (no "Bar code" column at all;
+        // e.g. Nr_PRO034535_no_09072026.HTM).
         // Such a file can never match offers, so reject the whole upload
         // with an actionable operator message instead of persisting a
         // useless zero-line invoice. Row-level EAN leniency (D-16) still
@@ -251,17 +254,6 @@ final class HtmInvoiceParser
             }
         }
 
-        if (count($arTds) < self::MIN_TD_COUNT) {
-            return [
-                'line' => null,
-                'skip' => [
-                    'row_index' => $iRowIndex,
-                    'reason' => 'insufficient_columns',
-                    'raw' => $this->dumpRow($obRow),
-                ],
-            ];
-        }
-
         $sEan = $arTds[2];
         $sName = $arTds[3];
         $sUnit = $arTds[4];
@@ -288,9 +280,10 @@ final class HtmInvoiceParser
             ['row_index' => $iRowIndex, 'ean' => $sEan],
         );
 
-        // Positions 6..9 are guaranteed to exist because `MIN_TD_COUNT = 10`
-        // was enforced above; PriceNormalizer accepts the trimmed strings
-        // directly and returns `null` for non-numeric content.
+        // Positions 2..9 are guaranteed to exist because `ROW_XPATH` only
+        // selects rows with at least MIN_TD_COUNT cells; PriceNormalizer
+        // accepts the trimmed strings directly and returns `null` for
+        // non-numeric content.
         $obLine = new ParsedLine(
             row_index: $iRowIndex,
             ean: $sEan,
@@ -304,27 +297,5 @@ final class HtmInvoiceParser
         );
 
         return ['line' => $obLine, 'skip' => null];
-    }
-
-    /**
-     * Serialize a `<TR>` node to a short HTML snippet suitable for the
-     * `skipped_rows` audit trail. Truncated to 200 chars so a malicious
-     * 1MB row cannot bloat the audit log.
-     */
-    private function dumpRow(DOMNode $obRow): string
-    {
-        $obOwner = $obRow->ownerDocument;
-
-        if ($obOwner === null) {
-            return '';
-        }
-
-        $sHtml = $obOwner->saveHTML($obRow);
-
-        if ($sHtml === false) {
-            return '';
-        }
-
-        return substr($sHtml, 0, 200);
     }
 }

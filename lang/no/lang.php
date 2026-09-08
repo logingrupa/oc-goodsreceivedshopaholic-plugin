@@ -120,6 +120,7 @@ return [
         'invoice_not_found'   => 'Faktura #:id ikke funnet.',
         'bulk_confirm'        => 'Anvend alle valgte parsede fakturaer på lager? Allerede anvendte rader hoppes over.',
         'bulk_no_selection'   => 'Ingen rader valgt. Kryss av minst én parset faktura før du klikker «Anvend valgte».',
+        'unmatched_heading'   => ':count linje(r) uten treff - ingen vare har denne EAN-koden, lager legges ikke til:',
     ],
     'override' => [
         'title'      => 'Overstyr og importer på nytt — bekreft',

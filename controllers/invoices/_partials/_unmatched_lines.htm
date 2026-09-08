@@ -1,0 +1,32 @@
+<?php
+/* Unmatched-line callout shared by the upload apply modal, the apply
+ * confirm modal and the invoice summary block. Names every line whose
+ * EAN resolved to no offer so the operator sees WHAT will not be stocked,
+ * not only how many lines (UAT 2026-09-08: one unmatched row among 45
+ * was invisible in the table).
+ *
+ * Renders nothing when the list is empty.
+ *
+ * Expected vars:
+ *   - $lines: iterable<InvoiceLine> already filtered by InvoiceLine::scopeUnmatched().
+ */
+$arLines = [];
+foreach ($lines ?? [] as $obLine) {
+    $arLines[] = $obLine;
+}
+?>
+<?php if ($arLines !== []): ?>
+    <div class="alert alert-warning gr-unmatched-lines">
+        <strong><?= e(trans('logingrupa.goodsreceivedshopaholic::lang.apply.unmatched_heading', ['count' => count($arLines)])) ?></strong>
+        <ul style="margin: 0.4rem 0 0; padding-left: 1.2rem;">
+            <?php foreach ($arLines as $obLine): ?>
+                <li>
+                    #<?= (int) $obLine->row_index ?>
+                    <code><?= e((string) $obLine->ean) ?></code>
+                    <?= e((string) $obLine->product_name_raw) ?>
+                    (<?= (int) $obLine->qty ?>)
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>

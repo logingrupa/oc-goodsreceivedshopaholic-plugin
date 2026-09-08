@@ -596,15 +596,12 @@ class Invoices extends Controller
             ]);
         }
 
-        $iTotalUnits = (int) InvoiceLine::where('invoice_id', $iInvoiceId)
-            ->whereNotNull('matched_offer_id')
-            ->sum(DB::raw('COALESCE(override_qty, qty)'));
-
         $mPartial = $this->makePartial('_partials/apply_confirm', [
             'invoice'         => $obInvoice,
-            'total_units'     => $iTotalUnits,
+            'total_units'     => InvoiceLine::unitsToApplyFor($iInvoiceId),
             'offer_count'     => (int) $obInvoice->matched_lines,
             'unmatched_count' => (int) $obInvoice->unmatched_lines,
+            'unmatched_lines' => InvoiceLine::unmatchedFor($iInvoiceId),
         ]);
 
         return [
@@ -1993,9 +1990,10 @@ class Invoices extends Controller
         return [
             'invoice'             => $obInvoice,
             'lines'               => $obLines,
-            'total_units'         => (int) InvoiceLine::where('invoice_id', $iInvoiceId)->sum('qty'),
+            'total_units'         => InvoiceLine::unitsToApplyFor($iInvoiceId),
             'matched_count'       => (int) $obInvoice->matched_lines,
             'unmatched_count'     => (int) $obInvoice->unmatched_lines,
+            'unmatched_lines'     => InvoiceLine::unmatchedFor($iInvoiceId),
             'current_qty_map'     => $arCurrentQtyMap,
             'matched_product_map' => $this->buildMatchedProductMap($obLines, $arOfferIds),
         ];

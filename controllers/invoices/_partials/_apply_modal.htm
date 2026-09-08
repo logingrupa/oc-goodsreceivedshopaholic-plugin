@@ -95,9 +95,10 @@ foreach ($arInvoices as $arPreview) {
                     <?= e($sFilename) ?>
                 </label>
                 <small class="text-muted">
-                    &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units total
+                    &mdash; <?= $iTotalLines ?> lines (<?= $iMatchedCount ?> matched, <?= $iUnmatchedCount ?> unmatched), <?= $iTotalUnits ?> units to add
                 </small>
             </h5>
+            <?= $this->makePartial('_partials/unmatched_lines', ['lines' => $arPreview['unmatched_lines'] ?? []]) ?>
 
             <table class="table table-condensed table-striped gr-apply-table">
                 <thead>

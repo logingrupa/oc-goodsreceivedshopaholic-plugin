@@ -120,6 +120,7 @@ return [
         'invoice_not_found'   => 'Rēķins #:id nav atrasts.',
         'bulk_confirm'        => 'Piemērot visus atlasītos apstrādātos rēķinus krājumiem? Jau piemērotās rindas tiek izlaistas.',
         'bulk_no_selection'   => 'Nav atlasītu rindu. Atzīmē vismaz vienu apstrādātu rēķinu, pirms klikšķini «Piemērot atlasītos».',
+        'unmatched_heading'   => ':count rinda(s) nav saskaņota(s) - nevienam piedāvājumam nav šī EAN, krājums netiks pievienots:',
     ],
     'override' => [
         'title'      => 'Pārrakstīt un atkārtoti importēt — apstiprināt',

@@ -120,6 +120,7 @@ return [
         'invoice_not_found'    => 'Invoice #:id not found.',
         'bulk_confirm'         => 'Apply all selected parsed invoices to live stock? Already-applied rows are skipped.',
         'bulk_no_selection'    => 'No rows selected. Tick at least one parsed invoice before clicking Apply selected.',
+        'unmatched_heading'    => ':count line(s) not matched - no offer carries this EAN, stock will not be added:',
     ],
     'override' => [
         'title'      => 'Override and re-import — Confirm',

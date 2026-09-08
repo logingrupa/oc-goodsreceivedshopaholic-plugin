@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Logingrupa\GoodsReceivedShopaholic\Models;
 
+use Illuminate\Support\Facades\DB;
 use Lovata\Shopaholic\Models\Offer;
 use October\Rain\Database\Model;
 use October\Rain\Database\Traits\Validation;
@@ -104,4 +105,41 @@ class InvoiceLine extends Model
         'invoice'        => [Invoice::class, 'key' => 'invoice_id'],
         'matched_offer'  => [Offer::class, 'key' => 'matched_offer_id'],
     ];
+
+    /**
+     * Lines of one invoice whose EAN resolved to no offer, in document
+     * order. Sole definition of "unmatched" for the upload apply modal, the
+     * apply confirm modal and the invoice summary block. The instanceof
+     * loop narrows October's untyped Builder rows for PHPStan L10 (same
+     * pattern as ApplyOrchestrator::loadMatchedLines).
+     *
+     * @return list<self>
+     */
+    public static function unmatchedFor(int $iInvoiceId): array
+    {
+        $arLines = [];
+        foreach (self::where('invoice_id', $iInvoiceId)
+            ->where('match_strategy', self::MATCH_STRATEGY_NONE)
+            ->orderBy('row_index')
+            ->get() as $obLine) {
+            if ($obLine instanceof self) {
+                $arLines[] = $obLine;
+            }
+        }
+
+        return $arLines;
+    }
+
+    /**
+     * Units apply will actually add for one invoice: `COALESCE(override_qty,
+     * qty)` over matched lines only, the same per-line formula
+     * StockApplyService uses. Shared by both apply modals so they quote the
+     * same number.
+     */
+    public static function unitsToApplyFor(int $iInvoiceId): int
+    {
+        return (int) self::where('invoice_id', $iInvoiceId)
+            ->whereNotNull('matched_offer_id')
+            ->sum(DB::raw('COALESCE(override_qty, qty)'));
+    }
 }

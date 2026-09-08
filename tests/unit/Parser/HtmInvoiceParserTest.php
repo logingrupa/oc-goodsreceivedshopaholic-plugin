@@ -96,11 +96,11 @@ it('HandlesUnquotedAttributesTest — parses real fixture with <TR CLASS=R20> un
 
     expect($obParsed)->toBeInstanceOf(ParsedInvoice::class);
     expect($obParsed->invoice_number)->toBe('PRO033328');
-    // 25 R20 rows in fixture; 21 are valid product lines, 4 are skipped
-    // (2 footer/totals rows with colspan TDs → insufficient_columns; 2 with
-    // empty EAN cells → invalid_ean). Total 25 rows touched, 21 emitted.
+    // 22 structural data rows (numeric Nr. cell, 10+ TDs); 21 are valid
+    // product lines, 1 has an empty EAN cell → invalid_ean. Header and
+    // footer/totals rows are never selected.
     expect(count($obParsed->lines))->toBe(21);
-    expect(count($obParsed->skipped_rows))->toBe(4);
+    expect(count($obParsed->skipped_rows))->toBe(1);
     expect($obParsed->lines[0]->row_index)->toBe(1);
     expect($obParsed->lines[0]->ean)->toBe('4752307000097');
     expect($obParsed->lines[0]->qty)->toBe(5);
@@ -149,11 +149,11 @@ it('HandlesBothR20AndR21RowsTest — real fixture with mixed R20/R21 yields comb
     /** @var string $sHtml */
     $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO026712_no_28112024.HTM');
 
-    // Real fixture has 147 R20 + 7 R21 = 154 data rows; 135 are valid
-    // product lines (13-digit EANs), 19 are skipped (non-13-digit internal
-    // codes like '40092454' / footer-summary rows with colspan TDs).
-    // Sum lines + skipped == 154 — pin invariant.
-    expect(count($obParsed->lines) + count($obParsed->skipped_rows))->toBe(154);
+    // Real fixture mixes 147 R20 + 7 R21 rows; 150 of them are structural
+    // data rows (numeric Nr., 10+ TDs). 135 are valid product lines
+    // (13-digit EANs), 15 are skipped (non-13-digit internal codes like
+    // '40092454'). Sum lines + skipped == 150 — pin invariant.
+    expect(count($obParsed->lines) + count($obParsed->skipped_rows))->toBe(150);
     expect(count($obParsed->lines))->toBe(135);
     expect($obParsed->invoice_number)->toBe('PRO026712');
 });
@@ -176,7 +176,7 @@ it('HandlesCRLFLineEndingsTest — CRLF and LF inputs yield identical parse resu
     expect($obFromCrlf->lines[0]->qty)->toBe($obFromLf->lines[0]->qty);
 });
 
-it('RejectsMalformedHtmTest — HTML without any R20/R21 rows throws MalformedHtmException', function (): void {
+it('RejectsMalformedHtmTest — HTML without any data rows throws MalformedHtmException', function (): void {
     $sHtml = '<HTML><BODY><P>Invoice No: PRO000001</P><P>No data rows here.</P></BODY></HTML>';
 
     expect(fn () => (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO000001_no_01012026.HTM'))
@@ -232,12 +232,39 @@ it('parses LV "Pavadzīme" template with R22 data rows and Svītrukods EAN colum
     expect($obParsed->lines[0]->unit_price)->toBe(5.12);
 });
 
+it('selects data rows by structure, not CLASS — two-line R23 rows parse alongside R22 (Nr_PRO033436, 2026-09-08)', function (): void {
+    // LV template where 10 of the 55 product rows wrap to two lines and
+    // are styled R23 instead of R22. A class-keyed selector dropped them
+    // silently (45 lines / 123 units imported instead of 55 / 144).
+    $sFixturePath = __DIR__.'/../../fixtures/invoices/Nr_PRO033436_no_07082026.HTM';
+    $sHtml = file_get_contents($sFixturePath);
+
+    expect($sHtml)->not->toBeFalse();
+
+    /** @var string $sHtml */
+    $obParsed = (new HtmInvoiceParser())->parse($sHtml, 'Nr_PRO033436_no_07082026.HTM');
+
+    expect($obParsed->invoice_number)->toBe('PRO033436');
+    expect(count($obParsed->lines))->toBe(55);
+    expect($obParsed->skipped_rows)->toBe([]);
+
+    $iUnits = 0;
+    foreach ($obParsed->lines as $obLine) {
+        $iUnits += $obLine->qty;
+    }
+    expect($iUnits)->toBe(144);
+
+    // Document row 2 is the first R23 row; row_index mirrors the Nr. column.
+    expect($obParsed->lines[1]->row_index)->toBe(2);
+    expect($obParsed->lines[1]->ean)->toBe('4751039484229');
+    expect($obParsed->lines[1]->qty)->toBe(2);
+});
+
 it('throws missing-EAN-column MalformedHtmException on real no-EAN distributor template fixture', function (): void {
-    // Distributor's alternate print form: header row R21, data rows R22,
-    // no "Bar code" column at all (Nr_PRO034535_no_09072026.HTM). The row
-    // XPath matches only the R21 header, whose position-2 cell is a text
-    // label — zero valid EAN lines → whole-file reject with the operator
-    // message pointing at naiskonsultants@gmail.com.
+    // Distributor's alternate print form with no "Bar code" column at all
+    // (Nr_PRO034535_no_09072026.HTM). Every data row's position-2 cell is
+    // the product name — zero valid EAN lines → whole-file reject with the
+    // operator message pointing at naiskonsultants@gmail.com.
     $sFixturePath = __DIR__.'/../../fixtures/invoices/Nr_PRO034535_no_09072026.HTM';
     $sHtml = file_get_contents($sFixturePath);
 

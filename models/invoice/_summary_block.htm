@@ -104,3 +104,8 @@ $sStatusBadge = match ($sStatus) {
         <dd><code><?= e($sSourceFilename) ?></code></dd>
     </div>
 </div>
+<?= $this->makePartial('$/logingrupa/goodsreceivedshopaholic/controllers/invoices/_partials/_unmatched_lines.htm', [
+    'lines' => $obInvoice instanceof \Logingrupa\GoodsReceivedShopaholic\Models\Invoice
+        ? \Logingrupa\GoodsReceivedShopaholic\Models\InvoiceLine::unmatchedFor((int) $obInvoice->id)
+        : [],
+]) ?>

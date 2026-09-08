@@ -27,6 +27,7 @@ $iUnmatchedCount = (int) ($unmatched_count ?? 0);
         <li>Matched lines (offer count): <strong><?= $iOfferCount ?></strong></li>
         <li>Unmatched lines: <strong><?= $iUnmatchedCount ?></strong></li>
     </ul>
+    <?= $this->makePartial('_partials/unmatched_lines', ['lines' => $unmatched_lines ?? []]) ?>
     <?php if ($mOverrideOf !== null): ?>
         <p class="alert alert-warning">
             <strong>Override mode:</strong> this re-applies the invoice ADDITIVELY on top of prior apply #<?= (int) $mOverrideOf ?>. Stock will be incremented again, NOT replaced.
