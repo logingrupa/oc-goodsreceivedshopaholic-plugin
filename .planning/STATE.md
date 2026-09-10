@@ -61,7 +61,7 @@ All 5 phases shipped. 56 v1 requirements validated. `make all` exits 0 with all 
 - `sudo pecl install pcov` + load via cli conf.d + re-measure coverage + tune `--min=N` in `make coverage` + wire `coverage` into `make all` (OPS-05 final closure)
 - Execute multi-site UAT per `.planning/UAT-CHECKLIST.md` on .no/.lv/.lt staging + sign Section C (OPS-06 final closure)
 
-**Next**: v2 backlog preserved in REQUIREMENTS.md ## v2 Requirements (V2-OP-01..03 operator productivity, V2-DIFF-01..05 differentiator features, V2-OPS-01..02 ops). Spawn a fresh `/gsd:project` conversation to start v2 planning when operator chooses.
+**Next**: v2 backlog preserved in REQUIREMENTS.md ## v2 Requirements (V2-OP-01..03 operator productivity, V2-DIFF-01..05 differentiator features, V2-OPS-01..02 ops). Spawn a fresh `/gsd-project` conversation to start v2 planning when operator chooses.
 
 ---
 

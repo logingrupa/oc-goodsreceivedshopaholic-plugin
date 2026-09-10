@@ -223,7 +223,7 @@ From PROJECT.md and `.planning/captures/20260429-stockinvoiceimport-discuss.md`:
 ### Ops
 - **V2-OPS-01..02**: (see REQUIREMENTS.md for details)
 
-When operator chooses to start v2, spawn a fresh `/gsd:project` conversation. The v1 close state in STATE.md provides clean ground.
+When operator chooses to start v2, spawn a fresh `/gsd-project` conversation. The v1 close state in STATE.md provides clean ground.
 
 ---
 
